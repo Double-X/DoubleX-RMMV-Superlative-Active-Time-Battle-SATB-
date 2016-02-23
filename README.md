@@ -92,3 +92,5 @@ The system testing consists of the below 3 levels:
 2. Integration testing - An integration test will be run for every standalone feature
 
 3. System testing - A system test will be run for the whole plugin
+
+No test case will ever be fixed - All of them will be subject to change as their underlying scenario changes
