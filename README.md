@@ -67,6 +67,13 @@ Technical Files:
 
 3. The Codebase Patterns And Templates file explains the planning of the implementation codebase.
 
+Responsibility Files:
+
+1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
+
+2. The Developer X Responsibility file lists the responsibility of SATB developer X.
+
+
 Approach
 
 The system development consists of the below 5 levels:
