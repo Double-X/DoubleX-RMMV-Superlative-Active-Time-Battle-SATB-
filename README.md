@@ -52,6 +52,8 @@ Documentation Files:
 
 7. The Coding Standard file specifies the coding standard requirements of SATB.
 
+8. The Reference file lists all helpful and useful links for developing SATB.
+
 
 Approach
 
