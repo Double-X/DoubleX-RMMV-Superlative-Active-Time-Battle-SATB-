@@ -6,6 +6,11 @@ To be the most flexible, performant and powerful RMMV Active Time Battle System 
 
 Files
 
+User Files:
+
+1. SATB Tutorial is the complete tutorial for all targeted audience groups.
+2. SATB Tutorial Level X is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
+
 Plugin Files:
 
 1. SATB file is the whole plugin.
@@ -54,6 +59,13 @@ Documentation Files:
 
 8. The Reference file lists all helpful and useful links for developing SATB.
 
+Technical Files:
+
+1. The Feature Set Architectures And Structures file explains the feature set architectures and structures.
+
+2. The Configurable Organization file explains the configuration organizations including users' control and freedom over them.
+
+3. The Codebase Patterns And Templates file explains the planning of the implementation codebase.
 
 Approach
 
