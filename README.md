@@ -3,13 +3,19 @@ Purpose
 
 To be the most flexible, performant and powerful RMMV Active Time Battle System plugin ever.
 
+Background
+
+This is a relatively massive, serious and tough plugin. All SATB developers are assumed to meet the prerequisites specified in the Developer-friendliness file.
+
+
+Completion Date
+
+Targeted: 31-12-2016
+
+Deadline: 31-12-2017
+
 
 Files
-
-User Files:
-
-1. SATB Tutorial is the complete tutorial for all targeted audience groups.
-2. SATB Tutorial Level X is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
 
 Plugin Files:
 
@@ -18,6 +24,12 @@ Plugin Files:
 2. SATB Config file is the user configuration part of the plugin.
 
 3. SATB Component X file is the SATB component named with X.
+
+Tutorial Files:
+
+1. SATB Tutorial is the complete tutorial for all targeted audience groups.
+
+2. SATB Tutorial Level X is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
 
 Test Files:
 
@@ -28,7 +40,7 @@ Test Files:
 3. SATB Integration Test Name X is the integration test named with X.
 
 4. SATB System Test Name X is the system test named with X.
-5
+
 Bug Files:
 
 1. SATB Buglist file is the whole bug list.
@@ -72,6 +84,12 @@ Responsibility Files:
 1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
 
 2. The Developer X Responsibility file lists the responsibility of SATB developer X.
+
+Progress Files:
+
+1. The SATB Progresses file lists the progress of all components
+
+2. The SATB Component X Progress file lists the progress of SATB component X.
 
 
 Approach
