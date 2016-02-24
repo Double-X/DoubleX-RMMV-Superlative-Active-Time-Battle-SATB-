@@ -5,10 +5,10 @@ To be the most flexible, performant and powerful RMMV Active Time Battle System 
 
 Background
 
-This is a relatively massive, serious and tough plugin. All SATB developers are assumed to meet the prerequisites specified in the Developer-friendliness file.
+This is a relatively massive, serious and tough plugin. All SATB developers are assumed to meet the prerequisites specified in the Developer-friendliness file. Nevertheless, this is still just an amateur plugin, so reaching the professional level isn't required albeit highly desirable.
 
 
-Completion Date
+Date to deliver a testing version that can behave like a complete plugin
 
 Targeted: 31-12-2016
 
@@ -23,13 +23,15 @@ Plugin Files:
 
 2. SATB Config file is the user configuration part of the plugin.
 
-3. SATB Component X file is the SATB component named with X.
+3. SATB Implementation file is the whole implementation part of the plugin.
+
+4. SATB Component X file is the SATB implementation component X.
 
 Tutorial Files:
 
-1. SATB Tutorial is the complete tutorial for all targeted audience groups.
+1. SATB Tutorial file is the complete tutorial for all targeted audience groups.
 
-2. SATB Tutorial Level X is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
+2. SATB Tutorial Level X file is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
 
 Test Files:
 
@@ -37,9 +39,9 @@ Test Files:
 
 2. SATB Unit Test Name X file is the unit test named with X.
 
-3. SATB Integration Test Name X is the integration test named with X.
+3. SATB Integration Test Name X file is the integration test named with X.
 
-4. SATB System Test Name X is the system test named with X.
+4. SATB System Test file is the system test named with X.
 
 Bug Files:
 
@@ -69,7 +71,11 @@ Documentation Files:
 
 7. The Coding Standard file specifies the coding standard requirements of SATB.
 
-8. The Reference file lists all helpful and useful links for developing SATB.
+8. The Codebase Quality file specifies the codebase quality requirements of SATB.
+
+9. The Test Suite Requirements file specifies the test suite requirements of SATB.
+
+10. The Reference file lists all helpful and useful links for developing SATB.
 
 Technical Files:
 
@@ -78,6 +84,10 @@ Technical Files:
 2. The Configurable Organization file explains the configuration organizations including users' control and freedom over them.
 
 3. The Codebase Patterns And Templates file explains the planning of the implementation codebase.
+
+4. The Component X Problem Domain file explains the problem domain of component X.
+
+5. The Component X Solution Domain file explains the solution domain of component X.
 
 Responsibility Files:
 
