@@ -19,13 +19,21 @@ Files
 
 Plugin Files:
 
-1. SATB file is the whole plugin.
+1. SATB Readme file is the SATB plugin file instructions.
 
-2. SATB Config file is the user configuration part of the plugin.
+2. SATB file is the whole plugin.
 
-3. SATB Implementation file is the whole implementation part of the plugin.
+3. SATB Info file is the user info part of the plugin.
 
-4. SATB Component X file is the SATB implementation component X.
+4. SATB Info Component X file is the SATB user info component X.
+
+5. SATB Config file is the user configuration part of the plugin.
+
+6. SATB Config Component X file is the SATB user configuration component X.
+
+7. SATB Implementation file is the whole implementation part of the plugin.
+
+8. SATB Implementation Component X file is the SATB implementation component X.
 
 Tutorial Files:
 
@@ -35,19 +43,23 @@ Tutorial Files:
 
 Test Files:
 
-1. SATB Test Suite file is the whole test suite.
+1. SATB Test Guideline file is the guidelines for writing tests.
 
-2. SATB Unit Test Name X file is the unit test named with X.
+2. SATB Test Suite file is the whole test suite.
 
-3. SATB Integration Test Name X file is the integration test named with X.
+3. SATB Unit Test X file is the unit test X.
 
-4. SATB System Test file is the system test named with X.
+4. SATB Integration Test X file is the integration test X.
+
+5. SATB System Test file is the system test.
 
 Bug Files:
 
-1. SATB Buglist file is the whole bug list.
+1. SATB Bug Guideline file is the guidelines for writing bug reports.
 
-2. SATB Bug Name X file is the bug named with X.
+2. SATB Buglist file is the whole bug list.
+
+3. SATB Bug X file is the bug X.
 
 Version Files:
 
