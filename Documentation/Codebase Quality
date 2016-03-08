@@ -18,6 +18,9 @@ Coupling
 No coupling is the best, although message coupling is also highly desirable and data coupling is still totally acceptable.
 Reaching tighter coupling should be backed up with very solid reasons.
 
+Immutability
+Immutable codes are generally preferred over mutable codes, although sometimes the latters are called for instead.
+
 Readability
 Every function name should concisely and precisely describe the intent of the function.
 All function contents should be to the point and clearly illustrate what they are doing.
