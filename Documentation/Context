@@ -27,6 +27,9 @@ Yanfly Engine Plugins - Battle System - Active Turn Battle -
 Goal
 To be the most flexible, performant and powerful RMMV Active Time Battle System plugin ever
 
+Targeted Devices
+All those targeted by RMMV, although PC will be the main target
+
 Conditions
 Functional requirements:
 1. Provides the feature set specified in the Feature Set file
