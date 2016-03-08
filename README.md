@@ -15,11 +15,11 @@ Targeted: 31-12-2016
 Deadline: 31-12-2017
 
 
-Files
+Folders
 
-Plugin Files:
+Plugins:
 
-1. SATB Readme file is the SATB plugin file instructions.
+1. SATB Plugin Guideline file is the SATB plugin file instructions.
 
 2. SATB file is the whole plugin.
 
@@ -37,11 +37,37 @@ Plugin Files:
 
 Tutorial Files:
 
-1. SATB Tutorial file is the complete tutorial for all targeted audience groups.
+1. SATB Tutorial Guideline file is the SATB tutorial file instructions.
 
-2. SATB Tutorial Level X file is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
+2. SATB Tutorial file is the complete tutorial for all targeted audience groups.
 
-Test Files:
+3. SATB Tutorial Level X file is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
+
+Versions:
+
+1. SATB Changelog Guideline file is the guidelines for writing changelogs.
+
+2. SATB Changelog file is the whole changelog.
+
+3. SATB Ver X file is the changelog of version X of SATB.
+
+Bug Files:
+
+1. SATB Bug Guideline file is the guidelines for writing bug reports.
+
+2. SATB Buglist file is the whole bug list.
+
+3. SATB Bug X file is the bug X.
+
+Progress Files:
+
+1. The SATB Progress Guideline file is the guidelines for writing progresses.
+
+2. The SATB Progresses file lists the progress of all components
+
+3. The SATB Component X Progress file lists the progress of SATB component X.
+
+Tests:
 
 1. SATB Test Guideline file is the guidelines for writing tests.
 
@@ -53,21 +79,7 @@ Test Files:
 
 5. SATB System Test file is the system test.
 
-Bug Files:
-
-1. SATB Bug Guideline file is the guidelines for writing bug reports.
-
-2. SATB Buglist file is the whole bug list.
-
-3. SATB Bug X file is the bug X.
-
-Version Files:
-
-1. SATB Changelog file is the whole changelog.
-
-2. SATB Ver X file is the changelog of version X of SATB.
-
-Documentation Files:
+Documentations:
 
 1. The Context file is the blueprint, outline and overview of SATB.
 
@@ -89,7 +101,7 @@ Documentation Files:
 
 10. The Reference file lists all helpful and useful links for developing SATB.
 
-Technical Files:
+Technicals:
 
 1. The Feature Set Architectures And Structures file explains the feature set architectures and structures.
 
@@ -106,12 +118,6 @@ Responsibility Files:
 1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
 
 2. The Developer X Responsibility file lists the responsibility of SATB developer X.
-
-Progress Files:
-
-1. The SATB Progresses file lists the progress of all components
-
-2. The SATB Component X Progress file lists the progress of SATB component X.
 
 
 Approach
