@@ -17,7 +17,7 @@ Deadline: 31-12-2017
 
 Folders
 
-Plugins:
+Plugin:
 
 1. SATB Plugin Guideline file is the SATB plugin file instructions.
 
@@ -35,7 +35,7 @@ Plugins:
 
 8. SATB Implementation Component X file is the SATB implementation component X.
 
-Tutorial Files:
+Tutorial:
 
 1. SATB Tutorial Guideline file is the SATB tutorial file instructions.
 
@@ -43,7 +43,7 @@ Tutorial Files:
 
 3. SATB Tutorial Level X file is the complete tutorial for all targeted audience belonging to plugin usage proficiency level X.
 
-Versions:
+Version:
 
 1. SATB Changelog Guideline file is the guidelines for writing changelogs.
 
@@ -51,7 +51,7 @@ Versions:
 
 3. SATB Ver X file is the changelog of version X of SATB.
 
-Bug Files:
+Bug:
 
 1. SATB Bug Guideline file is the guidelines for writing bug reports.
 
@@ -59,7 +59,7 @@ Bug Files:
 
 3. SATB Bug X file is the bug X.
 
-Progress Files:
+Progress:
 
 1. The SATB Progress Guideline file is the guidelines for writing progresses.
 
@@ -67,7 +67,7 @@ Progress Files:
 
 3. The SATB Component X Progress file lists the progress of SATB component X.
 
-Tests:
+Test:
 
 1. SATB Test Guideline file is the guidelines for writing tests.
 
@@ -79,7 +79,7 @@ Tests:
 
 5. SATB System Test file is the system test.
 
-Documentations:
+Documentation:
 
 1. The Context file is the blueprint, outline and overview of SATB.
 
@@ -101,7 +101,7 @@ Documentations:
 
 10. The Reference file lists all helpful and useful links for developing SATB.
 
-Technicals:
+Technical:
 
 1. The Feature Set Architectures And Structures file explains the feature set architectures and structures.
 
@@ -113,7 +113,7 @@ Technicals:
 
 5. The Component X Solution Domain file explains the solution domain of component X.
 
-Responsibility Files:
+Responsibility:
 
 1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
 
