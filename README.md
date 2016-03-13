@@ -115,6 +115,8 @@ Technical:
 
 6. The Component X Invariant file lists all nontrivial invariants the component X replied upon.
 
+7. The Glossary file lists all nontrivial terms defined in SATB.
+
 Responsibility:
 
 1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
