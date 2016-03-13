@@ -113,6 +113,8 @@ Technical:
 
 5. The Component X Solution Domain file explains the solution domain of component X.
 
+6. The Component X Invariant file lists all nontrivial invariants the component X replied upon.
+
 Responsibility:
 
 1. The Developers Responsibilities file lists the responsibilities of all SATB developers.
