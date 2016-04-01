@@ -27,6 +27,10 @@ All function contents should be to the point and clearly illustrate what they ar
 Additional comments are used to neatly summarize the need of the function's intent and the way this function serve its intent.
 Not reaching this level of readability should be backed up with very solid reasons.
 
+Referential Transparency
+All functions that are meant to return values only should be always 100% side effect free. Not doing so should be backed up by
+very solid reasons.
+
 Robustness
 Invariants should be as hard to be broken as possible, as few as possible, and as crystal clear and obvious as possible.
 Not reaching the maximum amount of robustness should be backed up with very solid reasons.
