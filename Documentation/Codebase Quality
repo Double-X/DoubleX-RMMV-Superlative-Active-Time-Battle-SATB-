@@ -17,6 +17,7 @@ Not reaching this level of correctness should be backed up with very solid reaso
 Coupling
 No coupling is the best, although message coupling is also highly desirable and data coupling is still totally acceptable.
 Reaching tighter coupling should be backed up with very solid reasons.
+Also, Law Of Demeter should be always conformed with. Not doing so should be backed up with very solid reasons.
 
 Immutability
 Immutable codes are generally preferred over mutable codes, although sometimes the latters are called for instead.
