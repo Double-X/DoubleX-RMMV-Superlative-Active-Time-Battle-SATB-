@@ -1,0 +1,7 @@
+[
+null,
+{"id":1,"battlerName":"Actor1_1","characterIndex":0,"characterName":"Actor1","classId":1,"equips":[1,1,2,3,4],"faceIndex":0,"faceName":"Actor1","traits":[{"code":61,"dataId":0,"value":1}],"initialLevel":15,"maxLevel":99,"name":"Harold","nickname":"","note":"<hp status bar: HP>\n<mp status bar: MP>\n<tp status bar: TP>","profile":""},
+{"id":2,"battlerName":"Actor1_8","characterIndex":7,"characterName":"Actor1","classId":2,"equips":[2,1,2,3,4],"faceIndex":7,"faceName":"Actor1","traits":[{"code":61,"dataId":0,"value":1}],"initialLevel":15,"maxLevel":99,"name":"Therese","nickname":"","note":"<patb can act se: Bell1, 80, 100, 0>\n<hp status bar: HP>\n<mp status bar: MP>\n<tp status bar: TP>","profile":""},
+{"id":3,"battlerName":"Actor3_8","characterIndex":7,"characterName":"Actor3","classId":3,"equips":[3,0,2,3,4],"faceIndex":7,"faceName":"Actor3","traits":[{"code":61,"dataId":0,"value":1}],"initialLevel":15,"maxLevel":99,"name":"Marsha","nickname":"","note":"<patb overlay colors: 30, 31>\n<hp status bar: HP>\n<mp status bar: MP>\n<tp status bar: TP>","profile":""},
+{"id":4,"battlerName":"Actor2_7","characterIndex":6,"characterName":"Actor2","classId":4,"equips":[4,0,2,3,4],"faceIndex":6,"faceName":"Actor2","traits":[{"code":61,"dataId":0,"value":1}],"initialLevel":15,"maxLevel":99,"name":"Lucius","nickname":"","note":"<hp status bar: HP>\n<mp status bar: MP>\n<tp status bar: TP>","profile":""}
+]
