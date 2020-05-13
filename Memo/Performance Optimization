@@ -1,5 +1,0 @@
-Use 1 array to mark all inputable actors that won't input actions automatically
-Use BattleManager._actionBattlers to mark all Action Execution Subjects
-Change notification notetags for abstract notetag readers reading many notetags should mark which data type(actor, class, equip, 
-enemy, state) might be changed, so the abstract notetag readers might not have to reread everything, as partial results for each
-data type are cached as well(not just the final result that's actually used)
