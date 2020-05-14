@@ -8,51 +8,10 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
         "DoubleX RMMV Superlative ATB Params v100a";
 //
 
-// Fathoms these before changing _switchIds nor _varIds via script calls
-/*~struct~NoteFactors:
- *
- * @param note
- * @type text
- *
- * @param factors
- * @type text[]
- */
-
-/*~struct~SwitchIds:
- *
- * @param switchId
- * @type switch
- *
- * @param notes
- * @type struct<NoteFactors>[]
- */
-
-/*~struct~VarIds:
- *
- * @param varId
- * @type variable
- *
- * @param notes
- * @type struct<NoteFactors>[]
- */
-//
-
 /*:
  *
  * @plugindesc The parameter plugin of DoubleX RMMV Superlative ATB
  * @author DoubleX
- *
- * @param _switchIds
- * @type struct<SwitchIds>[]
- * @desc Sets the list of game switches used by this plugin
- * You can use script calls to change this list later in game
- * @default []
- *
- * @param _varIds
- * @type struct<VarIds>[]
- * @desc Sets the list of game variables used by this plugin
- * You can use script calls to change this list later in game
- * @default []
  *
  * @param IsCoreEnabled
  * @type note
@@ -245,11 +204,11 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *      5. coreTurnATBAct
  *         Setting coreTurnATBAct as
  *         return BattleManager.allBattleMembers().length; will cause the
- *         turn to consist of the number of turns equal to that of all battlers
+ *         turn to consist of the number of turns equal to that of all battler
  *      6. canCoreTurnOverflow
  *         Setting canCoreTurnOverflow as return true; will cause the current
- *         turn time/action counter to overflow to the next turn(If the counter
- *         and max was 15 and 10 respectively, then a new turn will immediately
+ *         turn time/action counter to overflow to next turn(If the counter
+ *         and max was 15 and 10 respectively, then new turn will immediately
  *         come with the current turn/action counter becoming 15 - 10 = 5)
  *      7. coreMaxATBVal
  *         Setting coreMaxATBVal as return 200.0; will cause the maximum ATB
