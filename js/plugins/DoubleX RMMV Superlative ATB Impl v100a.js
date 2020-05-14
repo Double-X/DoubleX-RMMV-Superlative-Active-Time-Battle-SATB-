@@ -4,7 +4,10 @@
  *----------------------------------------------------------------------------
  *    # Plugin Support Info:
  *      1. Prerequisites
- *         - Decent RMMV plugin development proficiency to fully comprehend
+ *         - Thorough comprehension on the essence of this plugin on the user
+ *           level
+ *         - Thorough comprehension on the essence of RMMV ATB system plugins
+ *         - Advanced RMMV plugin development proficiency to fully comprehend
  *           this plugin
  *      2. All reference tags are to have clear references between the
  *         Plugin Info and Plugin Implementations by searching them
@@ -14,7 +17,7 @@
 
 /*----------------------------------------------------------------------------
  *    # New classes:
- *      - Implements the note result/running helper and UIs for SATB
+ *      - Implements the note result/running helper for SATB
  *----------------------------------------------------------------------------*/
 
 function Game_SATBNotes() { this.initialize.apply(this, arguments); };
@@ -92,7 +95,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         if (_SATB._areAllNotesLoaded) return true;
         _SATB._loadAllNotes.call(this);
         _SATB._areAllNotesLoaded = true;
-        return _SATB._areAllNotesLoaded;
+        return true;
         //
     }; // _SATB._isDatabaseLoaded
 
@@ -163,9 +166,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
                 satb[type] = (satb[type] || []).concat(_SATB._notePairs.call(
                         this, ["eval"], [funcLines.join("\n")]));
                 //
-            } else if (isEval) {
-                funcLines.push(line);
-            }
+            } else if (isEval) funcLines.push(line);
         }, this);
         //
     }; //  _SATB._loadEvalNote
@@ -213,37 +214,13 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     /**
      * The this pointer is DataManager
      * Idempotent
-     * @since v0.00a @version v0.00a
+     * @since v1.00a @version v1.00a
      */
-    _SATB._extractSaveContents = function() {
-        _SATB._extractFuncContents.call(this, "params");
-        _SATB._extractFuncContents.call(this, "cfgs");
-        _SATB._extractFuncContents.call(this, "notes");
+    _SP._extractSaveContents = function() {
+        ["params", "notes"].forEach(
+                $gameSystem.extractSATBFuncContents, $gameSystem);
         $gameParty.initSATBNotes();
-    }; // _SATB._extractSaveContents
-
-    /**
-     * The this pointer is DataManager
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
-     */
-    _SATB._extractFuncContents = function(funcType) {
-        Object.keys($gameSystem.satb[funcType]).forEach(
-                _SATB._extractFuncContent.bind(this, funcType));
-    }; // _SATB._extractFuncContents
-
-    /**
-     * The this pointer is DataManager
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
-     * @param {String} funcName - The name of the stored function content
-     */
-    _SATB._extractFuncContent = function(funcType, funcName) {
-        SATB[funcType][funcName] = $gameSystem.satbFunc(funcType,
-                funcName, $gameSystem.satb[funcType][funcName]);
-    }; // _SATB._extractFuncContent
+    }; // _SP._extractSaveContents
 
 })(DoubleX_RMMV.SATB);
 
@@ -259,21 +236,37 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     SATB.Game_System = { orig: {}, new: {} };
     var _GS = SATB.Game_System.orig, _SATB = SATB.Game_System.new;
     var $ = Game_System.prototype;
+    _SATB._0_ARG_FUNC = function(funcContent) {
+        return new Function(funcContent);
+    };
     _SATB._FUNCS = {
-        params: function(funcName, content) {
-            // This arg list covers rest cases so unused args' the only problem
-            return new Function("skillId", "target", "value", content);
-            //
+        params: {
+            IsCoreEnabled: _SATB._0_ARG_FUNC,
+            coreBaseFillATBFrame: _SATB._0_ARG_FUNC,
+            coreBaseFillATBSec: _SATB._0_ARG_FUNC,
+            coreTurnATBTime: function(funcContent) {
+                return new Function("baseFillATB", funcContent);
+            },
+            coreTurnATBAct: _SATB._0_ARG_FUNC,
+            canCoreTurnOverflow: _SATB._0_ARG_FUNC,
+            coreMaxATBVal: _SATB._0_ARG_FUNC
         },
-        cfgs: function(funcName, content) {
-            return new Function("current", "max", "isKeep", content);
-        },
-        notes: function(funcName, content) {
-            // This arg list covers all cases so unused args' the only problem
-            return new Function("skillId", "datum", "target", "value", content);
-            //
+        notes: {
+            coreMax: function(funcContent) {
+                return new Function("max", "datum", funcContent);
+            }
         }
     };
+    _SATB._IS_FUNC_PARAM = function(param) { return param[0] !== "_"; };
+    _SATB._PARAM_MODULE = {
+        IsCoreEnabled: "core",
+        coreBaseFillATBFrame: "core",
+        coreBaseFillATBSec: "core",
+        coreTurnATBTime: "core",
+        coreTurnATBAct: "core",
+        canCoreTurnOverflow: "core",
+        coreMaxATBVal: "core"
+    }
 
     _GS.initialize = $.initialize;
     _SATB.initialize = $.initialize = function() { // v0.00a - v0.00a; Extended
@@ -282,23 +275,21 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $.initialize
 
     /*------------------------------------------------------------------------
-     *    New public instance variables
+     *    New private instance variables
      *------------------------------------------------------------------------*/
-    // {{{*}}} satb: The container of all other new variables
-    //         {{*}} params: The container of all parameter/configuration values
-    //         {{*}} notes: The container of all notetag function contents
+    // {{{*}}} _satb: The container of all other new variables
+    //                {{*}} params: The container of all parameter values
+    //                {{*}} notes: The container of all notetag function content
 
     /**
-     * Pure function
+     * Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} funcType - The params/notes label
-     * @param {String} funcName - The name of the stored function content
-     * @param {String} funcContent - The stored function content
-     * @returns {()} The requested function with the stored content
      */
-    $.satbFunc = function(funcType, funcName, content) {
-        return _SATB._FUNCS[funcType](funcName, content);
-    }; // $.satbFunc
+    $.extractSATBFuncContents = function(funcType) {
+        Object.keys(this._satb[funcType]).forEach(
+                _SATB._extractFuncTypeContent.bind(this, funcType));
+    }; // $.extractSATBFuncContents
 
     /**
      * The this pointer is Game_System.prototype
@@ -308,7 +299,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     _SATB._init = function() {
         _SATB._initContainers.call(this);
         _SATB._storeParams.call(this);
-        _SATB._storeCfgNotes.call(this);
+        _SATB._storeNotes.call(this);
     }; // _SATB._init
 
     /**
@@ -317,7 +308,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @since v0.00a @version v0.00a
      */
     _SATB._initContainers = function() {
-        this.satb = { params: {}, cfgs: {}, notes: {} };
+        this._satb = { params: { core: {} }, notes: { coreMax: {} } };
     }; // _SATB._initContainers
 
     /**
@@ -334,17 +325,15 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Pure function
      * @since v0.00a @version v1.00b
-     * @returns {{String}} The requested name-value mapping
+     * @returns {{String}} The raw parameter name-value mapping
      */
     _SATB._rawParams = function() {
         // There's no need to cache it as _rawParams should only be called once
-        var params = PluginManager.parameters(DoubleX_RMMV.Superlative_ATB_Params_File);
+        var params = PluginManager.parameters(
+                DoubleX_RMMV.Superlative_ATB_Params_File);
         Object.keys(params).forEach(function(param) {
-            // All parent parameters are removed from the raw parameters
-            var first = param[0];
-            if (first.toLowerCase() !== first) return delete params[param];
-            //
-            params[param] = _SATB._rawParam.call(this, param, params[param]);
+            if (!_SATB._IS_FUNC_PARAM(param)) return;
+            params[param] = _SATB._jsonParam.call(this, param, params[param]);
         });
         return params;
         //
@@ -356,9 +345,9 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @since v1.00b @version v1.00b
      * @param {String} param - The parameter name
      * @param {String} val - The raw parameter value string
-     * @returns {String} The requested normalized parameter value string
+     * @returns {String} The normalized parameter value string
      */
-    _SATB._rawParam = function(param, val) {
+    _SATB._jsonParam = function(param, val) {
         if (!val) return val;
         try {
             return JSON.parse(val);
@@ -371,7 +360,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
             ].join("\n"));
             return val;
         }
-    }; // _SATB._rawParam
+    }; // _SATB._jsonParam
 
     /**
      * The this pointer is Game_System.prototype
@@ -381,9 +370,11 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @param {String} param - The parameter name
      */
     _SATB._storeParam = function(params, param) {
-        this.satb.params[param] = _SATB._param.call(this, params, param);
-        SATB.params[param] = this.satbFunc("params", param,
-                this.satb.params[param]);
+        var type = _SATB._PARAM_MODULE[param];
+        this._satb.params[type][param] = _SATB._param.call(this, params, param);
+        if (!_SATB._IS_FUNC_PARAM(param)) return;
+        SATB.params[type][param] =
+                _SATB._func.call(this, "params", type, param);
     }; // _SATB._storeParam
 
     /**
@@ -392,11 +383,12 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @since v0.00a @version v0.00a
      * @param {{String}} params - The parameter name-value map
      * @param {String} param - The parameter name
-     * @retruns {String} The requested function contents as parameter values
+     * @returns {String} The function contents as parameter values
      */
     _SATB._param = function(params, param) {
         // Refer to reference tag PARAMETERS_CONFIGURATIONS
-        return params[param] || _SATB._funcContent.call(this, SATB.params[param]);
+        return params[param] || _SATB._funcContent.call(
+                this, SATB.params[_SATB._PARAM_MODULE[param]][param]);
         //
     }; // _SATB._param
 
@@ -405,29 +397,38 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Idempotent
      * @since v0.00a @version v0.00a
      */
-    _SATB._storeCfgNotes = function() {
-        Object.keys(SATB.cfgs).forEach(_SATB._storeCfgNote.bind(this, "cfgs"));
-        Object.keys(SATB.notes).forEach(_SATB._storeCfgNote.bind(this, "notes"));
-    }; // _SATB._storeCfgNotes
+    _SATB._storeNotes = function() {
+        Object.keys(SATB.notes).forEach(_SATB._storeNoteModule, this);
+    }; // _SATB._storeNotes
 
     /**
      * The this pointer is Game_System.prototype
      * Idempotent
-     * @param {String} type - The configuration type label
-     * @param {String} name - The name of the configuration/note
+     * @param {String} type - The type of the note
      * @since v0.00a @version v0.00a
      */
-    _SATB._storeCfgNote = function(type, name) {
-        this.satb[type][name] =
-                _SATB._funcContent.call(this, SATB[type][name]);
-    }; // _SATB._storeCfgNote
+    _SATB._storeNoteModule = function(type) {
+        Object.keys(SATB.notes).forEach(_SATB._storeNote.bind(this, type));
+    }; // _SATB._storeNotes
+
+    /**
+     * The this pointer is Game_System.prototype
+     * Idempotent
+     * @param {String} type - The type of the note
+     * @param {String} name - The name of the note
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._storeNote = function(type, name) {
+        this._satb.notes[type][name] =
+              _SATB._funcContent.call(this, SATB.notes[type][name]);
+    }; // _SATB._storeNote
 
     /**
      * The this pointer is Game_System.prototype
      * Pure function
      * @since v0.00a @version v0.00a
      * @param {()} func - The function as the value of the configuration
-     * @returns {String} The requested parameters in the configuration region
+     * @returns {String} The parameters in the configuration plugin
      */
     _SATB._funcContent = function(func) {
         // Only the function contents are stored in save files
@@ -435,6 +436,48 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
                 replace(/^[^{]*{\s*/, "").replace(/\s*}[^}]*$/, "");
         //
     }; // _SATB._funcContent
+
+    /**
+     * The this pointer is Game_System.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @param {String} funcType - The params/notes label
+     * @param {String} funcModule - The module of the stored function content
+     */
+    _SATB._extractFuncTypeContent = function(funcType, funcModule) {
+        Object.keys(this._satb[funcType][funcModule]).forEach(
+                _SATB._extractFuncContent.bind(this, funcType, funcModule));
+    }; // _SATB._extractFuncTypeContent
+
+    /**
+     * The this pointer is Game_System.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @param {String} funcType - The params/notes label
+     * @param {String} funcModule - The module of the stored function content
+     * @param {String} funcName - The name of the stored function content
+     */
+    _SATB._extractFuncContent = function(funcType, funcModule, funcName) {
+        SATB[funcType][funcModule][funcName] =
+                _SATB._func(funcType, funcModule, funcName);
+    }; // _SATB._extractFuncContent
+
+    /**
+     * The this pointer is Game_System.prototype
+     * Pure function
+     * @since v0.00a @version v0.00a
+     * @param {String} funcType - The params/notes label
+     * @param {String} funcModule - The module of the stored function content
+     * @param {String} funcName - The name of the stored function content
+     * @returns {(**) -> *} The function with the stored content
+     */
+    _SATB._func = function(funcType, funcModule, funcName) {
+        var funcContent = this._satb[funcType][funcModule][funcName];
+        if (funcType === "params") {
+            return _SATB._FUNCS.params[funcName](funcContent);
+        }
+        return _SATB._FUNCS.notes[funcModule](funcContent);
+    }; // _SATB._func
 
 })(DoubleX_RMMV.SATB);
 
