@@ -16,5 +16,5 @@ Plugins Ordering:
 
 Getting Started:
 1. Only the core module should be enabled when you first experience SATB
-2. Enable other modules one at a time to be familiar with them one by one
+2. Enable other modules of interest one at a time to be familiar with them one by one
 3. Enable other compatible plugins to determine whether SATB suits your needs with those plugins
