@@ -120,22 +120,22 @@
  *----------------------------------------------------------------------------
  *    # Changelog
  *      Documentations:
- *      - v1.00a(GMT 0500 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *      Parameters:
- *      - v1.00a(GMT 0500 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *      Configurations:
- *      - v1.00a(GMT 1400 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *      Implementations:
- *      - v1.00a(GMT 1400 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *      Unit Test:
- *      - v1.00a(GMT 1400 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *      Compatibility:
- *      - v1.00a(GMT 1400 14-May-2020)
+ *      - v1.00a(GMT 0800 14-May-2020)
  *        1. Finished the core module
  *----------------------------------------------------------------------------
  *    # Todo
@@ -164,8 +164,8 @@
  *          - type is one of the following:
  *            Core module -
  *            1. coreMax(related to coreMaxATBVal,
- *                       coreMaxATBValNoteChainingRule and
- *                       coreMaxATBValNotePriority)
+ *                       _coreMaxATBValNoteChainingRule and
+ *                       _coreMaxATBValNotePriority)
  *            (Reference tag: NOTE_TYPE)
  *          - suffixes is the list of suffixes in the form of:
  *            suffix1 suffix2 suffix3 ... suffixn
@@ -276,9 +276,9 @@
  *           not inputable
  *           (Reference tag: INCREASED_MAX_CORE_ATB_NOT_INPUTABLE)
  *         - E.g.:
- *           If coreMaxATBValNoteChainingRule is set as return "*";, and the
- *           only coreMax notetag is <satb coreMax var: 1>, then this notetag
- *           will set the maximum ATB value of the battler involved to be
+ *           If _coreMaxATBValNoteChainingRule is set as *, and the only
+ *           coreMax notetag is <satb coreMax var: 1>, then this notetag will
+ *           set the maximum ATB value of the battler involved to be
  *           multiplied by the value of the game variable with id 1 as long as
  *           that value is a positive Number
  *============================================================================
