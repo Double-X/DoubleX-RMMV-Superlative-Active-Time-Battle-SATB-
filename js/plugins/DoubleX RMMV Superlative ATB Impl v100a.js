@@ -1,3 +1,8 @@
+/*:
+ * @plugindesc The implementation plugin of DoubleX RMMV Superlative ATB
+ * @author DoubleX
+ */
+
 /*============================================================================
  *    ## Plugin Implementations
  *       You need not edit this part as it's about how this plugin works
@@ -38,6 +43,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     SATB.DataManager = { orig: {}, new: {} };
     var _DM = SATB.DataManager.orig, _SATB = SATB.DataManager.new;
+    _SATB.switchIds = {}, _SATB.varIds = {};
     // Refer to reference tag NOTE_STRUCTURE
     _SATB._REG_EXP_ID = " *(?:doublex +rmmv +)?satb +(\\w+)";
     _SATB._REG_EXPS = {
@@ -105,42 +111,33 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @since v0.00a @version v0.00a
      */
     _SATB._loadAllNotes = function() {
-        _SATB._data.call(this).forEach(_SATB._loadNote, this);
+        var allData = {
+            actor: $dataActors,
+            enemy: $dataEnemies,
+            currentClass: $dataClasses,
+            weapons: $dataWeapons,
+            armors: $dataArmors,
+            states: $dataStates,
+            skills: $dataSkills
+        };
+        Object.keys(allData).forEach(function(type) {
+            allData[type].forEach(_SATB._loadNote.bind(this, type));
+        }, this);
     }; // _SATB._loadAllNotes
-
-    /**
-     * The this pointer is DataManager
-     * Nullipotent
-     * @since v0.00a @version v0.00a
-     * @returns {[{*}]} The list of data to have notetags loaded
-     */
-    _SATB._data = function() {
-        // The function's easy, simple and small enough to be inlined
-        return [
-            $dataActors,
-            $dataEnemies,
-            $dataClasses,
-            $dataWeapons,
-            $dataArmors,
-            $dataStates,
-            $dataSkills
-        ].reduce(function(allData, data) {
-            return allData.concat(data.filter(function(d) { return d; }));
-        }, []);
-        //
-    }; // _SATB._data
 
     /**
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {{*}} datum - The datum to have notetags loaded
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {{*}?} datum - The datum to have notetags loaded
      */
-    _SATB._loadNote = function(datum) {
+    _SATB._loadNote = function(type, datum) {
+        if (!datum) return;
         // Script call/plugin command
-        var lines = datum.note.split(/[\r\n]+/);
-        _SATB._loadEvalNote.call(this, datum.meta.satb = {}, lines);
-        lines.forEach(_SATB._loadBaseNote.bind(this, datum.meta.satb));
+        var lines = datum.note.split(/[\r\n]+/), satb = datum.meta.satb = {};
+        _SATB._loadEvalNote.call(this, type, satb, lines);
+        lines.forEach(_SATB._loadBaseNote.bind(this, type, satb));
         //
     }; // _SATB._loadNote
 
@@ -148,23 +145,24 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {{{String}}} satb - The loaded note values
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {{*}} satb - The datum plugin notetag container
      * @param {[String]} lines - The list of lines being scanned for notetags
      *                           to be loaded
      */
-    _SATB._loadEvalNote = function(satb, lines) {
+    _SATB._loadEvalNote = function(type, satb, lines) {
         // It's tolerable and more performant than any declarative counterpart
-        var isEval = false, type = "", funcLines = [];
+        var isEval = false, note = "", funcLines = [];
         lines.forEach(function(line) {
             if (line.match(_SATB._REG_EXPS.evalStart)) {
                 isEval = true;
-                type = RegExp.$1;
+                note = RegExp.$1;
             } else if (line.match(_SATB._REG_EXPS.evalEnd)) {
                 isEval = false;
                 // Refer to reference tag NOTETAG_MULTI
-                if (type !== RegExp.$1 || satb[type]) return;
-                satb[type] = (satb[type] || []).concat(_SATB._notePairs.call(
-                        this, ["eval"], [funcLines.join("\n")]));
+                if (note !== RegExp.$1 || satb[note]) return;
+                satb[note] = (satb[note] || []).concat(_SATB._notePairs.call(
+                        this, type, note, ["eval"], [funcLines.join("\n")]));
                 //
             } else if (isEval) funcLines.push(line);
         }, this);
@@ -175,15 +173,16 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {{{String}}} satb - The loaded note values
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {{*}} satb - The datum plugin notetag container
      * @param {String} line - The line being scanned for notetags to be loaded
      */
-    _SATB._loadBaseNote = function(satb, line) {
+    _SATB._loadBaseNote = function(type, satb, line) {
         // Refer to reference tag NOTETAG_MULTI and LINE_MONO
         if (!line.match(_SATB._REG_EXPS.base)) return;
-        var type = RegExp.$1, suffixes = RegExp.$2, entries = RegExp.$3;
-        satb[type] = (satb[type] || []).concat(_SATB._notePairs.call(
-                this, suffixes.split(/ +/), entries.split(/ *, +/)));
+        var note = RegExp.$1, suffixes = RegExp.$2, entries = RegExp.$3;
+        satb[note] = (satb[note] || []).concat(_SATB._notePairs.call(this,
+                type, note, suffixes.split(/ +/), entries.split(/ *, +/)));
         //
     }; // _SATB._loadBaseNote
 
@@ -191,25 +190,61 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {String} note - The type of the notetag to be loaded
      * @param {[String]} suffixes - The list of suffixes in the notetag
      * @param {[String]} entries - The list of entries in the notetag
      * @returns {{String}} The suffix-entry pair mapping
      */
-    _SATB._notePairs = function(suffixes, entries) {
+    _SATB._notePairs = function(type, note, suffixes, entries) {
         // So those excessive suffixes/entries will be discarded right here
         var l = Math.min(suffixes.length, entries.length);
         //
         // It's tolerable and more performant than any declarative counterpart
         for (var i = 0, pairs = {}; i < l; i++) {
             // Refer to reference tag MULTI_SUFFIX_ENTRY
-            var count = i + 1;
-            pairs["suffix" + count] = suffixes[i];
-            pairs["entry" + count] = entries[i];
+            var count = i + 1, suffix = suffixes[i], entry = entries[i];
+            pairs["suffix" + count] = suffix;
+            pairs["entry" + count] = entry;
+            //
+            // Users changing the switch/var note map should update it manually
+            _SATB._updateSwitchVarIds.call(this, type, note, suffix, entry);
             //
         }
         return pairs;
         //
     }; // _SATB._notePairs
+
+    /**
+     * The this pointer is DataManager
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {String} note - The type of the notetag to be loaded
+     * @param {String} suffix - The currently inspected suffix in the notetag
+     * @param {String} entry - The currently inspected entry in the notetag
+     */
+    _SATB._updateSwitchVarIds = function(type, note, suffix, entry) {
+        if (suffix === "switch") {
+            _SATB._updateIds.call(this, type, note, +entry, _SATB.switchIds);
+        } else if (suffix === "var") {
+            _SATB._updateIds.call(this, type, note, +entry, _SATB.varIds);
+        }
+    }; // _SATB._updateSwitchVarIds
+
+    /**
+     * The this pointer is DataManager
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @param {String} type - The type of the datum to have notetags loaded
+     * @param {String} note - The type of the notetag to be loaded
+     * @param {Id} id - The id of the switch/variable used in the notetag
+     */
+    _SATB._updateIds = function(type, note, id, ids) {
+        var notes = ids[id] = ids[id] || {};
+        var factors = notes[note] = notes[note] || [];
+        if (factors.indexOf(type) < 0) factors.concat(type);
+    }; // _SATB._updateIds
 
     /**
      * The this pointer is DataManager
@@ -260,12 +295,16 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     _SATB._IS_FUNC_PARAM = function(param) { return param[0] !== "_"; };
     _SATB._PARAM_MODULE = {
         IsCoreEnabled: "core",
+        _coreBaseFillUnit: "core",
         coreBaseFillATBFrame: "core",
         coreBaseFillATBSec: "core",
+        _coreTurnUnit: "core",
         coreTurnATBTime: "core",
         coreTurnATBAct: "core",
         canCoreTurnOverflow: "core",
-        coreMaxATBVal: "core"
+        coreMaxATBVal: "core",
+        _coreMaxATBValNoteChainingRule: "core",
+        _coreMaxATBValNotePriority: "core"
     }
 
     _GS.initialize = $.initialize;
@@ -287,9 +326,64 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @param {String} funcType - The params/notes label
      */
     $.extractSATBFuncContents = function(funcType) {
+        // params becomes Param and notes becomes Note
+        var type = funcType.charAt(0).toUpperCase() + funcType.slice(1, -1);
+        //
         Object.keys(this._satb[funcType]).forEach(
-                _SATB._extractFuncTypeContent.bind(this, funcType));
+                _SATB["_extract" + type + "FuncContents"], this);
     }; // $.extractSATBFuncContents
+
+    /**
+     * Nullipotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} param - The parameter name
+     * @returns {String} The function content as the parameter value
+     */
+    $.satbParam = function(param) {
+        return this._satb.params[_SATB._PARAM_MODULE[param]][param];
+    }; // $.satbParam
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} param - The parameter name
+     * @param {String} funcContent - The function content as the parameter value
+     */
+    $.setSATBParam = function(param, funcContent) {
+        var type = _SATB._PARAM_MODULE[param];
+        this._satb.params[type][param] = funcContent;
+        if (!_SATB._IS_FUNC_PARAM(param)) return;
+        SATB.params[type][param] = _SATB._paramFunc.call(this, type, param);
+    }; // $.setSATBParam
+
+    /**
+     * Nullipotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} type - The notetag type
+     * @param {String} name - The notetag value name
+     * @returns {String} The notetag function content
+     */
+    $.satbNote = function(type, name) { return this._satb.notes[type][name]; };
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} type - The notetag type
+     * @param {String} name - The notetag value name
+     * @param {String} funcContent - The function content as the parameter value
+     * @param {String?} switchVar - "switch", "var" or neither
+     * @param {Id?} id - The switch/variable id
+     * @param {[String]?} factors - The types of data using this notetag
+     */
+    $.setSATBNote = function(type, name, funcContent, switchVar, id, factors) {
+        this._satb.notes[type][name] = funcContent;
+        _SATB._extractNoteFuncContent.call(this, type, name);
+        if (factors) factors.forEach(function(factor) {
+            SATB.DataManager.new._updateSwitchVarIds.call(
+                    this, type, factor, switchVar, id);
+        }, this);
+        _SATB._storeSwitchVarIds.call(this); // It's just to play safe
+    }; // $.setSATBNote
 
     /**
      * The this pointer is Game_System.prototype
@@ -300,6 +394,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         _SATB._initContainers.call(this);
         _SATB._storeParams.call(this);
         _SATB._storeNotes.call(this);
+        _SATB._storeSwitchVarIds.call(this);
     }; // _SATB._init
 
     /**
@@ -370,24 +465,20 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @param {String} param - The parameter name
      */
     _SATB._storeParam = function(params, param) {
-        var type = _SATB._PARAM_MODULE[param];
-        this._satb.params[type][param] = _SATB._param.call(this, params, param);
-        if (!_SATB._IS_FUNC_PARAM(param)) return;
-        SATB.params[type][param] =
-                _SATB._func.call(this, "params", type, param);
+        this.setSATBParam(param, _SATB._param.call(this, param, params[param]));
     }; // _SATB._storeParam
 
     /**
      * The this pointer is Game_System.prototype
      * Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {{String}} params - The parameter name-value map
      * @param {String} param - The parameter name
+     * @param {{String}} val - The parameter value
      * @returns {String} The function contents as parameter values
      */
-    _SATB._param = function(params, param) {
+    _SATB._param = function(param, val) {
         // Refer to reference tag PARAMETERS_CONFIGURATIONS
-        return params[param] || _SATB._funcContent.call(
+        return val || _SATB._funcContent.call(
                 this, SATB.params[_SATB._PARAM_MODULE[param]][param]);
         //
     }; // _SATB._param
@@ -441,43 +532,51 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
-     * @param {String} funcModule - The module of the stored function content
      */
-    _SATB._extractFuncTypeContent = function(funcType, funcModule) {
-        Object.keys(this._satb[funcType][funcModule]).forEach(
-                _SATB._extractFuncContent.bind(this, funcType, funcModule));
-    }; // _SATB._extractFuncTypeContent
+    _SATB._storeSwitchVarIds = function() {
+        var DM = SATB.DataManager.new;
+        this._satb.switchIds = DM.switchIds;
+        this._satb.varIds = DM.varIds;
+    }; // _SATB._storeSwitchVarIds
+
+    ["Param", "Note"].forEach(function(type) {
+        var t = type.toLowerCase() + "s";
+        var func = "_extract" + type + "FuncContent";
+        /**
+         * The this pointer is Game_System.prototype
+         * Idempotent
+         * @since v0.00a @version v0.00a
+         * @param {String} funcModule - The module of the stored function content
+         */
+        _SATB["_extract" + type + "FuncContents"] = function(funcModule) {
+            Object.keys(this._satb[t][funcModule]).forEach(
+                    _SATB[func].bind(this, funcModule));
+        }; // _SATB["_extract" + type + "FuncContents"]
+    })
 
     /**
      * The this pointer is Game_System.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
      * @param {String} funcModule - The module of the stored function content
      * @param {String} funcName - The name of the stored function content
      */
-    _SATB._extractFuncContent = function(funcType, funcModule, funcName) {
-        SATB[funcType][funcModule][funcName] =
-                _SATB._func(funcType, funcModule, funcName);
-    }; // _SATB._extractFuncContent
+    _SATB._extractParamFuncContent = function(funcModule, funcName) {
+        SATB.params[funcModule][funcName] = _SATB._FUNCS.params[funcName](
+                this._satb.params[funcModule][funcName]);
+    }; // _SATB._extractParamFuncContent
 
     /**
      * The this pointer is Game_System.prototype
-     * Pure function
+     * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
      * @param {String} funcModule - The module of the stored function content
      * @param {String} funcName - The name of the stored function content
-     * @returns {(**) -> *} The function with the stored content
      */
-    _SATB._func = function(funcType, funcModule, funcName) {
-        var funcContent = this._satb[funcType][funcModule][funcName];
-        if (funcType === "params") {
-            return _SATB._FUNCS.params[funcName](funcContent);
-        }
-        return _SATB._FUNCS.notes[funcModule](funcContent);
-    }; // _SATB._func
+    _SATB._extractNoteFuncContent = function(funcModule, funcName) {
+        SATB.notes[funcModule][funcName] = _SATB._FUNCS.notes[funcModule](
+                this._satb.notes[funcModule][funcName]);
+    }; // _SATB._extractNoteFuncContent
 
 })(DoubleX_RMMV.SATB);
 
@@ -491,8 +590,8 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     "use strict";
 
     var classes = {
-        Game_Switches: { proto: Game_Switches.prototype, param: "_switchIds" },
-        Game_Variables: { proto: Game_Variables.prototype, param: "_varIds" }
+        Game_Switches: { proto: Game_Switches.prototype, param: "switchIds" },
+        Game_Variables: { proto: Game_Variables.prototype, param: "varIds" }
     };
     Object.keys(classes).forEach(function(klass) {
 
@@ -501,7 +600,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         var $ = classes[klass].proto, param = classes[klass].param;
 
         _GSV.setValue = $.setValue;
-        _SATB.setValue = $.setValue = function(id, val) {
+        _SATB.setValue = $.setValue = function(id, value) {
         // v0.00a - v0.00a; Extended
             _GSV.setValue.apply(this, arguments);
             // Added to raise the change factors involving this id
@@ -516,12 +615,9 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
          * @param {Id} id - The id to have its involved change factors raised
          */
         _SATB._raiseChangeFactors = function(id) {
-            var ids = SATB.params[param]();
-            // Emphasizes the differences between the Array and Object forms
-            if (Array.isArray(ids)) {
-                return _SATB._raiseAllChangeFactors.call(this, id, ids);
-            }
-            _SATB._raiseNoteChangeFactors.call(this, ids[id]);
+            // It's safe to access $gameSystem._satb directly in private method
+            _SATB._raiseNoteChangeFactors.call(
+                    this, $gameSystem._satb[param][id]);
             //
         }; // _SATB._raiseChangeFactors
 
@@ -529,27 +625,14 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
          * The this pointer is klass.prototype
          * Idempotent
          * @since v0.00a @version v0.00a
-         * @param {Id} id - The id to have its involved change factors raised
-         * @param {[Id]} ids - The list of ids used by this plugin
-         */
-        _SATB._raiseAllChangeFactors = function(id, ids) {
-            if (ids.indexOf(id) >= 0) $gameParty.members().forEach(function(m) {
-                m.raiseAllSATBNoteChangeFactors();
-            });
-        }; // _SATB._raiseAllChangeFactors
-
-        /**
-         * The this pointer is klass.prototype
-         * Idempotent
-         * @since v0.00a @version v0.00a
-         * @param {{[String], [String]}} noteFactors - The notes and factors to
-         *                                             be raised by this id
+         * @param {{[String]}?} noteFactors - The notes and factors to be
+         *                                     raised by this id
          */
         _SATB._raiseNoteChangeFactors = function(noteFactors) {
-            if (noteFactors) $gameParty.members().forEach(function(mem) {
-                noteFactors.notes.forEach(function(note) {
-                    noteFactors.factors.forEach(mem.
-                            raiseSATBNoteChangeFactor.bind(mem, note));
+            if (noteFactors) BattleManager.satbMems().forEach(function(mem) {
+                Object.keys(noteFactors).forEach(function(note) {
+                    noteFactors[note].forEach(
+                            mem.raiseSATBNoteChangeFactor.bind(mem, note));
                 });
             });
         }; // _SATB._raiseNoteChangeFactors
@@ -1194,6 +1277,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     // Refer to reference tag NOTE_DATA_TYPES
     _SATB._FACTORS = [
         "actor",
+        "enemy",
         "currentClass",
         "weapons",
         "armors",
