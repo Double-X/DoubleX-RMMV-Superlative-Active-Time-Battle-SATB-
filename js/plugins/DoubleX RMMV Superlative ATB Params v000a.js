@@ -38,22 +38,22 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  * @value coreBaseFillATBFrame
  * @option Seconds
  * @value coreBaseFillATBSec
- * @desc Sets whether the ATB bar fill rate is based on frames or seconds
- * You'll have to use script calls to change this selection later in game
+ * @desc Sets whether the ATB fill rate's based on frames or seconds
+ * You can use script calls to change this choice later in game
  * @default coreBaseFillATBFrame
  *
  * @param coreBaseFillATBFrame
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets the base number of ATB frames to fully fill battler ATB values
- * It'll be the contents of a function returning a natural Number
+ * @desc Sets the base number of ATB frames to fully fill battler ATB
+ * It'll be contents of a function returning a natural Number
  * @default "return 600;"
  *
  * @param coreBaseFillATBSec
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets the base number of ATB seconds to fully fill battler ATB values
- * It'll be the contents of a function returning a positive Number
+ * @desc Sets the base number of ATB second to fully fill battler ATB
+ * It'll be contents of a function returning a positive Number
  * @default "return 5.0;"
  *
  * @param _coreTurnUnit
@@ -64,35 +64,35 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  * @option Number Of Actions
  * @value coreTurnATBAct
  * @desc Sets whether the turn's based on time or number of actions
- * You'll have to use script calls to change this selection later in game
+ * You can use script calls to change this choice later in game
  * @default coreTurnATBTime
  *
  * @param coreTurnATBTime
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets the turn duration as coreBaseFillATBTimeUnit * coreTurnATBTime
- * It'll be the contents of a function returning a positive Number
+ * @desc Sets the turn duration as coreBaseFillUnit * coreTurnATBTime
+ * It'll be contents of a function returning a positive Number
  * @default "return 1.0;"
  *
  * @param coreTurnATBAct
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the number of actions constituting a turn
- * It'll be the contents of a function returning a natural Number
+ * It'll be contents of a function returning a natural Number
  * @default return BattleManager.allBattleMembers().length;
  *
  * @param canCoreTurnOverflow
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets whether the current turn time/action can overflow to the next
- * It'll be the contents of a function returning a boolean
+ * @desc Sets whether current turn progress can overflow to the next
+ * It'll be the contents of a function returning a Boolean
  * @default "return false;"
  *
  * @param coreMaxATBVal
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets the base maximum ATB value for each battlers
- * It'll be the contents of a function returning a positive Number
+ * @desc Sets the base maximum ATB value for each battler
+ * It'll be contents of a function returning a positive Number
  * @default "return 100.0;"
  *
  * @param coreMaxATBValNoteChainingRule
