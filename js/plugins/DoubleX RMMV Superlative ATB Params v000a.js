@@ -8,22 +8,51 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
         "DoubleX RMMV Superlative ATB Params v100a";
 //
 
+// Fathoms these before changing _switchIds nor _varIds via script calls
+/*~struct~NoteFactors:
+ *
+ * @param note
+ * @type text
+ *
+ * @param factors
+ * @type text[]
+ */
+
+/*~struct~SwitchIds:
+ *
+ * @param switchId
+ * @type switch
+ *
+ * @param notes
+ * @type struct<NoteFactors>[]
+ */
+
+/*~struct~VarIds:
+ *
+ * @param varId
+ * @type variable
+ *
+ * @param notes
+ * @type struct<NoteFactors>[]
+ */
+//
+
 /*:
  *
  * @plugindesc The parameter plugin of DoubleX RMMV Superlative ATB
  * @author DoubleX
-  *
+ *
  * @param _switchIds
- * @type switch[]
+ * @type struct<SwitchIds>[]
  * @desc Sets the list of game switches used by this plugin
  * You can use script calls to change this list later in game
- * @default
+ * @default []
  *
  * @param _varIds
- * @type variable[]
+ * @type struct<VarIds>[]
  * @desc Sets the list of game variables used by this plugin
  * You can use script calls to change this list later in game
- * @default
+ * @default []
  *
  * @param IsCoreEnabled
  * @type note
@@ -72,14 +101,14 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  * @type note
  * @desc Sets the turn duration as coreBaseFillUnit * coreTurnATBTime
  * It'll be contents of a function returning a positive Number
- * @default "return 1.0;"
+ * @default "return baseFillATB * 2.0;"
  *
  * @param coreTurnATBAct
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the number of actions constituting a turn
  * It'll be contents of a function returning a natural Number
- * @default return BattleManager.allBattleMembers().length;
+ * @default "return BattleManager.allBattleMembers().length;"
  *
  * @param canCoreTurnOverflow
  * @parent IsCoreEnabled
@@ -95,19 +124,49 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  * It'll be contents of a function returning a positive Number
  * @default "return 100.0;"
  *
- * @param coreMaxATBValNoteChainingRule
+ * @param _coreMaxATBValNoteChainingRule
  * @parent IsCoreEnabled
- * @type note
+ * @type select
+ * @option Uses the 1st effective notetag value only
+ * @value first
+ * @option Adds all effective notetag values
+ * @value +
+ * @option Minuses all effective notetag values
+ * @value -
+ * @option Multiplies all effective notetag values
+ * @value *
+ * @option Divides all effective notetag values
+ * @value /
+ * @option Takes the modulo of all effective notetag values
+ * @value %
+ * @option Assigns all effective notetag values
+ * @value =
+ * @option Uses the last effective notetag value only
+ * @value last
  * @desc Sets how to use multiple coreMax notetags
- * It'll be the contents of a function returning a String
- * @default "return '*';"
+ * You can use script calls to change this choice later in game
+ * @default *
  *
- * @param coreMaxATBValNotePriority
+ * @param _coreMaxATBValNotePriority
  * @parent IsCoreEnabled
- * @type note
+ * @type select[]
+ * @option State data
+ * @value states
+ * @option Skill data
+ * @value skills
+ * @option Armor data
+ * @value armors
+ * @option Weapon data
+ * @value weapons
+ * @option Class data
+ * @value classes
+ * @option Actor data
+ * @value actor
+ * @option Enemy data
+ * @value enemy
  * @desc Sets the data type priority of coreMax notetags
- * It'll be contents of function returning an Array of Strings
- * @default "return ['states', 'skills', 'armors', 'weapons', 'classes', 'battler'];"
+ * You can use script calls to change this list later in game
+ * @default ["states","skills","armors","weapons","classes","actor","enemy"]
  *
  * @help
  *============================================================================
@@ -136,12 +195,14 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *      1. IsCoreEnabled
  *      2. coreBaseFillATBFrame
  *      3. coreBaseFillATBSec
+ *         None
  *      4. coreTurnATBTime
+ *         baseFillATB - The value returned by coreBaseFillATBFrame or
+ *                       coreBaseFillATBSec, depending on the value of
+ *                       _coreBaseFillUnit
  *      5. coreTurnATBAct
  *      6. canCoreTurnOverflow
  *      7. coreMaxATBVal
- *      8. coreMaxATBValNoteChainingRule
- *      9. coreMaxATBValNotePriority
  *         None
  *    # Valid values
  *      Core Module:
@@ -160,37 +221,6 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *         Any valid Javascript(It'll always be regarded as truthy/falsy)
  *      7. coreMaxATBVal
  *         Any valid Javascript returning a positive Number
- *      8. coreMaxATBValNoteChainingRule
- *         Any valid Javascript returning any of the below String:
- *         - "first"(Only the 1st notetag of the involved skill will be used)
- *         - "+"(The results of all effective notetags will be added)
- *         - "-"(The results of all effective notetags will be subtracted)
- *         - "*"(The results of all effective notetags will be multiplied)
- *         - "/"(The results of all effective notetags will be divided)
- *         - "%"(The results of all effective notetags will be remainders)
- *         - (Advanced)"="(The results of effective notetags with higher
- *                         priorities will be replaced by those with lower
- *                         priorities, leading to maximum flexibilities)
- *         - "last"(Only the last effective notetag will be used)
- *         ("=" and "last" are different only for more advanced/creative uses)
- *         (Reference tag: NOTE_OPERATORS)
- *         All invalid values will be regarded as "first"
- *         (Reference tag: DEFAULT_CHAINING_RULE_FIRST)
- *      9. coreMaxATBValNotePriority
- *         Any valid Javascript returning an Array having the below String:
- *         - "states" Effective states in the States category
- *         - "skills" Learnt skills in the Skills category
- *         - "armors" Current armors in the Armors category
- *         - "weapons" Current weapons in the Weapons category
- *         - "currentClass" Current class in the Classes category
- *         - "battler" Involved actor in the Actors/Enemies category
- *         (Reference tag: NOTE_DATA_TYPES)
- *         The effective notetag priority among data types are sorted
- *         ascendingly in the array
- *         The effective notetag priority among the same data type are the
- *         same as the other priorities among there
- *         Notetags of data belonging types not included in the array won't be
- *         effective
  *    # Examples
  *      Core Module:
  *      1. IsCoreEnabled
@@ -210,8 +240,8 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *      4. coreTurnATBTime
  *         If _coreBaseFillUnit is set as coreBaseFillATBFrame and
  *         coreBaseFillATBFrame is set as return 600;, then setting
- *         coreTurnATBTime as return 1.5; will set the turn duration as
- *         600 * 1.5 = 900 ATB frames
+ *         coreTurnATBTime as return baseFillATB * 1.5; will set the turn
+ *         duration as 600 * 1.5 = 900 ATB frames
  *      5. coreTurnATBAct
  *         Setting coreTurnATBAct as
  *         return BattleManager.allBattleMembers().length; will cause the
@@ -224,17 +254,4 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *      7. coreMaxATBVal
  *         Setting coreMaxATBVal as return 200.0; will cause the maximum ATB
  *         value of each battler to be 200.0
- *      8. coreMaxATBValNoteChainingRule
- *         Setting coreMaxATBValNoteChainingRule as return "="; will cause the
- *         result of effective notetags with higher priorities to be replaced
- *         by those with lower priorities(this can be useful for more advanced
- *         uses by reusing the cached values of all effective notetags with
- *         higher priorities)
- *      9. coreMaxATBValNotePriority
- *         Setting coreMaxATBValNotePriority as
- *         return ["states", "skills", "armors", "weapons", "classes"];
- *         will cause the cond notetags in the States category to have the
- *         highest priorities, followed by the Skills, Armors, Weapons and
- *         Classes categories, whereas no notetags in the Actors nor Enemies
- *         categories will be effective
  */
