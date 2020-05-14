@@ -371,28 +371,28 @@
 
 // DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
 var DoubleX_RMMV = DoubleX_RMMV || {};
-DoubleX_RMMV["Superlative ATB Documentation"] = "v0.00a";
+DoubleX_RMMV["Superlative ATB Documentations"] = "v0.00a";
 //
 
 // Ensures that all plugins are of the latest version
-DoubleX_RMMV["Superlative ATB Documentation"].versions = {
+DoubleX_RMMV.SATB_VERS = {
     Parameters: "0.00a",
     Configurations: "0.00a",
     Implementations: "0.00a",
     "Unit Test": "0.00a",
     Compatibility: "0.00a"
 };
-Object.keys(DoubleX_RMMV["Superlative ATB Documentation"].versions).forEach(function(plugin) {
+Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
     var current = DoubleX_RMMV["Superlative ATB " + plugin];
     if (current) {
-        var latest = "v" + DoubleX_RMMV["Superlative ATB Documentation"].versions[plugin];
+        var latest = "v" + DoubleX_RMMV.SATB_VERS[plugin];
         if (current !== latest) {
             console.warn("The version of DoubleX RMMV Superlative ATB " +
                     plugin + " should be" + latest + " but is " + current);
         }
     } else {
           console.warn("DoubleX RMMV Superlative ATB " + plugin + " should " +
-                  "be placed above DoubleX RMMV Superlative ATB Documentation");
+                  "be placed above DoubleX RMMV Superlative ATB Documentations");
     }
 });
 // DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
