@@ -3,6 +3,11 @@ var DoubleX_RMMV = DoubleX_RMMV || {};
 DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
 //
 
+/*:
+ * @plugindesc The configuration plugin of DoubleX RMMV Superlative ATB
+ * @author DoubleX
+ */
+
 /*============================================================================
  *    ## Plugin Configurations
  *       You only need to edit this part as it's about what this plugin does
@@ -117,56 +122,59 @@ DoubleX_RMMV.SATB = {
          * The 1st character of CATBMX can't be a number
          * The below CATBMX are examples added to help you set your CATBMX
          * You can freely use, rewrite and/or delete these examples
-         * CATBMX can be used on notetags other than coreMax if you know what
-         * you're truly doing
+         * (Advanced)CATBMX can be used on notetags other than coreMax if you
+         * know what you're truly doing
          * (Advanced)You're encouraged and recommended to write modular CATBMX
          */
+        coreMax: {
 
-        /**
-         * The this pointer refers to the battler involved
-         * Nullipotent
-         * @since v0.00a @version v0.00a
-         * @param {Number} max - The maximum ATB value up to the last notetag
-         * @param {{*}} datum - The datum having this notetag
-         * @returns {Number} The maximum ATB value(Which should be positive) for
-         *                   the battler involved
-         */
-        CATBM_MAX: function(max, datum) {
-            // Returns 2 and 1 if the max is greater and not greater than 100
-            return max > 100.0 ? 2 : 1;
-            //
-        },
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+             * @param {Number} max - The maximum ATB value up to the last note
+             * @param {{*}} datum - The datum having this notetag
+             * @returns {Number} The maximum ATB value(Which should be positive)
+             *                   for the battler involved
+             */
+            CATBM_MAX: function(max, datum) {
+                // Returns 2 and 1 if max is greater and not greater than 100
+                return max > 100.0 ? 2 : 1;
+                //
+            },
 
-        /**
-         * The this pointer refers to the battler involved
-         * Nullipotent
-         * @since v0.00a @version v0.00a
-         * @param {Number} max - The maximum ATB value up to the last notetag
-         * @param {{*}} datum - The datum having this notetag
-         * @returns {Number} The maximum ATB value(Which should be positive) for
-         *                   the battler involved
-         */
-        CATBM_AGI: function(max, datum) {
-            return 999 - this.agi; // 999 - the battler's AGI
-        },
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+             * @param {Number} max - The maximum ATB value up to the last note
+             * @param {{*}} datum - The datum having this notetag
+             * @returns {Number} The maximum ATB value(Which should be positive)
+             *                   for the battler involved
+             */
+            CATBM_AGI: function(max, datum) {
+                return 999 - this.agi; // 999 - the battler's AGI
+            },
 
-        /**
-         * The this pointer refers to the battler involved
-         * Nullipotent
-         * @since v0.00a @version v0.00a
-         * @param {Number} max - The maximum ATB value up to the last notetag
-         * @param {{*}} datum - The datum having this notetag
-         * @returns {Number} The maximum ATB value(Which should be positive) for
-         *                   the battler involved
-         */
-        CATBM_VAR: function(max, datum) {
-            // Returns the value in the game variable with id x
-            return $gameVariables.value(x);
-            //
-        }, // M3
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+              * @param {Number} max - The maximum ATB value up to the last note
+             * @param {{*}} datum - The datum having this notetag
+             * @returns {Number} The maximum ATB value(Which should be positive)
+             *                   for the battler involved
+             */
+            CATBM_VAR: function(max, datum) {
+                // Returns the value in the game variable with id x
+                return $gameVariables.value(x);
+                //
+            }, // M3
 
-        // Adds new CATBMX here
+            // Adds new CATBMX here
 
+
+        }
 
     } // notes
 
