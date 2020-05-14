@@ -106,7 +106,8 @@
  *----------------------------------------------------------------------------
  *    # Instructions
  *      1. If you want to edit configurations instead of parameters, you must
- *         open the configuration plugin js file to access those configurations
+ *         open the configuration plugin js file to access those
+ *         configurations
  *      2. The default plugin parameters file name is
  *         DoubleX RMMV Superlative ATB Params v100a
  *         If you want to change that, you must edit the value of
@@ -142,7 +143,7 @@
  *      1.
  *============================================================================*/
 /*:
- * @plugindesc To be the most flexible, performant and powerful RMMV ATB system
+ * @plugindesc To be the most flexible, performant and powerful ATB system
  * framework with the greatest amount of freedom while being user-friendly
  * @author DoubleX
  *
@@ -215,8 +216,8 @@
  *          - Each of the above parts have its own effective notetag list
  *            cache, which will be recached if it's possible that the
  *            effective notetag list might have changed due to changing
- *            classes/weapons/armors/states/etc, which will automatically raise
- *            the coresponding note change factor for the corresponding note
+ *            classes/weapons/armors/states/etc, which will automatically
+ *            raise coresponding note change factor for the corresponding note
  *            (Reference tag: NOTE_LIST_CACHE)
  *          - Each of the above parts has its own intermediate result cache
  *            based on the result chained from the effective notetags with
@@ -240,30 +241,13 @@
  *            be raised immediately
  *----------------------------------------------------------------------------
  *    # Actor/Class/Weapon/Armor/State/Skill Notetag contents:
- *      2. max suffix1: entry1
- *         - Sets the maximum experience of the skill to be progressed
- *         - suffix1 can be cfg, val, var or script
- *         - (Advanced)Please refer to Max Functions in the configuration
- *           plugin for using cfg or script suffixes, or the eval variant
- *         - The result of entry1 can be any positive Number as the maximum
- *           experience
- *         - Having an invalid result is the same as not meeting prerequisites
- *           (Reference tag: INVALID_MAX)
- *         - If the maximum experience of the skill to be progressed's reduced
- *           to become not greater than its current experience, the skill will
- *           be ended progressing immediately
- *           (Reference tag: REDUCED_MAX_END_SKILL_PROGRESS)
- *         - E.g.:
- *           <skill progress max var: 1> will set the maximum experience of
- *           the skill to be progressed as the value of the game variable with
- *           id 1
  *      Core Module:
  *      1. coreMax suffix: entry
  *         - Sets the maximum ATB value of the battler involved
  *         - suffix can be cfg, val, var or script
  *         - (Advanced)Please refer to Max Functions in the core module of the
- *           configuration plugin for using cfg or script suffixes, or the eval
- *           variant
+ *           configuration plugin for using cfg or script suffixes, or the
+ *           eval variant
  *         - The result of entry can be any positive Number
  *         - Having an invalid entry value will make the notetag ineffective
  *           (Reference tag: INVALID_NOTE)
@@ -292,7 +276,7 @@
  *           $gameSystem.satbParam("IsCoreEnabled") will return the String
  *           contents of a function returning a Boolean indicating whether
  *           this plugin's enabled
- *      2. $gameSystem.setSATBParam(param, funcContents)
+ *      2. $gameSystem.setSATBParam(param, funcContent)
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
  *           funcContents, which is the String contents of a function
@@ -300,20 +284,29 @@
  *           $gameSystem.setSATBParam("IsCoreEnabled", "return false;") will
  *           set the stored value of parameter IsCoreEnabled shown on the
  *           parameter plugin or its configuration counterpart in the
- *           configuration plugin as "return false;", causing the corresponding
- *           function to always return false, thus always disabling this plugin
+ *           configuration plugin as "return false;", causing corresponding
+ *           function to always return false, thus always disabling the plugin
  *         - Such function content changes will be saved in save files
- *      3. $gameSystem.satbNote(NOTEX)
+ *      3. $gameSystem.satbNote(type, NOTEX)
  *         - Basically the same as $gameSystem.satbParam(param), except that
- *           this script call applies to notetag values of NOTEX found in the
- *           configuration plugin
- *      4. $gameSystem.setSATBNote(NOTEX, funcContents)
+ *           this script call applies to notetag values of NOTEX of the
+ *           notetag type found in the configuration plugin
+ *         - E.g.:
+ *           $gameSystem.satbNote("coreMax", "CATBM_MAX") will return the
+ *           String contents of function CATBM_MAX of the coreMax notetag type
+ *      4. $gameSystem.setSATBNote(type, NOTEX, funcContent, switchVar, id, factors)
  *         - Basically the same as
- *           $gameSystem.setSATBParam(param, funcContents), except
- *           that this script call applies to notetag values of NOTEX found in
- *           the configuration plugin
- *    # (Advanced)Actor/Class/Weapon/Armor/State/Skill notetag manipulations
- *      All meta.skillProgress changes can be saved if
+ *           $gameSystem.setSATBParam(param, funcContent), except that this
+ *           script call applies to notetag values of NOTEX of the notetag
+ *           type found in the configuration plugin
+ *         - If funcContent uses switches, switchVar must be "switch", id must
+ *           be the switch id and factors must be the list of types of data
+ *           using NOTEX
+ *         - If funcContent uses variables, switchVar must be "var", id must
+ *           be the variable id and factors must be the list of types of data
+ *           using NOTEX
+ *    # (Advanced)Actor/Enemy/Class/Weapon/Armor/State/Skill notetag manipulations
+ *      All meta.satb changes can be saved if
  *      DoubleX RMMV Dynamic Data is used
  *      1. meta.satb.note
  *         - note is either of the following:
@@ -325,18 +318,19 @@
  *         (Reference tag: MULTI_SUFFIX_ENTRY)
  *         - E.g.:
  *           $dataWeapons[3].meta.satb.coreMax will return the Array of Object
- *           [{ suffix: "var", entry: "2" }] if the effective notetag of weapon
- *           with id 3 is <satb coreMax var: 1, 2>
- *      2. meta.skillProgress.note = [{ suffixi: suffixi, entryi: entryi }]
+ *           [{ suffix: "var", entry: "2" }] if the effective notetag of
+ *           weapon with id 3 is <satb coreMax var: 1, 2>
+ *      2. meta.satb.note = [{ suffixi: suffixi, entryi: entryi }]
  *         (Reference tag: MULTI_SUFFIX_ENTRY)
  *         - note is the same as that of meta.satb.note
- *         - Sets the notetag to be the same as
- *           <skill progress note suffixi: entryi>
+ *         - Sets the notetag to be the same as <satb note suffixi: entryi>
  *         - E.g.:
- *           $dataArmors[4].meta.skillProgress.cond =
- *           [{ suffix1: "switch", entry1: "1", suffix2: "var", entry2: "2" }]
- *           will set the max notetag of the armor with id 4 to be the same as
- *           <skill progress cond switch var: 1, 2>
+ *           $dataArmors[4].meta.satb.coreMax =
+ *           [{ suffix: "var", entry: "2" }] will set the coreMax notetag of
+ *           the armor with id 4 to be the same as <satb coreMax var: 1, 2>
+ *         - If the notetag uses switches or variables, you must update
+ *           $gameSystem._satb.switchIds or $gameSystem._satb.varIds manually
+ *           (You can check the method _updateIds in DataManager for help)
  *    # Actor manipulations
  *      1. skillProgressCondDesc(skillId)
  *         - Returns the mapping with the condition descriptions as the keys
@@ -346,8 +340,8 @@
  *           progress due to having no effective cond notetags and is thus
  *           treated as a normal skill
  *           (Reference tag: SKILL_COND_DESCS)
- *         - The mapping having only truthy values means that the prerequisites
- *           are met under the cond notetag chaining rule
+ *         - The mapping having only truthy values means that the
+ *           prerequisites are met under the cond notetag chaining rule
  *           (Reference tag: SKILL_COND_DESCS)
  *         - (Advanced)It's supposed to return an Object
  *         - E.g.:
