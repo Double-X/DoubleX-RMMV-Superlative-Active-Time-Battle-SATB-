@@ -1,52 +1,70 @@
-// This plugin file name must be the same as DoubleX_RMMV.Superlative_ATB_File
-if (DoubleX_RMMV) {
-    DoubleX_RMMV.Superlative_ATB_File = "DoubleX RMMV Superlative ATB v100a";
-} else {
-    alert([
-        "DoubleX RMMV Superlative ATB Documentation",
-        "DoubleX RMMV Superlative ATB Parameters"
-    ].join(" should be placed above "));
-}
+// DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
+var DoubleX_RMMV = DoubleX_RMMV || {};
+DoubleX_RMMV["Superlative ATB Parameters"] = "v0.00a";
+//
+
+// Edit this to be the same of the name of this parameter plugin file
+DoubleX_RMMV.Superlative_ATB_Params_File =
+        "DoubleX RMMV Superlative ATB Params v100a";
 //
 
 /*:
+ *
+ * @plugindesc The parameter plugin of DoubleX RMMV Superlative ATB
+ * @author DoubleX
+  *
+ * @param _switchIds
+ * @type switch[]
+ * @desc Sets the list of game switches used by this plugin
+ * You can use script calls to change this list later in game
+ * @default
+ *
+ * @param _varIds
+ * @type variable[]
+ * @desc Sets the list of game variables used by this plugin
+ * You can use script calls to change this list later in game
+ * @default
  *
  * @param IsCoreEnabled
  * @type note
  * @desc Sets whether this plugin will be enabled
  * It'll be the contents of a function returning a Boolean
- * @default return true;
+ * @default "return true;"
  *
  * @param _coreBaseFillUnit
  * @parent IsCoreEnabled
  * @type select
- * @option coreBaseFillATBFrame
- * @option coreBaseFillATBSec
+ * @option Frames
+ * @value coreBaseFillATBFrame
+ * @option Seconds
+ * @value coreBaseFillATBSec
  * @desc Sets whether the ATB bar fill rate is based on frames or seconds
- * coreBaseFillATBFrame means frames while coreBaseFillATBSec means seconds
- * @default coreBaseFillFrame
+ * You'll have to use script calls to change this selection later in game
+ * @default coreBaseFillATBFrame
  *
  * @param coreBaseFillATBFrame
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the base number of ATB frames to fully fill battler ATB values
- * It'll be the contents of a function returning a positive Number
- * @default return 600;
+ * It'll be the contents of a function returning a natural Number
+ * @default "return 600;"
  *
  * @param coreBaseFillATBSec
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the base number of ATB seconds to fully fill battler ATB values
  * It'll be the contents of a function returning a positive Number
- * @default return 5;
+ * @default "return 5.0;"
  *
  * @param _coreTurnUnit
  * @parent IsCoreEnabled
  * @type select
- * @option coreTurnATBTime
- * @option coreTurnATBAct
+ * @option Time
+ * @value coreTurnATBTime
+ * @option Number Of Actions
+ * @value coreTurnATBAct
  * @desc Sets whether the turn's based on time or number of actions
- * coreTurnATBTime means time while coreTurnATBAct means number of actions
+ * You'll have to use script calls to change this selection later in game
  * @default coreTurnATBTime
  *
  * @param coreTurnATBTime
@@ -54,13 +72,13 @@ if (DoubleX_RMMV) {
  * @type note
  * @desc Sets the turn duration as coreBaseFillATBTimeUnit * coreTurnATBTime
  * It'll be the contents of a function returning a positive Number
- * @default return 1.0;
+ * @default "return 1.0;"
  *
  * @param coreTurnATBAct
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the number of actions constituting a turn
- * It'll be the contents of a function returning a positive Number
+ * It'll be the contents of a function returning a natural Number
  * @default return BattleManager.allBattleMembers().length;
  *
  * @param canCoreTurnOverflow
@@ -68,28 +86,28 @@ if (DoubleX_RMMV) {
  * @type note
  * @desc Sets whether the current turn time/action can overflow to the next
  * It'll be the contents of a function returning a boolean
- * @default return false;
+ * @default "return false;"
  *
- * @param maxCoreATBVal
+ * @param coreMaxATBVal
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the base maximum ATB value for each battlers
  * It'll be the contents of a function returning a positive Number
- * @default return 100.0;
+ * @default "return 100.0;"
  *
- * @param maxCoreATBValNoteChainingRule
+ * @param coreMaxATBValNoteChainingRule
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets how to use multiple max core atb notetags
+ * @desc Sets how to use multiple coreMax notetags
  * It'll be the contents of a function returning a String
- * @default return "*";
+ * @default "return '*';"
  *
- * @param maxCoreATBValNotePriority
+ * @param coreMaxATBValNotePriority
  * @parent IsCoreEnabled
  * @type note
- * @desc Sets the data type priority of  max core atb notetags
+ * @desc Sets the data type priority of coreMax notetags
  * It'll be contents of function returning an Array of Strings
- * @default return ["states", "skills", "armors", "weapons", "classes", "battler"];
+ * @default "return ['states', 'skills', 'armors', 'weapons', 'classes', 'battler'];"
  *
  * @help
  *============================================================================
@@ -99,7 +117,8 @@ if (DoubleX_RMMV) {
  *      The below points apply to all parameters/configurations unless stated
  *      otherwise:
  *      1. If the value of a parameter's empty, its configuration counterpart
- *         will be used instead(Reference tag: PARAMETERS_CONFIGURATIONS)
+ *         in the configuration plugin will be used instead
+ *         (Reference tag: PARAMETERS_CONFIGURATIONS)
  *         - E.g.: Setting the parameter IsCoreEnabled as empty means that the
  *                 configuration isEnabled will be used instead
  *      2. (Advanced)The this pointer referring to the battler involved as the
@@ -120,9 +139,9 @@ if (DoubleX_RMMV) {
  *      4. coreTurnATBTime
  *      5. coreTurnATBAct
  *      6. canCoreTurnOverflow
- *      7. maxCoreATBVal
- *      8. maxCoreATBValNoteChainingRule
- *      9. maxCoreATBValNotePriority
+ *      7. coreMaxATBVal
+ *      8. coreMaxATBValNoteChainingRule
+ *      9. coreMaxATBValNotePriority
  *         None
  *    # Valid values
  *      Core Module:
@@ -139,9 +158,9 @@ if (DoubleX_RMMV) {
  *         Any valid Javascript returning a natural Number
  *      6. canCoreTurnOverflow
  *         Any valid Javascript(It'll always be regarded as truthy/falsy)
- *      7. maxCoreATBVal
+ *      7. coreMaxATBVal
  *         Any valid Javascript returning a positive Number
- *      8. maxCoreATBValNoteChainingRule
+ *      8. coreMaxATBValNoteChainingRule
  *         Any valid Javascript returning any of the below String:
  *         - "first"(Only the 1st notetag of the involved skill will be used)
  *         - "+"(The results of all effective notetags will be added)
@@ -157,7 +176,7 @@ if (DoubleX_RMMV) {
  *         (Reference tag: NOTE_OPERATORS)
  *         All invalid values will be regarded as "first"
  *         (Reference tag: DEFAULT_CHAINING_RULE_FIRST)
- *      9. maxCoreATBValNotePriority
+ *      9. coreMaxATBValNotePriority
  *         Any valid Javascript returning an Array having the below String:
  *         - "states" Effective states in the States category
  *         - "skills" Learnt skills in the Skills category
@@ -202,21 +221,20 @@ if (DoubleX_RMMV) {
  *         turn time/action counter to overflow to the next turn(If the counter
  *         and max was 15 and 10 respectively, then a new turn will immediately
  *         come with the current turn/action counter becoming 15 - 10 = 5)
- *      7. maxCoreATBVal
- *         Setting maxCoreATBVal as return 200.0; will cause the maximum ATB
+ *      7. coreMaxATBVal
+ *         Setting coreMaxATBVal as return 200.0; will cause the maximum ATB
  *         value of each battler to be 200.0
- *      8. maxCoreATBValNoteChainingRule
- *         Setting maxCoreATBValNoteChainingRule as return "="; will cause the
+ *      8. coreMaxATBValNoteChainingRule
+ *         Setting coreMaxATBValNoteChainingRule as return "="; will cause the
  *         result of effective notetags with higher priorities to be replaced
  *         by those with lower priorities(this can be useful for more advanced
  *         uses by reusing the cached values of all effective notetags with
  *         higher priorities)
- *      9. maxCoreATBValNotePriority
- *         Setting maxCoreATBValNotePriority as
+ *      9. coreMaxATBValNotePriority
+ *         Setting coreMaxATBValNotePriority as
  *         return ["states", "skills", "armors", "weapons", "classes"];
  *         will cause the cond notetags in the States category to have the
  *         highest priorities, followed by the Skills, Armors, Weapons and
  *         Classes categories, whereas no notetags in the Actors nor Enemies
  *         categories will be effective
- *    # Configurations having no parameter counterparts
  */
