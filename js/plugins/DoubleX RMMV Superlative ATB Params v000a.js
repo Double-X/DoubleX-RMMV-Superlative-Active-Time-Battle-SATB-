@@ -4,7 +4,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.00a";
 //
 
 // Edit this to be the same of the name of this parameter plugin file
-DoubleX_RMMV.Superlative_ATB_Params_File =
+DoubleX_RMMV.Superlative_ATB_Parameters_File =
         "DoubleX RMMV Superlative ATB Params v100a";
 //
 
@@ -12,6 +12,18 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *
  * @plugindesc The parameter plugin of DoubleX RMMV Superlative ATB
  * @author DoubleX
+ *
+ * @param _isCached
+ * @type boolean
+ * @desc (Advanced)Sets whether value lists/results will be cached
+ * Sets this off if at least some of those results' random
+ * @default true
+ *
+ * @param _isAlwaysRecacheAllSwitchVars
+ * @type boolean
+ * @desc (Advanced)Please refer to _alwaysRecacheAllSwitchVars
+ * in the help section of this parameter plugin
+ * @default false
  *
  * @param IsCoreEnabled
  * @type note
@@ -109,23 +121,31 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  * @param _coreMaxATBValNotePriority
  * @parent IsCoreEnabled
  * @type select[]
- * @option State data
+ * @option Data of effective states
  * @value states
- * @option Skill data
+ * @option Data of learnt skills(Shouldn't be used with Data of usable skills)
  * @value skills
- * @option Armor data
+ * @option Data of usable skills(Shouldn't be used with Data of learnt skills)
+ * @value usableSkills
+ * @option Data of possessed items(Shouldn't be used with Data of usable items)
+ * @value items
+ * @option Data of usable items(Shouldn't be used with Data of possessed items)
+ * @value usableItems
+ * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @value latestSkillItem
+ * @option Data of equipped armors
  * @value armors
- * @option Weapon data
+ * @option Data of equipped weapons
  * @value weapons
- * @option Class data
- * @value classes
- * @option Actor data
+ * @option Data of the current class
+ * @value class
+ * @option Data of the actor
  * @value actor
- * @option Enemy data
+ * @option Data of the enemy
  * @value enemy
  * @desc Sets the data type priority of coreMax notetags
  * You can use script calls to change this list later in game
- * @default ["states","skills","armors","weapons","classes","actor","enemy"]
+ * @default ["states", "armors","weapons","class","actor","enemy"]
  *
  * @help
  *============================================================================
@@ -138,7 +158,7 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *         in the configuration plugin will be used instead
  *         (Reference tag: PARAMETERS_CONFIGURATIONS)
  *         - E.g.: Setting the parameter IsCoreEnabled as empty means that the
- *                 configuration isEnabled will be used instead
+ *                 configuration isCoreEnabled will be used instead
  *      2. (Advanced)The this pointer referring to the battler involved as the
  *         function contexts are Game_Battler.prototype
  *         (Reference tag: THIS_GAME_BATTLER)
@@ -149,6 +169,13 @@ DoubleX_RMMV.Superlative_ATB_Params_File =
  *      5. (Advanced)Returning highly nondeterministic values like random ones
  *         will have to manually invalidate the corresponding cache first or
  *         those values might be ignored due to the cached ones being used
+ *         (Setting _isCached on will free you from doing this, but can have
+*           very severe performance penalties if you use lots of notetags)
+ *      6. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
+ *         change from using some switch/variables to using some others or
+ *         from not using those to using those or vice versa, without wanting
+ *         to explicitly update the switch/variable note factor mapping
+ *         yourselves(setting this on might have performance penalties)
  *    # Function arguments
  *      Core Module:
  *      1. IsCoreEnabled
