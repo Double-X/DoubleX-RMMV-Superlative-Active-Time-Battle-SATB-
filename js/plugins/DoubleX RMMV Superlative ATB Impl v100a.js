@@ -26,7 +26,7 @@
  *----------------------------------------------------------------------------*/
 
 function Game_SATBNotes() { this.initialize.apply(this, arguments); };
-// These classes should be private and used by Game_SATBNotes only
+// DON'T USE THESE DIRECTLY ON YOUR OWN UNLESS YOU REALLY KNOW WHAT YOU'RE DOING
 function Game_SATBCache() { this.initialize.apply(this, arguments); };
 function Game_SATBPairs() { this.initialize.apply(this, arguments); };
 function Game_SATBRules() { this.initialize.apply(this, arguments); };
@@ -44,7 +44,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     SATB.DataManager = { orig: {}, new: {} };
     var _DM = SATB.DataManager.orig, _SATB = SATB.DataManager.new;
     _SATB.switchIds = {}, _SATB.varIds = {};
-    // Refer to reference tag NOTE_STRUCTURE
+    // Refers to reference tag NOTE_STRUCTURE
     _SATB._REG_EXP_ID = " *(?:doublex +rmmv +)?satb +(\\w+)";
     _SATB._REG_EXPS = {
         // It's too nasty to validate the notetags here so it's not done here
@@ -53,7 +53,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         evalStart: new RegExp("<" + _SATB._REG_EXP_ID + " *>", "gmi"),
         evalEnd: new RegExp("< *\/" + _SATB._REG_EXP_ID + " *>", "gmi")
         //
-    };
+    }; // _SATB._REG_EXPS
     //
     _SATB._areAllNotesLoaded = false;
 
@@ -90,6 +90,24 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     /**
      * The this pointer is DataManager
+     * Idempotent
+     * @mixin @since v0.00a @version v0.00a
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
+     * @enum @param {String} noteType - The type of the notetag to be loaded
+     * @param {String} suffix - The currently inspected suffix in the notetag
+     * @param {String} entry - The currently inspected entry in the notetag
+     */
+    _SATB.updateSwitchVarIds = function(datumType, noteType, suffix, entry) {
+        // Refer to reference tag SWITCH_VAR
+        if (suffix === "switch") return _SATB._updateIds.call(
+                this, datumType, noteType, +entry, _SATB.switchIds);
+        if (suffix !== "var") return;
+        //
+        _SATB._updateIds.call(this, datumType, noteType, +entry, _SATB.varIds);
+    }; // _SATB.updateSwitchVarIds
+
+    /**
+     * The this pointer is DataManager
      * DataManager.isDatabaseLoaded was Nullipotent but is now Idempotent
      * Idempotent
      * @since v0.00a @version v0.00a
@@ -111,17 +129,22 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @since v0.00a @version v0.00a
      */
     _SATB._loadAllNotes = function() {
+        // These note change factors must match those in the parameters plugin
         var allData = {
             actor: $dataActors,
             enemy: $dataEnemies,
-            currentClass: $dataClasses,
+            class: $dataClasses,
             weapons: $dataWeapons,
             armors: $dataArmors,
             states: $dataStates,
-            skills: $dataSkills
+            skills: $dataSkills,
+            items: $dataItems
         };
-        Object.keys(allData).forEach(function(type) {
-            allData[type].forEach(_SATB._loadNote.bind(this, type));
+        //
+        Object.keys(allData).forEach(function(datumType) {
+            // The function's easy, simple and small enough to be inlined
+            allData[datumType].forEach(_SATB._loadNote.bind(this, datumType));
+            //
         }, this);
     }; // _SATB._loadAllNotes
 
@@ -129,28 +152,29 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
-     * @param {{*}?} datum - The datum to have notetags loaded
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
+     * @param {{*}?} datum_ - The datum to have notetags loaded
      */
-    _SATB._loadNote = function(type, datum) {
-        if (!datum) return;
-        // Script call/plugin command
-        var lines = datum.note.split(/[\r\n]+/), satb = datum.meta.satb = {};
-        _SATB._loadEvalNote.call(this, type, satb, lines);
-        lines.forEach(_SATB._loadBaseNote.bind(this, type, satb));
+    _SATB._loadNote = function(datumType, datum_) {
+        if (!datum_) return;
+        var lines = datum_.note.split(/[\r\n]+/);
+        // Storing datumType is to streamline the notetag datum type reading
+        var satb = datum_.meta.satb = { datumType: datumType };
         //
+        _SATB._loadEvalNote.call(this, datumType, satb, lines);
+        lines.forEach(_SATB._loadBaseNote.bind(this, datumType, satb));
     }; // _SATB._loadNote
 
     /**
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
      * @param {{*}} satb - The datum plugin notetag container
      * @param {[String]} lines - The list of lines being scanned for notetags
      *                           to be loaded
      */
-    _SATB._loadEvalNote = function(type, satb, lines) {
+    _SATB._loadEvalNote = function(datumType, satb, lines) {
         // It's tolerable and more performant than any declarative counterpart
         var isEval = false, note = "", funcLines = [];
         lines.forEach(function(line) {
@@ -159,10 +183,11 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
                 note = RegExp.$1;
             } else if (line.match(_SATB._REG_EXPS.evalEnd)) {
                 isEval = false;
-                // Refer to reference tag NOTETAG_MULTI
-                if (note !== RegExp.$1 || satb[note]) return;
+                // Refers to reference tag NOTETAG_MULTI
+                if (note !== RegExp.$1) return;
                 satb[note] = (satb[note] || []).concat(_SATB._notePairs.call(
-                        this, type, note, ["eval"], [funcLines.join("\n")]));
+                        this, datumType, note, ["eval"],
+                        [funcLines.join("\n")]));
                 //
             } else if (isEval) funcLines.push(line);
         }, this);
@@ -173,16 +198,16 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
      * @param {{*}} satb - The datum plugin notetag container
      * @param {String} line - The line being scanned for notetags to be loaded
      */
-    _SATB._loadBaseNote = function(type, satb, line) {
-        // Refer to reference tag NOTETAG_MULTI and LINE_MONO
+    _SATB._loadBaseNote = function(datumType, satb, line) {
+        // Refers to reference tag NOTETAG_MULTI and LINE_MONO
         if (!line.match(_SATB._REG_EXPS.base)) return;
         var note = RegExp.$1, suffixes = RegExp.$2, entries = RegExp.$3;
         satb[note] = (satb[note] || []).concat(_SATB._notePairs.call(this,
-                type, note, suffixes.split(/ +/), entries.split(/ *, +/)));
+                datumType, note, suffixes.split(/ +/), entries.split(/ *, +/)));
         //
     }; // _SATB._loadBaseNote
 
@@ -190,25 +215,26 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
-     * @param {String} note - The type of the notetag to be loaded
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
+     * @enum @param {String} noteType - The type of the notetag to be loaded
      * @param {[String]} suffixes - The list of suffixes in the notetag
      * @param {[String]} entries - The list of entries in the notetag
      * @returns {{String}} The suffix-entry pair mapping
      */
-    _SATB._notePairs = function(type, note, suffixes, entries) {
+    _SATB._notePairs = function(datumType, noteType, suffixes, entries) {
         // So those excessive suffixes/entries will be discarded right here
         var l = Math.min(suffixes.length, entries.length);
         //
         // It's tolerable and more performant than any declarative counterpart
         for (var i = 0, pairs = {}; i < l; i++) {
-            // Refer to reference tag MULTI_SUFFIX_ENTRY
+            // Refers to reference tag MULTI_SUFFIX_ENTRY
             var count = i + 1, suffix = suffixes[i], entry = entries[i];
             pairs["suffix" + count] = suffix;
             pairs["entry" + count] = entry;
             //
             // Users changing the switch/var note map should update it manually
-            _SATB._updateSwitchVarIds.call(this, type, note, suffix, entry);
+            _SATB.updateSwitchVarIds.call(
+                    this, datumType, noteType, suffix, entry);
             //
         }
         return pairs;
@@ -219,31 +245,15 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is DataManager
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
-     * @param {String} note - The type of the notetag to be loaded
-     * @param {String} suffix - The currently inspected suffix in the notetag
-     * @param {String} entry - The currently inspected entry in the notetag
-     */
-    _SATB._updateSwitchVarIds = function(type, note, suffix, entry) {
-        if (suffix === "switch") {
-            _SATB._updateIds.call(this, type, note, +entry, _SATB.switchIds);
-        } else if (suffix === "var") {
-            _SATB._updateIds.call(this, type, note, +entry, _SATB.varIds);
-        }
-    }; // _SATB._updateSwitchVarIds
-
-    /**
-     * The this pointer is DataManager
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     * @param {String} type - The type of the datum to have notetags loaded
-     * @param {String} note - The type of the notetag to be loaded
+     * @enum @param {String} datumType - Refers to reference tag NOTE_DATA_TYPES
+     * @enum @param {String} noteType - The type of the notetag to be loaded
      * @param {Id} id - The id of the switch/variable used in the notetag
+     * @param {{{[String]}}} ids - The notetag switch/variable id factor mapping
      */
-    _SATB._updateIds = function(type, note, id, ids) {
+    _SATB._updateIds = function(datumType, noteType, id, ids) {
         var notes = ids[id] = ids[id] || {};
-        var factors = notes[note] = notes[note] || [];
-        if (factors.indexOf(type) < 0) factors.concat(type);
+        var factors = notes[noteType] = notes[noteType] || [];
+        if (factors.indexOf(datumType) < 0) factors.concat(datumType);
     }; // _SATB._updateIds
 
     /**
@@ -270,11 +280,12 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     SATB.Game_System = { orig: {}, new: {} };
     var _GS = SATB.Game_System.orig, _SATB = SATB.Game_System.new;
-    var $ = Game_System.prototype;
+    var $ = Game_System.prototype, DM = SATB.DataManager.new;
+    _SATB._IS_FUNC_PARAM = function(param) { return param[0] !== "_"; };
     _SATB._0_ARG_FUNC = function(funcContent) {
         return new Function(funcContent);
     };
-    _SATB._FUNCS = {
+    _SATB.FUNCS = {
         params: {
             IsCoreEnabled: _SATB._0_ARG_FUNC,
             coreBaseFillATBFrame: _SATB._0_ARG_FUNC,
@@ -287,13 +298,16 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
             coreMaxATBVal: _SATB._0_ARG_FUNC
         },
         notes: {
+            // Refer to reference tag NOTE_TYPE
             coreMax: function(funcContent) {
-                return new Function("max", "datum", funcContent);
+                return new Function("max", "datum", "datumType", funcContent);
             }
+            //
         }
     };
-    _SATB._IS_FUNC_PARAM = function(param) { return param[0] !== "_"; };
-    _SATB._PARAM_MODULE = {
+    _SATB._PARAM_MODULES = {
+        _isCached: "core",
+        _isAlwaysRecacheAllSwitchVars: "core",
         IsCoreEnabled: "core",
         _coreBaseFillUnit: "core",
         coreBaseFillATBFrame: "core",
@@ -305,7 +319,34 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         coreMaxATBVal: "core",
         _coreMaxATBValNoteChainingRule: "core",
         _coreMaxATBValNotePriority: "core"
-    }
+    };
+    _SATB._PARAM_UPDATES = {
+        coreMaxATBVal: function(switchVar_, id_, dataTypes_) {
+            _SATB._storeUpdatedSwitchVarIds.call(
+                    this, "coreMax", switchVar_, id_, dataTypes_);
+            /*var mems = BattleManager._phase ?
+                    BattleManager.allBattleMembers() : $gameParty.members();*/
+            // Only the default value might change so factor result is raised
+            BattleManager.satbMems().forEach(function(mem) {
+                mem.raiseSATBNoteChangeFactor("coreMax", "result");
+            });
+            //
+        },
+        _coreMaxATBValNoteChainingRule: function() {
+            /*var mems = BattleManager._phase ?
+                    BattleManager.allBattleMembers() : $gameParty.members();*/
+            BattleManager.satbMems().forEach(function(mem) {
+                mem.raiseSATBNoteChangeFactor("coreMax", "chainingRule");
+            });
+        },
+        _coreMaxATBValNotePriority: function() {
+            /*var mems = BattleManager._phase ?
+                    BattleManager.allBattleMembers() : $gameParty.members();*/
+            BattleManager.satbMems().forEach(function(mem) {
+                mem.raiseSATBNoteChangeFactor("coreMax", "priority");
+            });
+        }
+    };
 
     _GS.initialize = $.initialize;
     _SATB.initialize = $.initialize = function() { // v0.00a - v0.00a; Extended
@@ -317,13 +358,13 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      *    New private instance variables
      *------------------------------------------------------------------------*/
     // {{{*}}} _satb: The container of all other new variables
-    //                {{*}} params: The container of all parameter values
-    //                {{*}} notes: The container of all notetag function content
+    //         {{{String}}} params: The container of all parameter values
+    //         {{{String}}} notes: The container of all notetag function content
 
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} funcType - The params/notes label
+     * @enum @param {String} funcType - "params", "notes"
      */
     $.extractSATBFuncContents = function(funcType) {
         // params becomes Param and notes becomes Note
@@ -336,53 +377,59 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     /**
      * Nullipotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} param - The parameter name
+     * @enum @param {String} param - The parameter name
      * @returns {String} The function content as the parameter value
      */
     $.satbParam = function(param) {
-        return this._satb.params[_SATB._PARAM_MODULE[param]][param];
+        return this._satb.params[_SATB._PARAM_MODULES[param]][param];
     }; // $.satbParam
 
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} param - The parameter name
+     * @enum @param {String} param - The parameter name
      * @param {String} funcContent - The function content as the parameter value
+     * @enum @param {String?} switchVar_ - "switch", "var"
+     * @param {Id?} id_ - The switch/variable id
+     * @enum @param {[String]?} dataTypes_ - Refers to reference tag
+     *                                       NOTE_DATA_TYPES
      */
-    $.setSATBParam = function(param, funcContent) {
-        var type = _SATB._PARAM_MODULE[param];
+    $.setSATBParam = function(param, funcContent, switchVar_, id_, dataTypes_) {
+        var module = _SATB._PARAM_MODULES[param];
         this._satb.params[type][param] = funcContent;
         if (!_SATB._IS_FUNC_PARAM(param)) return;
-        SATB.params[type][param] = _SATB._paramFunc.call(this, type, param);
+        SATB.params[module][param] = _SATB._paramFunc.call(this, module, param);
+        var func = _SATB._PARAM_UPDATES[param];
+        if (func) func.call(this, switchVar_, id_, dataTypes_);
     }; // $.setSATBParam
 
     /**
      * Nullipotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} type - The notetag type
+     * @enum @param {String} noteType - The notetag type
      * @param {String} name - The notetag value name
      * @returns {String} The notetag function content
      */
-    $.satbNote = function(type, name) { return this._satb.notes[type][name]; };
+    $.satbNote = function(noteType, name) {
+        return this._satb.notes[noteType][name];
+    }; // $.satbNote
 
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} type - The notetag type
+     * @enum @param {String} noteType - The notetag type
      * @param {String} name - The notetag value name
      * @param {String} funcContent - The function content as the parameter value
-     * @param {String?} switchVar - "switch", "var" or neither
-     * @param {Id?} id - The switch/variable id
-     * @param {[String]?} factors - The types of data using this notetag
+     * @enum @param {String?} switchVar_ - "switch", "var"
+     * @param {Id?} id_ - The switch/variable id
+     * @enum @param {[String]?} dataTypes_ - Refers to reference tag
+     *                                       NOTE_DATA_TYPES
      */
-    $.setSATBNote = function(type, name, funcContent, switchVar, id, factors) {
-        this._satb.notes[type][name] = funcContent;
+    $.setSATBNote = function(noteType, name, funcContent, switchVar_, id_, dataTypes_) {
+        this._satb.notes[noteType][name] = funcContent;
         _SATB._extractNoteFuncContent.call(this, type, name);
-        if (factors) factors.forEach(function(factor) {
-            SATB.DataManager.new._updateSwitchVarIds.call(
-                    this, type, factor, switchVar, id);
-        }, this);
-        _SATB._storeSwitchVarIds.call(this); // It's just to play safe
+        _SATB._storeUpdatedSwitchVarIds.call(
+                this, noteType, switchVar_, id_, dataTypes_);
     }; // $.setSATBNote
 
     /**
@@ -425,7 +472,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     _SATB._rawParams = function() {
         // There's no need to cache it as _rawParams should only be called once
         var params = PluginManager.parameters(
-                DoubleX_RMMV.Superlative_ATB_Params_File);
+                DoubleX_RMMV.Superlative_ATB_Parameters_File);
         Object.keys(params).forEach(function(param) {
             if (!_SATB._IS_FUNC_PARAM(param)) return;
             params[param] = _SATB._jsonParam.call(this, param, params[param]);
@@ -438,7 +485,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Pure function
      * @since v1.00b @version v1.00b
-     * @param {String} param - The parameter name
+     * @enum @param {String} param - The parameter name
      * @param {String} val - The raw parameter value string
      * @returns {String} The normalized parameter value string
      */
@@ -451,6 +498,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
               "The value of the parameter " + param + " is",
               val,
               "Which should be entered via note rather than text",
+              "The relevant stacktrace of DoubleX RMMV Superlative ATB is:",
               err.stack
             ].join("\n"));
             return val;
@@ -462,7 +510,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Idempotent
      * @since v0.00a @version v0.00a
      * @param {{String}} params - The parameter name-value map
-     * @param {String} param - The parameter name
+     * @enum @param {String} param - The parameter name
      */
     _SATB._storeParam = function(params, param) {
         this.setSATBParam(param, _SATB._param.call(this, param, params[param]));
@@ -472,14 +520,14 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {String} param - The parameter name
+     * @enum @param {String} param - The parameter name
      * @param {{String}} val - The parameter value
      * @returns {String} The function contents as parameter values
      */
     _SATB._param = function(param, val) {
-        // Refer to reference tag PARAMETERS_CONFIGURATIONS
+        // Refers to reference tag PARAMETERS_CONFIGURATIONS
         return val || _SATB._funcContent.call(
-                this, SATB.params[_SATB._PARAM_MODULE[param]][param]);
+                this, SATB.params[_SATB._PARAM_MODULES[param]][param]);
         //
     }; // _SATB._param
 
@@ -495,17 +543,18 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     /**
      * The this pointer is Game_System.prototype
      * Idempotent
-     * @param {String} type - The type of the note
+     * @enum @param {String} type - The type of the note
      * @since v0.00a @version v0.00a
      */
     _SATB._storeNoteModule = function(type) {
-        Object.keys(SATB.notes).forEach(_SATB._storeNote.bind(this, type));
+        Object.keys(SATB.notes[type]).forEach(
+                _SATB._storeNote.bind(this, type));
     }; // _SATB._storeNotes
 
     /**
      * The this pointer is Game_System.prototype
      * Idempotent
-     * @param {String} type - The type of the note
+     * @enum @param {String} type - The type of the note
      * @param {String} name - The name of the note
      * @since v0.00a @version v0.00a
      */
@@ -518,8 +567,8 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Pure function
      * @since v0.00a @version v0.00a
-     * @param {()} func - The function as the value of the configuration
-     * @returns {String} The parameters in the configuration plugin
+     * @param {(**) -> *} func - The function as the value of the configuration
+     * @returns {String} The parameter function contents in configuration plugin
      */
     _SATB._funcContent = function(func) {
         // Only the function contents are stored in save files
@@ -528,29 +577,20 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         //
     }; // _SATB._funcContent
 
-    /**
-     * The this pointer is Game_System.prototype
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     */
-    _SATB._storeSwitchVarIds = function() {
-        var DM = SATB.DataManager.new;
-        this._satb.switchIds = DM.switchIds;
-        this._satb.varIds = DM.varIds;
-    }; // _SATB._storeSwitchVarIds
-
     ["Param", "Note"].forEach(function(type) {
+        // Param becomes params and Note becomes notes
         var t = type.toLowerCase() + "s";
+        //
         var func = "_extract" + type + "FuncContent";
         /**
          * The this pointer is Game_System.prototype
          * Idempotent
          * @since v0.00a @version v0.00a
-         * @param {String} funcModule - The module of the stored function content
+         * @param {String} funcModule - The module of stored function content
          */
-        _SATB["_extract" + type + "FuncContents"] = function(funcModule) {
-            Object.keys(this._satb[t][funcModule]).forEach(
-                    _SATB[func].bind(this, funcModule));
+        _SATB["_extract" + type + "FuncContents"] = function(module) {
+            Object.keys(this._satb[t][module]).forEach(
+                    _SATB[func].bind(this, module));
         }; // _SATB["_extract" + type + "FuncContents"]
     })
 
@@ -558,25 +598,89 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_System.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} funcModule - The module of the stored function content
-     * @param {String} funcName - The name of the stored function content
+     * @enum @param {String} module - The module of the stored function content
+     * @enum @param {String} name - The name of the stored function content
      */
-    _SATB._extractParamFuncContent = function(funcModule, funcName) {
-        SATB.params[funcModule][funcName] = _SATB._FUNCS.params[funcName](
-                this._satb.params[funcModule][funcName]);
+    _SATB._extractParamFuncContent = function(module, name) {
+        SATB.params[module][name] =
+                _SATB.FUNCS.params[name](this._satb.params[module][name]);
     }; // _SATB._extractParamFuncContent
 
     /**
      * The this pointer is Game_System.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {String} funcModule - The module of the stored function content
-     * @param {String} funcName - The name of the stored function content
+     * @enum @param {String} type - The type of the stored function content
+     * @param {String} name - The name of the stored function content
      */
-    _SATB._extractNoteFuncContent = function(funcModule, funcName) {
-        SATB.notes[funcModule][funcName] = _SATB._FUNCS.notes[funcModule](
-                this._satb.notes[funcModule][funcName]);
+    _SATB._extractNoteFuncContent = function(type, name) {
+        SATB.notes[type][name] =
+                _SATB.FUNCS.notes[type](this._satb.notes[type][name]);
     }; // _SATB._extractNoteFuncContent
+
+    /**
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @enum @param {String} noteType - The notetag type
+     * @enum @param {String} switchVar - "switch", "var"
+     * @param {Id} id - The switch/variable id
+     * @enum @param {[String]} dataTypes - Refers to reference tag
+     *                                     NOTE_DATA_TYPES
+     */
+    _SATB._storeUpdatedSwitchVarIds = function(noteType, switchVar, id, dataTypes_) {
+        if (dataType_) _SATB._updateSwitchVarIds.call(
+                this, noteType, switchVar_, id_, dataTypes_);
+        // It's just to play safe as it's possible to de-register a switch/var
+        _SATB._storeSwitchVarIds.call(this);
+        //
+    }; // _SATB._storeUpdatedSwitchVarIds
+
+    /**
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @enum @param {String} noteType - The notetag type
+     * @enum @param {String} switchVar - "switch", "var"
+     * @param {Id} id - The switch/variable id
+     * @enum @param {[String]} dataTypes - Refers to reference tag
+     *                                     NOTE_DATA_TYPES
+     */
+    _SATB._updateSwitchVarIds = function(noteType, switchVar, id, dataTypes) {
+        if (dataTypes.length > 0) return dataTypes.forEach(function(dataType) {
+            // The function's easy, simple and small enough to be inlined
+            DM.updateSwitchVarIds.call(
+                    DataManager, dataType, noteType, switchVar, id);
+            //
+        }, this);
+        // Refer to reference tag SWITCH_VAR
+        if (switchVar === "switch") return _SATB._eraseSwitchVarIds.call(
+                this, noteType, id, DM.switchIds);
+        if (switchVar !== "var") return;
+        //
+        _SATB._eraseSwitchVarIds.call(this, noteType, id, DM.varIds);
+    }; // _SATB._updateSwitchVarIds
+
+    /**
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @enum @param {String} type - The notetag type
+     * @param {Id} id - The switch/variable id
+     * @enum @param {{{[String]}}} ids - The notetag switch/variable id factors
+     */
+    _SATB._eraseSwitchVarIds = function(type, id, ids) {
+        if (ids[id]) delete ids[id][type];
+    }; // _SATB._eraseSwitchVarIds
+
+    /**
+     * The this pointer is Game_System.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._storeSwitchVarIds = function() {
+        // It's better not to clone them as users can edit DM counterparts too
+        this._satb.switchIds = DM.switchIds;
+        this._satb.varIds = DM.varIds;
+        //
+    }; // _SATB._storeSwitchVarIds
 
 })(DoubleX_RMMV.SATB);
 
@@ -604,7 +708,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         // v0.00a - v0.00a; Extended
             _GSV.setValue.apply(this, arguments);
             // Added to raise the change factors involving this id
-            _SATB._raiseChangeFactors.call(this, id);
+            _SATB._raiseChangeFactors.call(this, $gameSystem.satbParam(param)[id]);
             //
         }; // $.setValue
 
@@ -612,32 +716,159 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
          * The this pointer is klass.prototype
          * Idempotent
          * @since v0.00a @version v0.00a
-         * @param {Id} id - The id to have its involved change factors raised
-         */
-        _SATB._raiseChangeFactors = function(id) {
-            // It's safe to access $gameSystem._satb directly in private method
-            _SATB._raiseNoteChangeFactors.call(
-                    this, $gameSystem._satb[param][id]);
-            //
-        }; // _SATB._raiseChangeFactors
-
-        /**
-         * The this pointer is klass.prototype
-         * Idempotent
-         * @since v0.00a @version v0.00a
-         * @param {{[String]}?} noteFactors - The notes and factors to be
+         * @param {{[String]}?} noteFactors_ - The notes and factors to be
          *                                     raised by this id
          */
-        _SATB._raiseNoteChangeFactors = function(noteFactors) {
-            if (noteFactors) BattleManager.satbMems().forEach(function(mem) {
-                Object.keys(noteFactors).forEach(function(note) {
-                    noteFactors[note].forEach(
-                            mem.raiseSATBNoteChangeFactor.bind(mem, note));
+        _SATB._raiseChangeFactors = function(noteFactors_) {
+            if ($gameSystem.satbParam("_isAlwaysRecacheAllSwitchVars")) {
+                return BattleManager.satbMems().forEach(function(mem) {
+                    mem.raiseAllSATBNoteChangeFactors();
                 });
+            }
+            /*var mems = BattleManager._phase ?
+                    BattleManager.allBattleMembers() : $gameParty.members();*/
+            if (noteFactors_) BattleManager.satbMems().forEach(function(mem) {
+                mem.raiseSATBChangeFactors(noteFactors_);
             });
-        }; // _SATB._raiseNoteChangeFactors
+        }; // _SATB._raiseChangeFactors
 
     });
+
+})(DoubleX_RMMV.SATB);
+
+/*----------------------------------------------------------------------------
+ *    # Edit class: Game_Battler
+ *      -
+ *----------------------------------------------------------------------------*/
+
+(function(SATB) {
+
+    "use strict";
+
+    SATB.Game_Battler = { orig: {}, new: {} };
+    var _GB = SATB.Game_Battler.orig, _SATB = SATB.Game_Battler.new;
+    var $ = Game_Battler.prototype, $$ = Game_BattlerBase.prototype;
+    // All these functions are battler script calls
+    _SATB._FORWARDED_FUNCS = {
+       raiseAllSATBNoteChangeFactors: "raiseAllChangeFactors",
+       raiseSATBNoteChangeFactor: "raiseChangeFactor",
+       invalidateSATBNoteResult: "invalidateResultCache",
+       invalidateSATBNoteList: "invalidateListCache"
+    };
+    //
+
+    /*------------------------------------------------------------------------
+     *    New private instance variables
+     *------------------------------------------------------------------------*/
+    // {{*}} _satb: The container of all other new variables
+    //       {Game_SATBNotes} notes: The notetag results
+
+    _GA.initialize = $.initialize;
+    _SATB.initialize = $.initialize = function(actorId) {
+    // v0.00a - v0.00a; Extended
+        _SATB._init.call(this); // Added to initialize all superlative ATB vars
+        _GA.initialize.apply(this, arguments);
+    }; // $.initialize
+
+    ["addState", "removeState"].forEach(function(func) {
+        // It's to avoid overwriting func in Game_BattlerBase from other plugins
+        _GB[func] = $[func] || $$[func];
+        //
+        _SATB[func] = $[func] = function(stateId) { // v0.00a - v0.00a; Extended
+            // Added to mark that state notetags might have changed
+            this._satb.notes.markChangeFactors(["states"]);
+            //
+            _GB[func].apply(this, arguments);
+        }; // $[func]
+    });
+
+    _GB.refresh = $.refresh;
+    _SATB.refresh = $.refresh = function() { // v0.00a - v0.00a; Extended
+        _GB.refresh.apply(this, arguments);
+        // Added to refreshes all superlative ATB notetags lists/results
+        _SATB._refresh.call(this);
+        //
+    }; // $.refresh
+
+    // Refers to the Game_SATBNotes counterparts
+    Object.keys(_SATB._FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB._FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            return this._satb.notes[f].apply(this._satb.notes, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @enum @param {{[String]}} noteFactors - Refers to reference tag
+     *                                         NOTE_DATA_TYPES
+     */
+    $.raiseSATBChangeFactors = function(noteFactors) {
+        Object.keys(noteFactors).forEach(function(note) {
+            noteFactors[note].forEach(
+                    this.raiseSATBNoteChangeFactor.bind(this, note));
+        });
+    }; // $.raiseSATBChangeFactors
+
+    /**
+     * Script Call/Hotspot/Nullipotent
+     * @interface @since v0.00a @version v0.00a
+     * @returns {+ve Number} The maximum ATB value of this battler
+     */
+    $.coreMaxSATB = function() { return this._satb.notes.result("coreMax"); };
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     */
+    $.initSATBNotes = function() {
+        // Setting the dependencies here's just to make this method less empty
+        var pairs = pairs || new Game_SATBPairs(this);
+        this._satb.notes = new Game_SATBNotes(
+                this, new Game_SATBCache(), pairs, new Game_SATBRules(pairs));
+        //
+    }; // $.initSATBNotes
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     */
+    $.clearSATBNotes = function() {
+        // Avoids memory leaks as it's the battler as a dependency
+        this._satb.notes.clear();
+        delete this._satb.notes;
+        //
+    }; // $.clearSATBNotes
+
+    /**
+     * The this pointer is Game_Battler.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._init = function() {
+        // The master container must be ready first before adding anything else
+        this._satb = {};
+        this.initSATBNotes();
+        //
+    }; // _SATB._init
+
+    /**
+     * The this pointer is Game_Battler.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._refresh = function() {
+        // Refers to reference tag BATTLER_REFRESH_RECACHE_NOTE
+        this._satb.notes.raiseMarkedChangeFactors();
+        //
+        // Refers to reference tag DECREASED_MAX_CORE_ATB_INPUTABLE
+        _SATB._checkUpdatedCoreMaxSATB.call(this);
+        // And INCREASED_MAX_CORE_ATB_NOT_INPUTABLE
+    }; // _SATB._refresh
 
 })(DoubleX_RMMV.SATB);
 
@@ -653,66 +884,6 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     SATB.Game_Actor = { orig: {}, new: {} };
     var _GA = SATB.Game_Actor.orig, _SATB = SATB.Game_Actor.new;
     var $ = Game_Actor.prototype;
-    var $$ = Game_Battler.prototype, $$$ = Game_BattlerBase.prototype;
-    // All these functions are actor script calls
-    _SATB._FORWARDED_FUNCS = {
-        raiseAllSATBNoteChangeFactors: "raiseAllChangeFactors",
-        raiseSATBNoteChangeFactor: "raiseChangeFactor",
-        satbNoteResult: "cachedPartResult",
-        invalidateSATBNoteResult: "invalidateResultCache"
-    };
-    _SATB._RESULT_FUNCS = {
-        /** @returns {+ve Number} The max ATB value of the battler involved */
-        maxSATB: "max",
-        //
-    };
-    //
-
-    /*------------------------------------------------------------------------
-     *    New private instance variables
-     *------------------------------------------------------------------------*/
-    // {{*}} _satb: The container of all other new variables
-    //       {Game_SATBNotes} notes: The notetag results
-    //       {{Boolean}} isEnded: Marks whether the skill has ended progress
-    //       {{Number}} exps: The skill progress experience container
-
-    // It's to avoid overwriting paySkillCost in Game_Actor/Battler from plugins
-    _GA.paySkillCost = $.paySkillCost || $$.paySkillCost || $$$.paySkillCost;
-    //
-    _SATB.paySkillCost = $.paySkillCost = function(skill) {
-    // v0.00a - v0.00a; Extended
-        // Added to trigger the skill progress upon using the skill
-        _SATB._onUseSkill.call(this, skill.id);
-        //
-        _GA.paySkillCost.apply(this, arguments);
-    }; // $.paySkillCost
-
-    ["addState", "removeState"].forEach(function(func) {
-        // It's to avoid overwriting func in Game_Actor from other plugins
-        _GA[func] = $[func] || $$[func];
-        //
-        _SATB[func] = $[func] = function(stateId) { // v0.00a - v0.00a; Extended
-            // Added to mark that state notetags might have changed
-            this._satb.notes.markChangeFactors(["states"]);
-            //
-            _GA[func].apply(this, arguments);
-        }; // $[func]
-    });
-
-    _GA.initialize = $.initialize;
-    _SATB.initialize = $.initialize = function(actorId) {
-    // v0.00a - v0.00a; Extended
-        _SATB._init.call(this); // Added to initialize all skill progress vars
-        _GA.initialize.apply(this, arguments);
-    }; // $.initialize
-
-    _GA.refresh = $.refresh;
-    _SATB.refresh = $.refresh = function() { // v0.00a - v0.00a; Extended
-        _GA.refresh.apply(this, arguments);
-        // Added to refreshes all skill progress notetags lists/results
-        _SATB._refresh.call(this);
-        //
-    }; // $.refresh
 
     ["initEquips", "changeEquip", "forceChangeEquip"].forEach(function(func) {
         _GA[func] = $[func];
@@ -730,78 +901,10 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     _SATB.changeClass = $.changeClass = function(classId, keepExp) {
     // v0.00a - v0.00a; Extended
         // Added to mark that class notetags might have changed
-        this._satb.notes.markChangeFactors(["currentClass"]);
+        this._satb.notes.markChangeFactors(["class"]);
         //
         _GA.changeClass.apply(this, arguments);
     }; // $.changeClass
-
-    // Refer to _SATB._RESULT_FUNCS and Game_SATBNotes for signatures
-    Object.keys(_SATB._RESULT_FUNCS).forEach(function(func) {
-        var note = _SATB._RESULT_FUNCS[func];
-        // It's ok to list unused arguments as long as they're consistent
-        $[func] = function(skillId, target, value) {
-            return this._satb.notes.result(
-                    note, skillId, target, value);
-        }; // $[func]
-        //
-    });
-
-    // Refer to the Game_SATBNotes counterparts
-    Object.keys(_SATB._FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB._FORWARDED_FUNCS[func];
-        // It's ok to skip the arguments in the signature as there's arguments
-        $[func] = function() {
-            return this._satb.notes[f].apply(
-                    this._satb.notes, arguments);
-        }; // $[func]
-        //
-    });
-    //
-
-    /**
-     * Idempotent
-     * @interface @since v0.00a @version v0.00a
-     */
-    $.initSATBNotes = function() {
-        this._satb.notes = new Game_SATBNotes(this);
-    }; // $.initSATBNotes
-
-    /**
-     * Idempotent
-     * @interface @since v0.00a @version v0.00a
-     */
-    $.clearSATBNotes = function() {
-        // Avoids memory leaks
-        this._satb.notes.clear();
-        delete this._satb.notes;
-        //
-    }; // $.clearSATBNotes
-
-    /**
-     * The this pointer is Game_Actor.prototype
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     */
-    _SATB._init = function() {
-        // The master container must be ready first before adding anything else
-        this._satb = { isEnded: {}, exps: {} };
-        this.initSATBNotes();
-        //
-    }; // _SATB._init
-
-    /**
-     * The this pointer is Game_Actor.prototype
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     */
-    _SATB._refresh = function() {
-        // Refer to reference tag ACTOR_REFRESH_RECACHE_NOTE
-        this._satb.notes.raiseMarkedChangeFactors();
-        //
-        // Refer to reference tag REDUCED_MAX_END_SKILL_PROGRESS
-        _SATB._checkUpdatedMaxSATBes.call(this);
-        //
-    }; // _SATB._refresh
 
 })(DoubleX_RMMV.SATB);
 
@@ -835,19 +938,15 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     "use strict";
 
-    var $ = Game_SATBNotes.prototype;
-    var _SATB = SATB.Game_SATBNotes = {};
-    // Refer to reference tag DEFAULT_CHAINING_RULE_FIRST
-    _SATB._DEFAULT_CHAINING_RULE = "first";
-    //
-    _SATB._IS_VALID_RESULT = function(result) {
+    var $ = Game_SATBNotes.prototype, _SATB = SATB.Game_SATBNotes = {};
+    _SATB.IS_VALID_RESULT = function(result) {
         return result !== null && result !== undefined;
-    }; // _SATB._IS_VALID_RESULT
+    }; // _SATB.IS_VALID_RESULT
 
     /*------------------------------------------------------------------------
      *    New private instance variables
      *------------------------------------------------------------------------*/
-    // {Game_Actor} _actor: The actor owning the effective notetag list
+    // {Game_Battler} _battler: The battler owning the effective notetag list
     // {Game_SATBCache} _cache: The helper caching notetag list/result
     // {Game_SATBPairs} _pairs: The helper checking/returning note pair
     // {Game_SATBRules} _rules: The helper using the rule to chain note
@@ -855,10 +954,13 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     /**
      * Idempotent
      * @constructor @since v0.00a @version v0.00a
-     * @param {Game_Actor} actor - The actor owning the effective notetag list
+     * @param {Game_Battler} battler - The battler with effective notetag list
+     * @param {Game_SATBCache?} cache_ - The helper caching notetag list/result
+     * @param {Game_SATBPairs?} pairs_ - The helper checking/returning note pair
+     * @param {Game_SATBRules?} rules_ - The helper using the rule to chain note
      */
-    $.initialize = function(actor) {
-        this._init(actor);
+    $.initialize = function(battler, cache_, pairs_, rules_) {
+        this._init(battler, cache_, pairs_, rules_);
         this.raiseAllChangeFactors();
     }; // $.initialize
 
@@ -867,8 +969,8 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @interface @since v0.00a @version v0.00a
      */
     $.clear = function() {
-        // Avoids memory leaks
-        delete this._actor;
+        // Avoids memory leaks as they've the battler as their dependencies
+        delete this._battler;
         this._pairs.clear(); // It's idempotent so it doesn't hurt to play safe
         this._rules.clear();
         //
@@ -880,10 +982,10 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         "raiseAllChangeFactors",
         "raisePartChangeFactors",
         "raiseChangeFactor",
-        "cachedPartResult",
-        "invalidateResultCache"
+        "invalidateResultCache",
+        "invalidateListCache"
     ].forEach(function(f) {
-        // Refer to the Game_SATBCache counterparts
+        // Refers to the Game_SATBCache counterparts
         $[f] = function() {
             return this._cache[f].apply(this._cache, arguments);
         }; // $[f]
@@ -891,87 +993,83 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     });
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $.result = function(note, skillId, target, value) {
-        // It's infeasible to cache target so value's not used here to miss it
-        var cache = this._cache.result(note, skillId);
-        //
+    $.result = function(note, argObj_) {
+        if (!$gameSystem.satbParam("_isCached")) return this._updatedResult(
+                note, argObj_);
+        var cache = this._cache.result_(note, argObj_);
         // It's possible for a cached result to be intentionally false
-        if (_SATB._IS_VALID_RESULT(cache)) return cache;
+        if (_SATB.IS_VALID_RESULT(cache)) return cache;
         //
-        // It's better to return an invalid result than to spoil the cache
-        if (!skillId) return this._pairs.default(note, skillId, target, value);
-        return this._updatedResult(note, skillId, target, value);
-        //
+        return this._updatedResult(note, argObj_);
     }; // $.result
 
     /**
+     * Hotspot
      * @interface @since v0.00a @version v0.00a
      * @param {[String]} notes - The list of notes to have their contents run
-     * @param {Id} skillId - The id of the skill involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      */
-    $.run = function(notes, skillId) {
-        notes.forEach(this._run.bind(this, skillId));
+    $.run = function(notes, argObj_) {
+        notes.forEach(this._run.bind(this, argObj_));
     }; // $.run
 
     /**
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Game_Actor} actor - The actor owning the effective notetag list
+     * @param {Game_Battler} battler - The battler with effective notetag list
+     * @param {Game_SATBCache?} cache_ - The helper caching notetag list/result
+     * @param {Game_SATBPairs?} pairs_ - The helper checking/returning note pair
+     * @param {Game_SATBRules?} rules_ - The helper using the rule to chain note
      */
-    $._init = function(actor) {
-        this._actor = actor;
-        // Not making these as explicit dependecies' to simplify its uses
-        this._cache = new Game_SATBCache();
-        this._pairs = new Game_SATBPairs(actor);
-        this._rules = new Game_SATBRules(this._pairs);
+    $._init = function(battler, cache_, pairs_, rules_) {
+        this._battler = battler;
+        // Not making these as needed explicit dependecies' to simplify its uses
+        this._cache = cache_ || new Game_SATBCache();
+        this._pairs = pairs_ || new Game_SATBPairs(battler);
+        this._rules = rules_ || new Game_SATBRules(this._pairs);
         //
     }; // $._init
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $._updatedResult = function(note, skillId, target, value) {
-        // Refer to reference tag NOTE_RESULT_CACHE
-        var result = this._uncachedResult(note, skillId, target, value);
-        this._cache.updateResultCaches(skillId, target, value, note, result);
+    $._updatedResult = function(note, argObj_) {
+        // Refers to reference tag NOTE_RESULT_CACHE
+        var result = this._uncachedResult(note, argObj_);
+        if (!$gameSystem.satbParam("_isCached")) return result;
+        this._cache.updateResultCaches(note, argObj_, result);
         return result;
         //
     }; // $._updatedResult
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $._uncachedResult = function(note, skillId, target, value) {
-        var chainingRule = this._chainingRule(skillId, note);
+    $._uncachedResult = function(note, argObj_) {
+        var chainingRule = this._rules.chainingRule(note);
         return this[this._updatedResultFunc(chainingRule)](
-                note, skillId, target, value, chainingRule);
+                note, argObj_, chainingRule);
     }; // $._uncachedResult
 
     /**
-     * Pure Function
+     * Potential Hotspot/Pure Function
      * @since v0.00a @version v0.00a
      * @param {String} chainingRule - The effective notetag result chaining rule
-     * @returns {String} The requested name of the function to be used
+     * @returns {String} The name of the chaining rule function to be used
      */
     $._updatedResultFunc = function(chainingRule) {
         return this._rules.isAssociative(chainingRule) ?
@@ -979,282 +1077,223 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._updatedResultFunc
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} chainRule - The effective notetag result chaining rule
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} chainingRule - The effective notetag result chaining rule
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $._associativeResult = function(note, skillId, target, value, chainRule) {
-        var partResults =
-                this._partResults(note, skillId, target, value, chainRule);
-        var defaultResult = this._pairs.default(note, skillId, target, value);
-        return this._chainedResult(partResults, skillId, note, target, value,
-                chainRule, "parts", defaultResult);
+    $._associativeResult = function(note, argObj_, chainingRule) {
+        return this._chainedResult(this._partResults(
+                 note, argObj_, chainingRule), note, argObj_, chainingRule,
+                 "parts", this._pairs.default(note, argObj_));
     }; // $._associativeResult
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} chainRule - The effective notetag result chaining rule
-     * @returns {[[]]*} The requested results of all effective notetags parts
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} chainingRule - The effective notetag result chaining rule
+     * @returns {[[]]*} The chained results of all effective notetags parts
      */
-    $._partResults = function(note, skillId, target, value, chainRule) {
-        // Refer to reference tag NOTE_LIST_PART
-        var partResults = this._priority(skillId, note).map(this._partResult.
-                bind(this, note, skillId, target, value, chainRule));
+    $._partResults = function(note, argObj_, chainingRule) {
+        // Refers to reference tag NOTE_LIST_PART
+        return this._rules.priority(note).map(this._partResult_.bind(
+                this, note, argObj_, chainingRule)).filter(
+                _SATB.IS_VALID_RESULT);
         //
-        return partResults.filter(_SATB._IS_VALID_RESULT);
     }; // $._partResults
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {String} chainingRule - The effective notetag result chaining rule
      * @param {String} part - The note part to have its part result retrieved
-     * @returns {*} The requested result from all effective notetags involved
+     * @returns {*?} The chained result from this effective notetags part
      */
-    $._partResult = function(note, skillId, target, value, chainingRule, part) {
-        var cache = this._cache.partResult(note, part);
+    $._partResult_ = function(note, argObj_, chainingRule, part) {
+        if (!$gameSystem.satbParam("_isCached")) {
+            return this._updatedPartResult_(note, argObj_, chainingRule, part);
+        }
+        var cache = this._cache.partResult_(note, argObj_, part);
         // It's possible for a cached result to be intentionally false
-        if (_SATB._IS_VALID_RESULT(cache)) return cache;
+        if (_SATB.IS_VALID_RESULT(cache)) return cache;
         //
-        return this._updatedPartResult(
-                note, skillId, target, value, chainingRule, part);
-    }; // $._partResult
+        return this._updatedPartResult_(note, argObj_, chainingRule, part);
+    }; // $._partResult_
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} rule - The effective notetag result chaining rule
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} chainingRule - The effective notetag result chaining rule
      * @param {String} part - The note part to have its part result retrieved
-     * @returns {*} The requested result from all effective notetags involved
+     * @returns {*?} The chained result from this effective notetags part
      */
-    $._updatedPartResult = function(note, skillId, target, value, rule, part) {
-        // Refer to reference tag NOTE_RESULT_CACHE
-        var result = this._uncachedPartResult(note, skillId, target, value,
-                rule, part);
-        this._cache.updatePartResultCaches(note, skillId, part, result);
+    $._updatedPartResult_ = function(note, argObj_, chainingRule, part) {
+        // Refers to reference tag NOTE_RESULT_CACHE
+        var result =
+                this._uncachedPartResult_(note, argObj_, chainingRule, part);
+        if (!$gameSystem.satbParam("_isCached")) return result;
+        this._cache.updatePartResultCaches(note, argObj_, part, result);
         return result;
         //
-    }; // $._updatedPartResult
+    }; // $._updatedPartResult_
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} rule - The effective notetag result chaining rule
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} chainingRule - The effective notetag result chaining rule
      * @param {String} part - The note part to have its part result retrieved
-     * @returns {*} The requested result from all effective notetags involved
+     * @returns {*?} The chained result from this effective notetags part
      */
-    $._uncachedPartResult = function(note, skillId, target, value, rule, part) {
-        var list = this._listPart(skillId, note, part);
+    $._uncachedPartResult_ = function(note, argObj_, chainingRule, part) {
+        var list = this._listPart(note, part);
         // The 1st datum in the part list must be the initial value of the part
-        return list.length <= 0 ? undefined : this._chainedResult(
-                list, skillId, note, target, value, rule, "list");
+        return list.length <= 0 ? undefined :
+                this._chainedResult(list, note, argObj_, chainingRule, "list");
         //
-    }; // $._uncachedPartResult
+    }; // $._uncachedPartResult_
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} rule - The effective notetag result chaining rule
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} chainingRule - The effective notetag result chaining rule
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $._nonAssociativeResult = function(note, skillId, target, value, rule) {
-        var defaultResult = this._pairs.default(note, skillId, target, value);
-        return this._chainedResult(this._list(skillId, note), skillId, note,
-                target, value, rule, "list", defaultResult);
+    $._nonAssociativeResult = function(note, argObj_, chainingRule) {
+        return this._chainedResult(this._list(note), note, argObj_,
+                chainingRule, "list", this._pairs.default(note, argObj_));
     }; // $._nonAssociativeResult
 
     /**
-     * Nullipotent
+     * Potential Hotspot/Nullipotent
      * @since v0.00a @version v0.00a
      * @param {[{*}]} list - The effective notetag list to be chained
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its end result retrieved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
-     * @param {String} r - The effective notetag result chaining rule
-     * @param {String} t - The type of the list to be chained(list/parts)
-     * @param {*?} i - The initial result to chain the notetag list
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {String} rule - The effective notetag result chaining rule
+     * @enum @param {String} type - Type of the list to be chained(list/parts)
+     * @param {*?} initVal_ - The initial result to chain the notetag list
+     * @returns {*} The chained result from all effective notetags involved
      */
-    $._chainedResult = function(list, skillId, note, target, value, r, t, i) {
-        return this._rules.chainResultFunc(note, r, t)(
-                list, skillId, note, target, value, i);
+    $._chainedResult = function(list, note, argObj_, rule, type, initVal_) {
+        return this._rules.chainResultFunc(
+                note, rule, type)(list, note, argObj_, initVal_);
     }; // $._chainedResult
 
     /**
+     * Hotspot
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {String} note - The note to have its contents run
      */
-    $._run = function(skillId, note) {
-        // Refer to reference tag RUN_DEFAULT_FIRST
-        this._pairs.default(note, skillId);
+    $._run = function(argObj_, note) {
+        // Refers to reference tag RUN_DEFAULT_FIRST
+        this._pairs.default(note, argObj_);
         //
-        if (!skillId) return; // It's better to be no-op than to spoil the cache
-        var list = this._rules.chainedRunListFunc(
-                this._chainingRule(skillId, note))(this._list(skillId, note));
-        // Binding run here would cause target and value to be index and list
-        list.forEach(function(d) { this._pairs.run(skillId, note, d); }, this);
-        //
+        this._rules.chainedRunListFunc(this._rules.chainingRule(note))(
+                this._list(note)).forEach(
+                this._pairs.run.bind(this._pairs, argObj_, note));
     }; // $._run
 
     /**
-     * Nullipotent
+     * Hotspot/Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
-     * @param {String} note - The note to have its effective list returned
-     * @returns {String} The requested effective notetag chaining rule
-     */
-    $._chainingRule = function(skillId, note) {
-        // Refer to reference tag THIS_GAME_ACTOR
-        return SATB.params[note + "NoteChainingRule"].call(
-                this._actor, skillId) || _SATB._DEFAULT_CHAINING_RULE;
-        //
-    }; // $._chainingRule
-
-    /**
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._list = function(skillId, note) {
+    $._list = function(note) {
+        if (!$gameSystem.satbParam("_isCached")) return this._updatedList(note);
         // A valid cache must be an Array so a falsy cache must be discarded
-        return this._cache.list(skillId, note) ||
-                this._updatedList(skillId, note);
+        return this._cache.list_(note) || this._updatedList(note);
         //
     }; // $._list
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._updatedList = function(skillId, note) {
-        // Refer to reference tag NOTE_LIST_CACHE
-        var list = this._uncachedList(skillId, note);
-        this._cache.updateListCaches(skillId, note, list);
+    $._updatedList = function(note) {
+        // Refers to reference tag NOTE_LIST_CACHE
+        var list = this._uncachedList(note);
+        if (!$gameSystem.satbParam("_isCached")) return list;
+        this._cache.updateListCaches(note, list);
         return list;
         //
     }; // $._updatedList
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._uncachedList = function(skillId, note) {
-        // Refer to reference tag NOTE_LIST_PART
-        return this._priority(skillId, note).reduce(function(list, part) {
+    $._uncachedList = function(note) {
+        // Refers to reference tag NOTE_LIST_PART
+        return this._rules.priority(note).reduce(function(list, part) {
             // The function's easy, simple and small enough to be inlined
-            return list.concat(this._listPart(skillId, note, part));
+            return list.concat(this._listPart(note, part));
             //
         }.bind(this), []);
         //
     }; // $._uncachedList
 
     /**
-     * Nullipotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
-     * @param {String} note - The note to have its effective list returned
-     * @returns {[String]} The requested data type priority queue
-     */
-    $._priority = function(skillId, note) {
-        // Refer to reference tag NOTE_DATA_TYPES and THIS_GAME_ACTOR
-        return ["skills"].concat(
-                SATB.params[note + "NotePriority"].call(this._actor, skillId));
-        //
-    }; // $._priority
-
-    /**
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @param {String} part - The note part to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._listPart = function(skillId, note, part) {
+    $._listPart = function(note, part) {
+        if (!$gameSystem.satbParam("_isCached")) return this._updatedListPart(
+                note, part);
         // A valid cache must be an Array so a falsy cache must be discarded
-        return this._cache.listPart(note, part) ||
-                this._updatedListPart(skillId, note, part);
+        return this._cache.listPart_(note, part) ||
+                this._updatedListPart(note, part);
         //
     }; // $._listPart
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @param {String} part - The note part to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._updatedListPart = function(skillId, note, part) {
-        // Refer to reference tag NOTE_LIST_CACHE
-        var list = this._uncachedListPart(skillId, note, part);
-        this._cache.updatePartListCaches(skillId, note, part, list);
+    $._updatedListPart = function(note, part) {
+        // Refers to reference tag NOTE_LIST_CACHE
+        var list = this._uncachedListPart(note, part);
+        if (!$gameSystem.satbParam("_isCached")) return list;
+        this._cache.updatePartListCaches(note, part, list);
         return list;
         //
     }; // $._updatedListPart
 
     /**
-     * Nullipotent
+     * Potential Hotspot/Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @param {String} part - The note part to have its effective list returned
      * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._uncachedListPart = function(skillId, note, part) {
-        return this._partList(skillId, part).map(
+    $._uncachedListPart = function(note, part) {
+        return this._cache.partListData(part, this._battler).map(
                 this._pairs.validData.bind(this._pairs, note)).filter(
                 this._pairs.hasPairs.bind(this._pairs, note));
     }; // $._uncachedListPart
-
-    /**
-     * Nullipotent
-     * @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
-     * @param {String} part - The note part to have its effective list returned
-     * @returns {[{*}]} The list of data having the effective notetags involved
-     */
-    $._partList = function(skillId, part) {
-        var list = part === "skills" ?
-                [$dataSkills[skillId]] : this._actor[part]();
-        return Array.isArray(list) ? list : [list];
-    }; // $._partList
 
 })(DoubleX_RMMV.SATB);
 
@@ -1267,50 +1306,85 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     "use strict";
 
-    var $ = Game_SATBCache.prototype;
-    var _SATB = SATB.Game_SATBCache = {};
-    // Otherwise the skill part might be mixed up by different skill ids
-    _SATB._FACTOR_PART_KEY = function(skillId, fp) {
-        return skillId && fp === "skills" ? fp + skillId : fp;
-    }; // _SATB._FACTOR_PART_KEY
+    var $ = Game_SATBCache.prototype, _SATB = SATB.Game_SATBCache = {};
+    _SATB._DEL_MASTER_KEY = function(cache, key) { // Potential Hotspot
+        Object.keys(cache).forEach(function(k) {
+            if (k.includes(key)) delete cache[k];
+        });
+    }; // _SATB._DEL_MASTER_KEY
+    _SATB._NOTE_KEY = function(argObj_, note) { // Hotspot
+        if (!argObj_) return note;
+        // It's infeasible to cache the target so an empty key means not caching
+        return argObj_.target ? undefined : JSON.stringify(argObj_);
+        //
+    }; // _SATB._NOTE_KEY
+    _SATB._NOTE_PART_KEY = function(argObj_, part) { // Hotspot
+        if (!argObj_) return part;
+        // It's infeasible to cache the target so an empty key means not caching
+        return argObj_.target ? undefined : part + JSON.stringify(argObj_);
+        //
+    }; // _SATB._NOTE_PART_KEY
+    // Refers to reference tag NOTE_DATA_TYPES
+    _SATB._FACTOR_DATA = {
+        actor: function(battler) {
+            return battler.isActor() ? [battler.actor()] : [];
+        },
+        enemy: function(battler) {
+            return battler.isEnemy() ? [battler.enemy()] : [];
+        },
+        class: function(battler) {
+            return battler.isActor() ? [battler.currentClass()] : [];
+        },
+        weapons: function(battler) {
+            return battler.isActor() ? [battler.weapons()] : [];
+        },
+        armors: function(battler) {
+            return battler.isActor() ? [battler.armors()] : [];
+        },
+        skills: function(battler) {
+            // It's just to play safe to assume battler other than actor/enemy
+            return battler.isEnemy() ? battler.enemy().actions.map(function(a) {
+                return $dataSkills[a.skillId];
+            }) : battler.isActor() ? battler.skills() : [];
+            //
+        },
+        usableSkills: function(battler) {
+            // It's just to play safe to assume battler other than actor/enemy
+            if (battler.isActor()) return battler.usableSkills();
+            if (!battler.isEnemy()) return [];
+            return battler.enemy().actions.filter(function(act) {
+                return battler.isActionValid(act);
+            }).map(function(act) { return $dataSkills[act.skillId]; });
+            //
+        },
+        items: function(battler) {
+            return battler.isActor() ? $gameParty.items() : [];
+        },
+        usableItems: function(battler) {
+            return battler.isActor() ? $gameParty.items().filter(function(i) {
+                return battler.canUse(i);
+            }) : [];
+        },
+        states: function(battler) { return battler.states() },
+        latestSkillItem: function(battler) {
+            return battler.lastSATBItem ? [battler.lastSATBItem.item] : [];
+        },
+        priority: function() { return [] },
+        chainingRule: function() { return [] },
+        result: function() { return [] }
+    };
     //
-    // Refer to reference tag NOTE_DATA_TYPES
-    _SATB._FACTORS = [
-        "actor",
-        "enemy",
-        "currentClass",
-        "weapons",
-        "armors",
-        "skills",
-        "states",
-        "priority",
-        "chainingRule",
-        "result"
-    ];
-    //
-    // Refer to reference tag NOTE_TYPE
-    _SATB._NOTES = [
-        "cond",
-        "max",
-        "useGain",
-        "hitGain",
-        "next",
-        "keepCurrent",
-        "willEnd",
-        "didEnd"
-    ];
+    // Refers to reference tag NOTE_TYPE
+    _SATB._NOTES = Object.keys(SATB.Game_System.new.FUNCS.notes);
     //
 
     /*------------------------------------------------------------------------
      *    New private instance variables
      *------------------------------------------------------------------------*/
-    // {{{*}}} _cachedLists: The mapping from a note to its notetag list
+    // {{[]}} _cachedLists: The mapping from a note to its notetag list
     // {{{*}}} _cachedResults: The mapping from a note to its cached result
     // {{{Boolean}}} _changeFactorMarks: The map of all change factor marks
-    // {{{Boolean}}} _changeFactors: The map of all change factors for all notes
-    // {{{Boolean}}} _isSameLists: The map of whether the list cache's valid
-    // {{{Boolean}}} _isSameResults: The map of whether the result cache's valid
-    // {{{*}}} _partLists: The mapping from a note to its notetag list parts
+    // {{{[]}}} _partLists: The mapping from a note to its notetag list parts
     // {{{*}}} _partResults: The mapping from a note to its cached result parts
     // (Advanced){Boolean} _hasUnknownChangeFactor: ADVANCED_SCRIPT_CALLS_ONLY
 
@@ -1319,12 +1393,14 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @constructor @since v0.00a @version v0.00a
      */
     $.initialize = function() {
-        this._init();
         this.raiseAllChangeFactors();
+        // Set it as false only if you're sure this plugin's all change factors
+        this._hasUnknownChangeFactor = true;
+        //
     }; // $.initialize
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {[String]} factors - The change factors to be marked for all notes
      */
@@ -1333,7 +1409,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $.markChangeFactors
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.raiseMarkedChangeFactors = function() {
@@ -1343,214 +1419,180 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $.raiseMarkedChangeFactors
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.raiseAllChangeFactors = function() {
         // They use separate containers so it must be called multiple times
+        this._cachedLists = {};
+        this._cachedResults = this._allEmptyContainers();
+        this._partLists = this._allEmptyContainers();
+        this._partResults = this._allEmptyContainers();
         this._changeFactorMarks = this._allEmptyContainers();
-        this._changeFactors = this._allRaisedChangeFactors();
-        this._isSameLists = this._allEmptyContainers();
-        this._isSameResults = this._allEmptyContainers();
         //
     }; // $.raiseAllChangeFactors
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {[String]} factors - The list of change factors to be raised
-     * @param {Id?} skillId - The id of the skill involved
      */
-    $.raisePartChangeFactors = function(factors, skillId) {
-        // The function's easy, simple and small enough to be inlined
+    $.raisePartChangeFactors = function(factors) {
         _SATB._NOTES.forEach(function(note) {
-            factors.forEach(function(factor) {
-                // The argument list must be in this order as it's script call
-                this.raiseChangeFactor(note, factor, skillId);
-                //
-            }, this);
+            // The function's easy, simple and small enough to be inlined
+            factors.forEach(this.raiseChangeFactor.bind(this, note));
+            //
         }, this);
-        //
     }; // $.raisePartChangeFactors
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its change factor raised
-     * @param {String} factor - The change factor to be raised for the note
-     * @param {Id?} skillId - The id of the skill involved
      */
-    $.raiseChangeFactor = function(note, factor, skillId) {
-        var key = _SATB._FACTOR_PART_KEY(skillId, factor);
-        this._changeFactors[note][key] = true;
-        this._changeFactorMarks[note][key] = false;
-        // The cache validity flags should be erased upon any factor change
-        this._isSameLists[note] = {};
-        this._isSameResults[note] = {};
-        //
+    $.raiseChangeFactor = function(note, factor) {
+        this.invalidateResultCache(note, factor);
+        this.invalidateListCache(note, factor);
+        this._changeFactorMarks[note][factor] = false;
     }; // $.raiseChangeFactor
 
     /**
-     * Nullipotent
-     * @interface @since v0.00a @version v0.00a
-     * @param {String} note - The note to having its part result caches
-     * @param {String} part - The note part to have its part result cache
-     * @returns {*} The requested effective notetag list part result cache
-     */
-    $.cachedPartResult = function(note, part) {
-        return this._partResults[note][part];
-    }; // $.cachedPartResult
-
-    /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its part result cache invalidated
      * @param {String} part - The note part to have its result cache invalidated
      */
     $.invalidateResultCache = function(note, part) {
-        delete this._partResults[note][part];
-        // The cache validity flags should be erased upon any factor change
-        this._isSameResults[note] = {};
+        // All part results belonging to part must be del regardless of argObj_
+        _SATB._DEL_MASTER_KEY(this._partResults[note], part);
+        //
+        // All end results belonging to note must be del regardless of argObj_
+        _SATB._DEL_MASTER_KEY(this._cachedResults[note], note);
         //
     }; // $.invalidateResultCache
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @returns {*} The requested result from all effective notetags involved
+     * @param {String} note - The note to have its part list cache invalidated
+     * @param {String} part - The note part to have its list cache invalidated
      */
-    $.result = function(note, skillId) {
-        // It's infeasible to cache target so value's not used here to miss it
-        if (!this._isSameResults[note][skillId]) return undefined;
-        return this._cachedResults[note][skillId];
-        //
-    }; // $.result
+    $.invalidateListCache = function(note, part) {
+        delete this._partLists[note][part];
+        delete this._cachedLists[note];
+    }; // $.invalidateListCache
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @returns {*?} The requested result from all effective notetags involved
+     */
+    $.result_ = function(note, argObj_) {
+        // It's just to play safe to not pass an undefined key into the object
+        var key = _SATB._NOTE_KEY(note, argObj_);
+        return key && this._cachedResults[note][key];
+        //
+    }; // $.result_
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {String} part - The note part to have its part result retrieved
-     * @returns {*} The requested result from all effective notetags involved
+     * @returns {*?} The requested result from all effective notetags involved
      */
-    $.partResult = function(note, part) {
-        // The skill change factor's raised upon changing skills so it's ok here
-        if (this._changeFactors[note][part]) return undefined;
-        return this.cachedPartResult(note, part);
+    $.partResult_ = function(note, argObj_, part) {
+        // It's just to play safe to not pass an undefined key into the object
+        var key = _SATB._NOTE_PART_KEY(argObj_, part);
+        return key && this._partResults[note][key];
         //
-    }; // $.partResult
+    }; // $.partResult_
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its end result retrieved
-     * @param {Id} skillId - The id of the skill involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {String} part - The note part to have its part result retrieved
      * @param {*} result - The effective notetag list part result to be cached
      * @returns {*} The requested result from all effective notetags involved
      */
-    $.updatePartResultCaches = function(note, skillId, part, result) {
-        var key = _SATB._FACTOR_PART_KEY(skillId, part);
-        this._partResults[note][key] = result;
-        this._changeFactors[note][key] = false;
+    $.updatePartResultCaches = function(note, argObj_, part, result) {
+        var key = _SATB._NOTE_PART_KEY(argObj_, part);
+        if (key) this._partResults[note][key] = result;
     }; // $.updatePartResultCaches
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
      * @param {String} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {*} result - The effective notetag list result to be cached
      * @returns {*} The requested result from all effective notetags involved
      */
-    $.updateResultCaches = function(skillId, target, value, note, result) {
-        // It's infeasible to cache target so value's used here to miss it later
-        var key = target ?
-                JSON.stringify({ skillId: skillId, value: value }) : skillId;
-        this._cachedResults[note][key] = result;
-        //
-        this._isSameResults[note][skillId] = true;
+    $.updateResultCaches = function(note, argObj_, result) {
+        var key = _SATB._NOTE_KEY(note, argObj_);
+        if (key) this._cachedResults[note][key] = result;
     }; // $.updateResultCaches
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
-     * @returns {[{*}]} The list of data having the effective notetags involved
+     * @returns {[{*}]?} The list of data having the effective notetags involved
      */
-    $.list = function(skillId, note) {
-        // A valid list must be truthy so this shorthand can be used
-        return this._isSameLists[note][skillId]
-                && this._cachedLists[note][skillId];
-        //
-    }; // $.list
+    $.list_ = function(note) { return this._cachedLists[note]; };
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its effective list returned
      * @param {String} part - The note part to have its effective list returned
-     * @returns {[{*}]} The list of data having the effective notetags involved
+     * @returns {[{*}]?} The list of data having the effective notetags involved
      */
-    $.listPart = function(note, part) {
-        // The skill change factor's raised upon changing skills so it's ok here
-        return !this._changeFactors[note][part] && this._partLists[note][part];
-        //
-    }; // $.listPart
+    $.listPart_ = function(note, part) { return this._partLists[note][part]; };
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @param {String} part - The note part to have its effective list returned
      * @param {[{*}]} partList The list of data having the notetags involved
      */
-    $.updatePartListCaches = function(skillId, note, part, partList) {
-        var key = _SATB._FACTOR_PART_KEY(skillId, part);
+    $.updatePartListCaches = function(note, part, partList) {
         // partList's supposed to be immutable so it's safe here
-        this._partLists[note][key] = partList; // partList.clone();
+        this._partLists[note][part] = partList; // partList.clone();
         //
-        this._changeFactors[note][key] = false;
     }; // $.updatePartListCaches
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
      * @param {String} note - The note to have its effective list returned
      * @param {[{*}]} list - The list of data having the notetags involved
      */
-    $.updateListCaches = function(skillId, note, list) {
+    $.updateListCaches = function(note, list) {
         // list's supposed to be immutable so it's safe here
-        this._cachedLists[note][skillId] = list; // list.clone();
+        this._cachedLists[note] = list; // list.clone();
         //
-        this._isSameLists[note][skillId] = true;
     }; // $.updateListCaches
 
     /**
-     * Idempotent
-     * @since v0.00a @version v0.00a
+     * Potential Hotspot/Nullipotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} part - The note part to have its effective list returned
+     * @param {Game_Battler} battler - The battler with effective notetag list
+     * @returns {[{*}]} The list of data having the effective notetags involved
      */
-    $._init = function() {
-        // They use separate containers so it must be called multiple times
-        this._cachedLists = this._allEmptyContainers();
-        this._cachedResults = this._allEmptyContainers();
-        this._partLists = this._allEmptyContainers();
-        this._partResults = this._allEmptyContainers();
-        //
-        // Set it as false only if you're sure this plugin's all change factors
-        this._hasUnknownChangeFactor = true;
-        //
-    }; // $._init
+    $.partListData = function(part, battler) {
+        return _SATB._FACTOR_DATA[part](battler);
+    }; // $.partListData
 
     /**
-     * Pure Function
+     * Potential Hotspot/Pure Function
      * @since v0.00a @version v0.00a
      * @returns {{{*}}} The requested mapping from a note to its container
      */
@@ -1561,30 +1603,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._allEmptyContainers
 
     /**
-     * Pure Function
-     * @since v0.00a @version v0.00a
-     * @returns {{{Boolean}}} The mapping of all change factors for all notes
-     */
-    $._allRaisedChangeFactors = function() {
-        return this._allNoteContainers(this._raisedChangeFactors.bind(this));
-    }; // $._allRaisedChangeFactors
-
-    /**
-     * Pure Function
-     * @since v0.00a @version v0.00a
-     * @returns {{Boolean}} The mapping of all change factors for all notes
-     */
-    $._raisedChangeFactors = function() {
-        // The function's easy, simple and small enough to be inlined
-        return _SATB._FACTORS.reduce(function(factors, factor) {
-            factors[factor] = true;
-            return factors;
-        }, {});
-        //
-    }; // $._raisedChangeFactors
-
-    /**
-     * Pure Function
+     * Potential Hotspot/Pure Function
      * @since v0.00a @version v0.00a
      * @param {()} noteContainerFunc - The function returning a container
      * @returns {{{*}}} The mapping of each note to its container
@@ -1601,7 +1620,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._allNoteContainers
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} factor - The change factor to be marked for all notes
      */
@@ -1610,7 +1629,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._markChangeFactor
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} factor - The change factor to be marked for the note
      * @param {String} note - The note to have its change factor marked
@@ -1620,7 +1639,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._markNoteChangeFactor
 
     /**
-     * Idempotent
+     * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its marked change factors raised
      */
@@ -1631,7 +1650,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._raiseMarkedNoteChangeFactors
 
     /**
-     * Nullipotent
+     * Potential Hotspot/Nullipotent
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its marked change factors raised
      */
@@ -1647,7 +1666,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     }; // $._raisedNoteChangeFactors
 
     /**
-     * Pure Function
+     * Potential Hotspot/Pure Function
      * @since v0.00a @version v0.00a
      * @param {{Boolean}} marks - The map of all the note change factor marks
      */
@@ -1668,47 +1687,45 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     "use strict";
 
-    var $ = Game_SATBPairs.prototype;
-    var _SATB = SATB.Game_SATBPairs = {};
-    // Refer to reference tag NOTE_SUFFIX
+    var $ = Game_SATBPairs.prototype, _SATB = SATB.Game_SATBPairs = {};
+    // Refers to reference tag NOTE_SUFFIX
     _SATB._FUNCS = {
-        cfg: function(type, entry) { return SATB.notes[entry]; },
-        val: function(type, entry) {
-            var func = _SATB._RESULTS[type];
-            return func ? func.bind(_SATB, entry) : function() { return entry; };
+        cfg: function(noteType, resultType, entry) {
+            return SATB.notes[noteType][entry];
         },
-        switch: function(type, entry) {
+        val: function(noteType, resultType, entry) {
+            var f = _SATB._RESULTS[resultType];
+            return f ? f.bind(_SATB, entry) : function() { return entry; };
+        },
+        switch: function(noteType, resultType, entry) {
             return $gameSwitches.value.bind($gameSwitches, +entry);
         },
-        event: function(type, entry) {
+        event: function(noteType, resultType, entry) {
             return $gameTemp.reserveCommonEvent.bind($gameTemp, +entry);
         },
-        var: function(type, entry) {
-            var f = _SATB._RESULTS[type];
-            if (!f) return $gameVariables.value.bind($gameVariables, +entry);
-            return function() { return f($gameVariables.value(+entry)); };
+        var: function(noteType, resultType, entry) {
+            return $gameVariables.value.bind($gameVariables, +entry);
         },
         // Function contents' not supposed to change frequently so it's ok here
-        script: function(type, entry) {
-            return new Function("skillId", "datum", "target", "value",
-                    $gameVariables.value(+entry));
+        script: function(noteType, resultType,  entry) {
+            return GB.FUNCS[noteType]($gameVariables.value(+entry));
         },
-        eval: function(type, entry) {
-            return new Function("skillId", "datum", "target", "value", entry);
+        eval: function(noteType, resultType, entry) {
+            return GB.FUNCS[noteType](entry);
         }
         //
-    };
+    }; // _SATB._FUNCS
     //
     _SATB._RESULTS = {
         boolean: function(result) { return result.toLowerCase() === "true"; },
         number: function(result) { return +result; },
         numberArray: function(result) {
-            // Refer to reference tag NUMBER_ARRAY
+            // Refers to reference tag NUMBER_ARRAY
             return result.split("_").map(function(r) { return +r; });
             //
         }
-    };
-    // Refer to reference tag NOTE_SUFFIX
+    }; // _SATB._RESULTS
+    // Refers to reference tag NOTE_SUFFIX
     _SATB._SUFFIXES = {
         run: ["cfg", "event", "script", "eval"],
         result: ["cfg", "val", "switch", "var", "script", "eval"]
@@ -1725,131 +1742,83 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         pairFunc: "_pairFunc",
         suffixes: _SATB._SUFFIXES.run
     };
-    // Refer to reference tag NOTE_TYPE
-    _SATB._NOTES = {
-        cond: {
-            hasPair: "_hasCondPair",
-            pairFunc: "_condPairFunc",
-            suffixes: _SATB._SUFFIXES.result
-        },
-        max: _SATB._NUMBER_RESULT_NOTES,
-        useGain: _SATB._NUMBER_RESULT_NOTES,
-        hitGain: _SATB._NUMBER_RESULT_NOTES,
-        next: {
-            hasPair: "_hasPair",
-            pairFunc: "_pairFunc",
-            result: "numberArray",
-            suffixes: _SATB._SUFFIXES.result
-        },
-        keepCurrent: {
-            hasPair: "_hasPair",
-            pairFunc: "_pairFunc",
-            result: "boolean",
-            suffixes: _SATB._SUFFIXES.result
-        },
-        willEnd: _SATB._BASE_RUN_NOTES,
-        didEnd: _SATB._BASE_RUN_NOTES
-    };
+    // Refers to reference tag NOTE_TYPE
+    _SATB._NOTES = { coreMax: _SATB._NUMBER_RESULT_NOTES };
     //
-    // Refer to reference tag NOTE_DEFAULT_RESULTS
+    // Refers to reference tag NOTE_DEFAULT_RESULTS
     _SATB._DEFAULT_RESULTS = {
-        // Using {} would cause inconsistent mixObject result argument type
-        cond: function() { return [] },
-        //
-        next: function() { return [] }
+        coreMax: function() {
+            return SATB.params.core.coreMaxATBVal.call(this._battler);
+        }
     };
     //
-
-    var notes = {
-        max: "defaultMax",
-        useGain: "defaultUseGain",
-        hitGain: "defaultHitGain",
-        keepCurrent: "defaultKeepCurrent",
-        willEnd: "willEnd",
-        didEnd: "didEnd"
-    };
-    Object.keys(notes).forEach(function(note) {
-        var param = notes[note];
-        // The this pointer is Game_SATBPairs.prototype
-        _SATB._DEFAULT_RESULTS[note] = function(skillId, target, value) {
-            // It's possible that SATB.params[param] changes midway
-            return SATB.params[param].call(this._actor, skillId, target, value);
-            //
-        };
-        //
-    });
 
     /*------------------------------------------------------------------------
      *    New private instance variables
      *------------------------------------------------------------------------*/
-    // {Game_Actor} _actor: The actor owning the effective notetag list
+    // {Game_Battler} _battler: The battler owning the effective notetag list
 
     /**
      * Idempotent
      * @constructor @since v0.00a @version v0.00a
-     * @param {Game_Actor} actor - The actor owning the effective notetag list
+     * @param {Game_Battler} battler - The battler owning effective notetag list
      */
-    $.initialize = function(actor) { this._actor = actor; };
+    $.initialize = function(battler) { this._battler = battler; };
 
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
      */
-    $.clear = function() { delete this._actor; /* Avoids memory leaks */ };
+    $.clear = function() { delete this._battler; /* Avoids memory leaks */ };
 
     /**
      * Pure Function
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its pairs retrieved
-     * @param {Id} skillId - The id of the skill involved
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @returns {*} The default result of the note
      */
-    $.default = function(note, skillId, target, value) {
-        return _SATB._DEFAULT_RESULTS[note].call(this, skillId, target, value);
+    $.default = function(note, argObj_) {
+        return _SATB._DEFAULT_RESULTS[note].call(this, argObj_);
     }; // $.default
 
     /**
      * Pure Function
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its pairs retrieved
-     * @param {{*}?} datum - The datum having the notetag involved
+     * @param {{*}?} datum_ - The datum having the notetag involved
      * @returns {{*}?} The datum having the notetag involved
      */
-    $.validData = function(note, datum) {
-        if (!datum) return datum;
-        var satb = datum.meta.satb;
-        var pairs = satb[note];
+    $.validData = function(note, datum_) {
+        if (!datum_) return datum_;
+        var satb = datum_.meta.satb, pairs = satb[note];
         satb[note] = pairs && pairs.filter(
                 this[_SATB._NOTES[note].hasPair].bind(this, note));
-        return datum;
+        return datum_;
     }; // $.validData
 
     /**
      * Pure Function
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its pairs retrieved
-     * @param {{*}?} datum - The datum having the notetag involved
+     * @param {{*}?} datum_ - The datum having the notetag involved
      * @returns {Boolean} The check result
      */
-    $.hasPairs = function(note, datum) {
-        var pairs = this._pairs(note, datum);
+    $.hasPairs = function(note, datum_) {
+        var pairs = this._pairs_(note, datum_);
         return pairs && pairs.length > 0;
     }; // $.hasPairs
 
     /**
      * @interface @since v0.00a @version v0.00a
-     * @param {Id} skillId - The id of the skill involved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {String} note - The note to have its contents run
      * @param {{*}} datum - The datum having the note to have its contents run
-     * @param {Game_Battler?} target - The target hit by the skill involved
-     * @param {Number?} value - The damage of the hit involved
      * @returns {[*]} The result of the notetag function involved
      */
-    $.run = function(skillId, note, datum, target, value) {
+    $.run = function(argObj_, note, datum) {
         var results = this.pairs(note, datum).map(function(func) {
-            return func(skillId, datum, target, value);
+            return func(datum, argObj);
         });
         if (_SATB._NOTES[note].result !== "numberArray") return results;
         return results.reduce(function(list, result) {
@@ -1861,12 +1830,12 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Pure Function
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its pairs retrieved
-     * @param {{*}?} datum - The datum having the notetag involved
-     * @returns {[(Id, {*}, Game_Battler?, Number?) -> *]} The functions referred
+     * @param {{*}?} datum_ - The datum having the notetag involved
+     * @returns {[(Id, {*}, Game_Battler?, Number?) -> *]} Functions referred
      *                                                    by the notetag pairs
      */
-    $.pairs = function(note, datum) {
-        var pairs = this._pairs(note, datum);
+    $.pairs = function(note, datum_) {
+        var pairs = this._pairs_(note, datum_);
         return pairs ? pairs.map(
                 this[_SATB._NOTES[note].pairFunc].bind(this, note)) : [];
     }; // $.pairs
@@ -1875,24 +1844,12 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Pure Function
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have its pairs retrieved
-     * @param {{String}?} pair - The suffix-entry pair of the note involved
+     * @param {{String}?} pair_ - The suffix-entry pairs of the note involved
      * @returns {Boolean} The check result
      */
-    $._hasCondPair = function(note, pair) {
-        if (!pair || !pair.entry1 || !pair.entry2) return false;
-        return [pair.suffix1, pair.suffix2].every(
-                this._isValidSuffix.bind(this, note));
-    }; // $._hasCondPair
-
-    /**
-     * Pure Function
-     * @since v0.00a @version v0.00a
-     * @param {String} note - The note to have its pairs retrieved
-     * @param {{String}?} pair - The suffix-entry pairs of the note involved
-     * @returns {Boolean} The check result
-     */
-    $._hasPair = function(note, pair) {
-        return pair && pair.entry1 && this._isValidSuffix(note, pair.suffix1);
+    $._hasPair = function(note, pair_) {
+        if (!pair_) return false;
+        return pair_.entry1 && this._isValidSuffix(note, pair_.suffix1);
     }; // $._hasPair
 
     /**
@@ -1910,35 +1867,14 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Pure Function
      * @since v0.00a @version v0.00a
      * @param {String} note - The note to have their contents run
-     * @param {{*}?} datum - The datum having the notetag involved
+     * @param {{*}?} datum_ - The datum having the notetag involved
      * @returns {[{String}?]} The suffix-entry pairs of the note involved
      */
-    $._pairs = function(note, datum) {
-        // Refer to reference tag NOTETAG_MULTI
-        return datum && datum.meta.satb[note];
+    $._pairs_ = function(note, datum_) {
+        // Refers to reference tag NOTETAG_MULTI
+        return datum_ && datum_.meta.satb[note];
         //
-    }; // $._pairs
-
-    /**
-     * Pure Function
-     * @since v0.00a @version v0.00a
-     * @param {String} note - The note to have its pairs retrieved
-     * @param {{String}} pair - The suffix-entry pair of the note involved
-     * @returns {(Id, {*}, ) -> String} The function referred by the cond pairs
-     */
-    $._condPairFunc = function(note, pair) {
-        var descFunc = _SATB._FUNCS[pair.suffix2]("string", pair.entry2);
-        var condFunc = _SATB._FUNCS[pair.suffix1]("boolean", pair.entry1);
-        return function(skillId, datum) {
-            // Refer to reference tag THIS_GAME_ACTOR
-            var result = {}, desc = descFunc.call(this._actor, skillId, datum);
-            //
-            // Refer to reference tag INVALID_COND_DESC and THIS_GAME_ACTOR
-            if (desc) result[desc] = condFunc.call(this._actor, skillId, datum);
-            //
-            return result;
-        }.bind(this);
-    }; // $._condPairFunc
+    }; // $._pairs_
 
     /**
      * Pure Function
@@ -1949,9 +1885,9 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      *                                                  by the notetag pairs
      */
     $._pairFunc = function(note, pair) {
-        // Refer to reference tag THIS_GAME_ACTOR
+        // Refers to reference tag THIS_GAME_BATTLER
         return _SATB._FUNCS[pair.suffix1](
-                _SATB._NOTES[note].result, pair.entry1).bind(this._actor);
+                _SATB._NOTES[note].result, pair.entry1).bind(this._battler);
         //
     }; // $._pairFunc
 
@@ -1966,8 +1902,8 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
 
     "use strict";
 
-    var $ = Game_SATBRules.prototype;
-    var _SATB = SATB.Game_SATBRules = {};
+    var $ = Game_SATBRules.prototype, _SATB = SATB.Game_SATBRules = {};
+    var GSATBN = SATB.Game_SATBNotes;
     _SATB._CHAINED_RESULT_FUNC = {
         // The control coupling's to simplify the use of these functions
         concat: function(isSome) {
@@ -2022,36 +1958,36 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
             operator: _SATB._CHAINED_RESULT_FUNC.operator("||")
         }
     };
-    // Refer to reference tag NOTE_OPERATORS
+    // Refers to reference tag NOTE_OPERATORS
     ["+", "*", "-", "/", "%", "="].forEach(function(operator) {
         _SATB._CHAINED_RESULT_FUNCS[operator] = {
             operator: _SATB._CHAINED_RESULT_FUNC.operator(operator)
         };
     });
     //
+    _SATB._NOTE_CHAINING_RULES = { coreMax: "_coreMaxATBValNoteChainingRule" };
+    _SATB._NOTE_PRIORITIES = { coreMax: "_coreMaxATBValNotePriority" };
+    // Refers to reference tag DEFAULT_CHAINING_RULE_FIRST
+    _SATB._DEFAULT_CHAINING_RULE = "first";
+    //
     // The this pointer is Game_SATBRules.prototype
-    _SATB._FIRST_LIST_MONO_FUNC = function(list, skillId, note) {
-        if (list.length <= 0) return this._pairs.default(note, skillId);
-        return this._pairs.run(skillId, note, list[0])[0];
+    _SATB._FIRST_LIST_MONO_FUNC = function(list, argObj, note) {
+        if (list.length <= 0) return this._pairs.default(note, argObj);
+        return this._pairs.run(argObj, note, list[0])[0];
     };
-    _SATB._LAST_LIST_MONO_FUNC = function(list, skillId, note) {
-        if (list.length <= 0) return this._pairs.default(note, skillId);
-        var pairs = this._pairs.run(skillId, note, list[list.length - 1]);
+    _SATB._LAST_LIST_MONO_FUNC = function(list, argObj, note) {
+        if (list.length <= 0) return this._pairs.default(note, argObj);
+        var pairs = this._pairs.run(argObj, note, list[list.length - 1]);
         return pairs[pairs.length - 1];
     };
     //
-    // Refer to reference tag NOTE_TYPE
+    // Refers to reference tag NOTE_TYPE
     _SATB._NOTES = {
-        cond: "mixObject",
-        max: "operator",
-        useGain: "operator",
-        hitGain: "operator",
-        next: "concat",
-        keepCurrent: "operator"
+        coreMax: "operator"
     };
     //
     _SATB._RESULT_CHAINING_RULE_FUNC = function(list, note, func, initialResult) {
-        if (initialResult === null || initialResult === undefined) {
+        if (GSATBN.IS_VALID_RESULT(initialResult)) {
             // The initial value of concat must be an Array
             if (_SATB._NOTES[note] === "concat") return list.reduce(func, []);
             //
@@ -2156,7 +2092,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * @interface @since v0.00a @version v0.00a
      * @param {String} note - The note to have its effective results chained
      * @param {String} rule - The rule to chain the effective notetag list
-     * @param {String} type - The type of the list to be chained(list/parts)
+     * @enum @param {String} type - Type of the list to be chained(list/parts)
      * @returns {(Id, {*}, Game_Battler?, Number?) -> *} The function chaining
      *                                                  the notetag list
      */
@@ -2164,6 +2100,19 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
         return _SATB._RESULT_CHAINING_RULES[rule][_SATB._NOTES[note]][type].
                 bind(this);
     }; // $.chainResultFunc
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @param {String} note - The note to have its effective list returned
+     * @returns {String} The effective notetag chaining rule parameter value
+     */
+    $.chainingRule = function(note) {
+        // Refers to reference tag THIS_GAME_BATTLER
+        return $gameSystem.satbParam(_SATB._NOTE_CHAINING_RULES[note]) ||
+                _SATB._DEFAULT_CHAINING_RULE;
+        //
+    }; // $._chainingRule
 
     /**
      * Pure Function
@@ -2174,6 +2123,18 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     $.chainedRunListFunc = function(rule) {
         return _SATB._RUN_CHAINING_RULES[rule];
     }; // $.chainedRunListFunc
+
+    /**
+     * Potential Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @param {String} note - The note to have its effective list returned
+     * @returns {[String]} The data type priority queue parameter value
+     */
+    $.priority = function(note) {
+        // Refers to reference tag NOTE_DATA_TYPES and THIS_GAME_BATTLER
+        return $gameSystem.satbParam(_SATB._NOTE_PRIORITIES[note]);
+        //
+    }; // $.priority
 
 })(DoubleX_RMMV.SATB);
 
@@ -2189,7 +2150,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     SATB.Game_Interpreter = { orig: {}, new: {} };
     var _GI = SATB.Game_Interpreter.orig, $ = Game_Interpreter.prototype;
     var _SATB = SATB.Game_Interpreter.new;
-    _SATB._CMDS = [];
+    _SATB._CMDS = ["coreMaxSATB"];
 
     _GI.pluginCommand = $.pluginCommand;
     _SATB.pluginCommand = $.pluginCommand = function(command, args) {
@@ -2203,7 +2164,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
     /**
      * The this pointer is Game_Interpreter.prototype
      * @since v0.00a @version v0.00a
-     * @param {String} cmd - The plugin command name
+     * @enum @param {String} cmd - The plugin command name
      * @param {[*]} args - The plugin command arguments
      */
     _SATB._pluginCmd = function(cmd, args) {
@@ -2215,7 +2176,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_Interpreter.prototype
      * Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {String} cmd - The plugin command name
+     * @enum @param {String} cmd - The plugin command name
      * @returns {Boolean} The check result
      */
     _SATB._isPluginCmd = function(cmd) {
@@ -2226,7 +2187,7 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Script call's just another way of using plugin commands
      * The this pointer is Game_Interpreter.prototype
      * @since v0.00a @version v0.00a
-     * @param {String} cmd - The plugin command name
+     * @enum @param {String} cmd - The plugin command name
      * @param {[*]} args - The plugin command arguments
      */
     _SATB._usePluginCmd = function(cmd, args) {
@@ -2241,8 +2202,9 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_Interpreter.prototype
      * Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {String} targetType - The plugin command target type
-     * @param {String} target - The plugin command target identifier
+     * @enum @param {String} targetType - Refer to reference tag
+     *                                    PLUGIN_CMD_TARGET_TYPE
+     * @param {String} target - Refer to reference tag PLUGIN_CMD_TARGET
      * @returns {[Game_Battler]} The battlers involved in the plugin command
      */
     _SATB._pluginCmdTargets = function(targetType, target) {
@@ -2254,20 +2216,33 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * The this pointer is Game_Interpreter.prototype
      * Nullipotent
      * @since v0.00a @version v0.00a
-     * @param {String} targetType - The plugin command target type
+     * @enum @param {String} targetType - Refer to reference tag
+     *                                    PLUGIN_CMD_TARGET_TYPE
      * @returns {[Game_Battler]} The battlers involved in the plugin command
      */
     _SATB._pluginCmdRawTargets = function(targetType) {
         switch (targetType) {
-            case "party": return $gameParty.members();
+            // Refers to reference tag PLUGIN_CMD_TARGET_TYPE
+            case "allParty": return $gameParty.members();
             case "aliveParty": return $gameParty.aliveMembers();
-            case "troop": return $gameTroop.members();
+            case "deadParty": return $gameParty.deadMembers();
+            case "movableParty": return $gameParty.movableMembers();
+            case "allTroop": return $gameTroop.members();
             case "aliveTroop": return $gameTroop.aliveMembers();
-            case "actor": return $gameActors._data;
-            case "aliveActor": return $gameActors._data.filter(function(actor) {
-                return actor.isAlive();
-            })
+            case "deadTroop": return $gameTroop.deadMembers();
+            case "movableTroop": return $gameTroop.movableMembers();
+            case "allActors": return $gameActors._data;
+            case "aliveActors": return $gameActors._data.filter(function(a) {
+                return a.isAlive();
+            });
+            case "deadActors": return $gameActors._data.filter(function(actor) {
+                return actor.isDead();
+            });
+            case "movableActors": return $gameActors._data.filter(function(a) {
+                return a.canMove();
+            });
             default: return [];
+            //
         }
     }; // _SATB._pluginCmdTargets
 
@@ -2276,12 +2251,14 @@ function Game_SATBRules() { this.initialize.apply(this, arguments); };
      * Nullipotent
      * @since v0.00a @version v0.00a
      * @param {[Game_Battler]} targets - The battlers to be filtered from
-     * @param {String} target - The plugin command target identifier
+     * @param {String} target - Refer to reference tag PLUGIN_CMD_TARGET
      * @returns {[Game_Battler]} The battlers involved in the plugin command
      */
     _SATB._pluginCmdFilteredTargets = function(targets, target) {
+        // Refers to reference tag PLUGIN_CMD_TARGET
         if (!isNaN(target)) return [targets[+target]];
         return targets.filter(function(t) { return t.name() === target; });
+        //
     }; // _SATB._pluginCmdFilteredTargets
 
 })(DoubleX_RMMV.SATB);
