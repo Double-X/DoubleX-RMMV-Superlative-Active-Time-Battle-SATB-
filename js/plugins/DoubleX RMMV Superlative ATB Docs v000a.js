@@ -111,8 +111,8 @@
  *      2. The default plugin parameters file name is
  *         DoubleX RMMV Superlative ATB Params v100a
  *         If you want to change that, you must edit the value of
- *         DoubleX_RMMV.Superlative_ATB_Params_File, which must be done via
- *         opening the parameters plugin js file directly
+ *         DoubleX_RMMV.Superlative_ATB_Parameters_File, which must be done
+ *         via opening the parameters plugin js file directly
  *      3. If you wish to use DoubleX RMMV Superlative ATB Unit Test, place it
  *         right below DoubleX RMMV Superlative ATB Implementation
  *----------------------------------------------------------------------------
@@ -186,6 +186,10 @@
  *                            notetag, so the function arguments are exactly
  *                            the same as the cfg counterpart)
  *            (Reference tag: NOTE_SUFFIX)
+ *            It's highly encouraged and recommended not to change from using
+ *            a switch/variable to using another, nor from not using one to
+ *            using one or vice versa in the game, as the script calls needed
+ *            to do so will be complicated and convoluted
  *          - entries is the list of entries in the form of:
  *            entry1, entry2, entry3, ..., entryn
  *            Where entryi must conform with the suffixi specifications
@@ -209,6 +213,7 @@
  *            Effective armor notetag list
  *            Effective state notetag list
  *            Effective skill notetag list
+ *            Effective item notetag list
  *            They'll be sorted according to the corresponding note priority
  *            and their results will be chained according to the corresponding
  *            note chaining rule
@@ -228,10 +233,10 @@
  *            has changed(this change should raise the priority/chain rule
  *            factor manually)
  *            (Reference tag: NOTE_RESULT_CACHE)
- *          - If the actor's refreshed due to changes other than class,
+ *          - If the battler's refreshed due to changes other than class,
  *            weapons, armors, states and last used skill, all note change
  *            factors for all notes will be automatically raised
- *            (Reference tag: ACTOR_REFRESH_RECACHE_NOTE)
+ *            (Reference tag: BATTLER_REFRESH_RECACHE_NOTE)
  *          - If users changes some notetags from some data manually, then
  *            the corresponding note change factor should be raised
  *            immediately afterwards
@@ -240,7 +245,7 @@
  *            invalid, then the result factor of the corresponding note should
  *            be raised immediately
  *----------------------------------------------------------------------------
- *    # Actor/Class/Weapon/Armor/State/Skill Notetag contents:
+ *    # Actor/Enemy/Class/Weapon/Armor/State/Skill/Item Notetag contents:
  *      Core Module:
  *      1. coreMax suffix: entry
  *         - Sets the maximum ATB value of the battler involved
@@ -276,10 +281,29 @@
  *           $gameSystem.satbParam("IsCoreEnabled") will return the String
  *           contents of a function returning a Boolean indicating whether
  *           this plugin's enabled
- *      2. $gameSystem.setSATBParam(param, funcContent)
+ *      2. $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors)
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
  *           funcContents, which is the String contents of a function
+ *         - (Advanced)switchVar, id and factors are all optional, and should
+ *           only be used if the parameter changes from using some
+ *           switches/variables to using some others or from not using those
+ *           to using those or vice versa
+ *         - (Advanced)If funcContent uses switches, switchVar must be
+ *           "switch", id must be the switch id and factors must be the list
+ *           of types of data using NOTEX
+ *           (Reference tag: SWITCH_VAR)
+ *         - (Advanced)If funcContent uses variables, switchVar must be "var",
+ *           id must be the variable id and factors must be the list of types
+ *           of data using NOTEX
+ *           (Reference tag: SWITCH_VAR)
+ *         - (Advanced)factors being an empty Array means the switch/variable
+ *           id becomes no longer used by any NOTEX of the specified type
+ *         - (Advanced)To ensure this script call won't be too hard to use in
+ *           most cases, those changing from using a switch/variable to using
+ *           another one will have to call this script call twice, to
+ *           register a new switch/variable and deregister an old one
+ *           respectively
  *         - E.g.:
  *           $gameSystem.setSATBParam("IsCoreEnabled", "return false;") will
  *           set the stored value of parameter IsCoreEnabled shown on the
@@ -292,19 +316,19 @@
  *           this script call applies to notetag values of NOTEX of the
  *           notetag type found in the configuration plugin
  *         - E.g.:
- *           $gameSystem.satbNote("coreMax", "CATBM_MAX") will return the
+ *           $gameSystem.satbNote("coreMax", "CMATB_MAX") will return the
  *           String contents of function CATBM_MAX of the coreMax notetag type
  *      4. $gameSystem.setSATBNote(type, NOTEX, funcContent, switchVar, id, factors)
  *         - Basically the same as
- *           $gameSystem.setSATBParam(param, funcContent), except that this
+ *           $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors), except that this
  *           script call applies to notetag values of NOTEX of the notetag
  *           type found in the configuration plugin
- *         - If funcContent uses switches, switchVar must be "switch", id must
- *           be the switch id and factors must be the list of types of data
- *           using NOTEX
- *         - If funcContent uses variables, switchVar must be "var", id must
- *           be the variable id and factors must be the list of types of data
- *           using NOTEX
+ *         - E.g.:
+ *           $gameSystem.satbNote("coreMax", "CMATB_MAX", "return $gameVariables.value(1);", "var", 1, ["states"])
+ *           will set the function content of CMATB_MAX as
+ *           return $gameVariables.value(1);, with changes of the value of the
+ *           variable with id 1 being notified to the coreMax notetags as long
+ *           as only coreMax notetags in states data uses this variable
  *    # (Advanced)Actor/Enemy/Class/Weapon/Armor/State/Skill notetag manipulations
  *      All meta.satb changes can be saved if
  *      DoubleX RMMV Dynamic Data is used
@@ -331,35 +355,137 @@
  *         - If the notetag uses switches or variables, you must update
  *           $gameSystem._satb.switchIds or $gameSystem._satb.varIds manually
  *           (You can check the method _updateIds in DataManager for help)
- *    # Actor manipulations
- *      1. skillProgressCondDesc(skillId)
- *         - Returns the mapping with the condition descriptions as the keys
- *           and their statuses as the values for the skill with id skillId to
- *           progress for the actor involved
- *         - The mapping being empty means that the skill involved won't
- *           progress due to having no effective cond notetags and is thus
- *           treated as a normal skill
- *           (Reference tag: SKILL_COND_DESCS)
- *         - The mapping having only truthy values means that the
- *           prerequisites are met under the cond notetag chaining rule
- *           (Reference tag: SKILL_COND_DESCS)
- *         - (Advanced)It's supposed to return an Object
+ *    # Battler manipulations
+ *      1. coreMaxSATB()
+ *         - Returns the maximum ATB value of the battler involved
+ *         - (Advanced)It's supposed to return a positive Number
  *         - E.g.:
- *           $gameParty.aliveMembers()[0].skillProgressCondDesc(3) will return
- *           the mapping with the condition descriptions as the keys and their
- *           statuses as the values for the skill with id 3 to progress for
- *           the 1st alive party member
+ *           $gameParty.aliveMembers()[0].coreMaxSATB() will return the
+ *           maximum value of the 1st alive party member
  *         - (Advanced)Using this script call might recache the return value
  *         - (Advanced)It's supposed to be Nullipotent other than possibly
  *           recaching the return value
+ *      10. (Advanced)raiseAllSATBNoteChangeFactors()
+ *          - Applies the script call raiseSATBNoteChangeFactor(note, factor)
+ *            to all notes and factors
+ *      11. (Advanced)raiseSATBNoteChangeFactor(note, factor)
+ *         - Notifies that the notetag note might need to be recached due to
+ *           potential changes in factor factor
+ *         - note is either of the following:
+ *           "coreMax"(corresponds to notetag content coreMax suffix: entry)
+ *         - factor is either of the following:
+ *           "states"(Changes in state notetags)
+ *           "skills"(Changes in skill notetags)
+ *           "items"(Changes in item notetags)
+ *           "armors"(Changes in armor notetags)
+ *           "weapons"(Changes in weapon notetags)
+ *           "class"(Changes in class notetags)
+ *           "actor"(Changes in actor notetags)
+ *           "enemy"(Changes in enemy notetags)
+ *           "priority"(Changes in the corresponding note priorities)
+ *           "chainingRule"(Changes in the corresponding note chaining rules)
+ *           "result"(Changes in all intermediate results for the note)
+ *         - It's supposed to be Idempotent
+ *         - E.g.:
+ *           $gameParty.aliveMembers()[0].raiseSATBNoteChangeFactor("coreMax", "states")
+ *           will notify the 1st alive party member that the coreMax notetags
+ *           might need to be recached due to potential changes in the states
+ *           or their coreMax notetags
+ *      12. (Advanced)invalidateSATBNoteResult(note, part)
+ *         - Invalidates the cached intermediate result of part part in note
+ *           note for the actor involved
+ *         - note is either of the following:
+ *           "coreMax"(corresponds to notetag content coreMax suffix: entry)
+ *         - part is either of the following:
+ *           "states"(All effective state notetags)
+ *           "skills"(All effective skill notetags)
+ *           "items"(All effective item notetags)
+ *           "armors"(All effective armor notetags)
+ *           "weapons"(All effective weapon notetags)
+ *           "currentClass"(All effective class notetags)
+ *           "actor"(All effective actor notetags)
+ *           "enemy"(All effective in enemy notetags)
+ *         - It's supposed to be Idempotent
+ *         - E.g.:
+ *           $gameParty.aliveMembers()[0].invalidateSATBNoteResult("coreMax", "states")
+ *           will invalidate the cached intermediate result of all effective
+ *           coreMax notetags in states for the 1t alive party member
+ *      13. (Advanced)invalidateSATBNoteList(note, part)
+ *         - Invalidates the cached notetag list of part part in note note for
+ *           the actor involved
+ *         - note is either of the following:
+ *           "coreMax"(corresponds to notetag content coreMax suffix: entry)
+ *         - part is either of the following:
+ *           "states"(All effective state notetags)
+ *           "skills"(All effective skill notetags)
+ *           "items"(All effective item notetags)
+ *           "armors"(All effective armor notetags)
+ *           "weapons"(All effective weapon notetags)
+ *           "currentClass"(All effective class notetags)
+ *           "actor"(All effective actor notetags)
+ *           "enemy"(All effective in enemy notetags)
+ *         - It's supposed to be Idempotent
+ *         - E.g.:
+ *           $gameParty.aliveMembers()[0].invalidateSATBNoteList("coreMax", "states")
+ *           will invalidate the cached notetag list of coreMax notetags in
+ *           states for the 1t alive party member
  *============================================================================
  *    ## Plugin Command Info
  *       Don't use this plugin command for actors that don't exist yet unless
  *       you really know what you're truly doing
+ *       1. targetType is combined by one of the following filter as prefix:
+ *          all - All battlers in the designated group
+ *          alive - All alive battlers in the designated group
+ *          dead - All dead battlers in the designated group
+ *          movable - All movable battlers in the designated group
+ *          with one of the following designated group as the suffix:
+ *          Party - Party members(Must be in battle)
+ *          Troop - Troop members(Don't use this outside battle)
+ *          Actors - Actors(possibly including those not in battle)
+ *          E.g.:
+ *          Setting targetType as aliveTroop means only alive troop members
+ *          can be targets
+ *          The plugin command won't be effective with an invalid targetType
+ *       (Reference tag: PLUGIN_CMD_TARGET_TYPE)
+ *       2. target means one of the following:
+ *          targetType has Party/Troop as suffix - target can be either the
+ *                                                 index of the designated
+ *                                                 party/troop member or the
+ *                                                 party/troop members with
+ *                                                 the exactly matched name
+ *          targetType has Actors as suffix - target can be either the id of
+ *                                            the actor or actors with the
+ *                                            exactly matched name
+ *          E.g.:
+ *          - Setting target as "Slime" with targetType as allTroop will apply
+ *            the plugin command to all enemies whose name is exactly Silme
+ *          - Setting target as 0 with targetType as aliveParty will apply the
+ *            plugin command to the 1st alive party member
+ *          - Setting target as 1 with targetType as movableActors will apply
+ *            the plugin command to the actor with id 1 as long as that actor
+ *            is movable
+ *       (Reference tag: PLUGIN_CMD_TARGET)
  *----------------------------------------------------------------------------
- *      1. skillProgressCondDesc actorId skillId
- *         - The same as the script call skillProgressCondDesc(skillId) in
- *           Actor manipulations for the actor with id actorId
+ *      1. coreMaxSATB targetType target
+ *         - The same as the script call coreMaxSATB() in Battler
+ *           manipulations with the designated target in the designated
+ *           targetType
+ *      10. raiseAllSATBNoteChangeFactors targetType target
+ *          - The same as the script call raiseAllSATBNoteChangeFactors() in
+ *            Battler manipulations with the designated target in the
+ *            designated targetType
+ *      11. raiseSATBNoteChangeFactor targetType target note factor
+ *          - The same as the script call coreMaxSATB(note, factor) in Battler
+ *            manipulations with the designated target in the designated
+ *            targetType
+ *      12. invalidateSATBNoteResult targetType target note part
+ *          - The same as the script call invalidateSATBNoteResult(note, part)
+ *            in Battler manipulations with the designated target in the
+ *            designated targetType
+ *      13. invalidateSATBNoteList targetType target note part
+ *          - The same as the script call invalidateSATBNoteList(note, part)in
+ *            Battler manipulations with the designated target in the
+ *            designated targetType
  *============================================================================
  */
 
@@ -375,7 +501,7 @@ DoubleX_RMMV.SATB_VERS = {
     Implementations: "0.00a",
     "Unit Test": "0.00a",
     Compatibility: "0.00a"
-};
+}; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
     var current = DoubleX_RMMV["Superlative ATB " + plugin];
     if (current) {
@@ -386,7 +512,7 @@ Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
         }
     } else {
           console.warn("DoubleX RMMV Superlative ATB " + plugin + " should " +
-                  "be placed above DoubleX RMMV Superlative ATB Documentations");
+                  "be above DoubleX RMMV Superlative ATB Documentations");
     }
 });
 // DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
