@@ -44,7 +44,7 @@ DoubleX_RMMV.SATB = {
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @returns {Natural Number} The number of ATB frames
+             * @returns {+ve Number} The number of ATB frames
              */
             coreBaseFillATBFrame: function() { return 600; },
 
@@ -53,7 +53,7 @@ DoubleX_RMMV.SATB = {
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @returns {Positive Number} The number of ATB seconds
+             * @returns {+ve Number} The number of ATB seconds
              */
             coreBaseFillATBSec: function() { return 5.0; },
 
@@ -62,9 +62,9 @@ DoubleX_RMMV.SATB = {
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @enum @param {Positive Number} baseFillATB - coreBaseFillATBFrame
-             *                                              coreBaseFillATBSec
-             * @returns {Positive Number} The turn time duration
+             * @enum @param {+ve Number} baseFillATB - coreBaseFillATBFrame
+             *                                         coreBaseFillATBSec
+             * @returns {+ve Number} The turn time duration
              */
             coreTurnATBTime: function(baseFillATB) {
                 // coreBaseFillATBFrame or coreBaseFillATBSec * 2.0 = turn time
@@ -99,7 +99,7 @@ DoubleX_RMMV.SATB = {
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @returns {Positive Number} The maximum ATB value of the battler
+             * @returns {+ve Number} The maximum ATB value of the battler
              */
             coreMaxATBVal: function() { return 100.0; }
 
@@ -132,15 +132,14 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {Number} max - The maximum ATB value up to the last note
              * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - "states", "skills", "armors",
-             *                                   "weapons", "class", "actor",
-             *                                   "enemy"
-             * @returns {Number} The maximum ATB value(Which should be positive)
-             *                   for the battler involved
+             * @enum @param {String} datumType - Refers to reference tag
+             *                                   NOTE_DATA_TYPES
+             * @param {+ve Number} latestMax - Max ATB value up to latest note
+             * @returns {+ve Number} The maximum ATB value(Which should be
+             *                       positive) for the battler involved
              */
-            CMATB_MAX: function(max, datum, datumType) {
+            CMATB_MAX: function(datum, datumType, latestMax) {
                 // Returns 2 and 1 if max is greater and not greater than 100
                 return max > 100.0 ? 2 : 1;
                 //
@@ -150,15 +149,14 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {Number} max - The maximum ATB value up to the last note
              * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - "states", "skills", "armors",
-             *                                   "weapons", "class", "actor",
-             *                                   "enemy"
-             * @returns {Number} The maximum ATB value(Which should be positive)
-             *                   for the battler involved
+             * @enum @param {String} datumType - Refers to reference tag
+             *                                   NOTE_DATA_TYPES
+             * @param {+ve Number} latestMax - Max ATB value up to latest note
+             * @returns {+ve Number} The maximum ATB value(Which should be
+             *                       positive) for the battler involved
              */
-            CMATB_AGI: function(max, datum, datumType) {
+            CMATB_MAX: function(datum, datumType, latestMax) {
                 return 999 - this.agi; // 999 - the battler's AGI
             }, // CMATB_AGI
 
@@ -166,15 +164,14 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {Number} max - The maximum ATB value up to the last note
              * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - "states", "skills", "armors",
-             *                                   "weapons", "class", "actor",
-             *                                   "enemy"
-             * @returns {Number} The maximum ATB value(Which should be positive)
-             *                   for the battler involved
+             * @enum @param {String} datumType - Refers to reference tag
+             *                                   NOTE_DATA_TYPES
+             * @param {+ve Number} latestMax - Max ATB value up to latest note
+             * @returns {+ve Number} The maximum ATB value(Which should be
+             *                       positive) for the battler involved
              */
-            CMATB_VAR: function(max, datum, datumType) {
+            CMATB_MAX: function(datum, datumType, latestMax) {
                 // Returns the value in the game variable with id x
                 return $gameVariables.value(x);
                 //
