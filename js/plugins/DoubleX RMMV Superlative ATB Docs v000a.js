@@ -140,7 +140,7 @@
  *        1. Finished the core module
  *----------------------------------------------------------------------------
  *    # Todo
- *      1.
+ *      1. Adds _isSaveParamNotes
  *============================================================================*/
 /*:
  * @plugindesc To be the most flexible, performant and powerful ATB system
@@ -166,7 +166,7 @@
  *            Core module -
  *            1. coreMax(related to coreMaxATBVal,
  *                       _coreMaxATBValNoteChainingRule and
- *                       _coreMaxATBValNotePriority)
+ *                       _coreMaxATBValNotePriorities)
  *            (Reference tag: NOTE_TYPE)
  *          - suffixes is the list of suffixes in the form of:
  *            suffix1 suffix2 suffix3 ... suffixn
@@ -214,7 +214,7 @@
  *            Effective state notetag list
  *            Effective skill notetag list
  *            Effective item notetag list
- *            They'll be sorted according to the corresponding note priority
+ *            They'll be sorted according to the corresponding note priorities
  *            and their results will be chained according to the corresponding
  *            note chaining rule
  *            (Reference tag: NOTE_LIST_PART)
@@ -229,9 +229,9 @@
  *            higher priorities, and this intermediate result cache will be
  *            recached if the effective notetag list of that part or any of
  *            those having higher priorities have their intermediate result
- *            cache recached, or if the corresponding note priority/chain rule
- *            has changed(this change should raise the priority/chain rule
- *            factor manually)
+ *            cache recached, or if the corresponding note priorities/chain
+ *            rule has changed(this change should raise the priorities/chain
+ *            rule factor manually)
  *            (Reference tag: NOTE_RESULT_CACHE)
  *          - If the battler's refreshed due to changes other than class,
  *            weapons, armors, states and last used skill, all note change
@@ -449,21 +449,30 @@
  *       (Reference tag: PLUGIN_CMD_TARGET_TYPE)
  *       2. target means one of the following:
  *          targetType has Party/Troop as suffix - target can be either the
- *                                                 index of the designated
- *                                                 party/troop member or the
- *                                                 party/troop members with
- *                                                 the exactly matched name
- *          targetType has Actors as suffix - target can be either the id of
- *                                            the actor or actors with the
- *                                            exactly matched name
+ *                                                 list of indices of the
+ *                                                 designated party/troop
+ *                                                 members or the party/troop
+ *                                                 members whose names matches
+ *                                                 at least 1 of those in the
+ *                                                 target list
+ *          targetType has Actors as suffix - target can be either the list of
+ *                                            id of the actors or actors whose
+ *                                            names matches at least 1 of
+ *                                            those in the target list
+ *          If there's no specified target, all targets in targetType will
+ *          have the plugin command applied
+ *          target should be either a list of indices, id or names, meaning
+ *          that mixing indices, id and names in the same list can cause the
+ *          plugin command to fail very badly
  *          E.g.:
- *          - Setting target as "Slime" with targetType as allTroop will apply
- *            the plugin command to all enemies whose name is exactly Silme
- *          - Setting target as 0 with targetType as aliveParty will apply the
- *            plugin command to the 1st alive party member
- *          - Setting target as 1 with targetType as movableActors will apply
- *            the plugin command to the actor with id 1 as long as that actor
- *            is movable
+ *          - Setting target as ["Slime", "Bat"] with targetType as allTroop
+ *            will apply the plugin command to all enemies whose name are
+ *            either exactly Silme or Bat
+ *          - Setting target as [0, 2] with targetType as aliveParty will
+ *            apply the plugin command to the 1st and 3rd alive party member
+ *          - Setting target as [1] with targetType as movableActors will
+ *            apply the plugin command to the actor with id 1 as long as that
+ *            actor is movable
  *       (Reference tag: PLUGIN_CMD_TARGET)
  *----------------------------------------------------------------------------
  *      1. coreMaxSATB targetType target
