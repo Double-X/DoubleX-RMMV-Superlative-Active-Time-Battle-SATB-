@@ -118,7 +118,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * You can use script calls to change this choice later in game
  * @default *
  *
- * @param _coreMaxATBValNotePriority
+ * @param _coreMaxATBValNotePriorities
  * @parent IsCoreEnabled
  * @type select[]
  * @option Data of effective states
@@ -143,7 +143,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @value actor
  * @option Data of the enemy
  * @value enemy
- * @desc Sets the data type priority of coreMax notetags
+ * @desc Sets the data type priorities of coreMax notetags
  * You can use script calls to change this list later in game
  * @default ["states", "armors","weapons","class","actor","enemy"]
  *
