@@ -18,3 +18,8 @@ Getting Started:
 1. Only the core module should be enabled when you first experience SATB
 2. Enable other modules of interest one at a time to be familiar with them one by one
 3. Enable other compatible plugins to determine whether SATB suits your needs with those plugins
+
+Fellow Plugin Developers:
+1. You're welcome to raise issues for this project(especially compatibility requests)
+2. You're welcome to submit pull requests for this project
+3. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
