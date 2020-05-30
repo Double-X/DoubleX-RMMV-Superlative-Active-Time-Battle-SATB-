@@ -46,7 +46,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the base number of ATB frames to fully fill battler ATB
- * It'll be contents of a function returning a natural Number
+ * It'll be contents of a function returning a Natural Number
  * @default "return 600;"
  *
  * @param coreBaseFillATBSec
@@ -78,10 +78,10 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the number of actions constituting a turn
- * It'll be contents of a function returning a natural Number
+ * It'll be contents of a function returning a Natural Number
  * @default "return BattleManager.allBattleMembers().length;"
  *
- * @param canCoreTurnOverflow
+ * @param canCoreTurnClockOverflow
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets whether current turn progress can overflow to the next
@@ -159,19 +159,25 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         (Reference tag: PARAMETERS_CONFIGURATIONS)
  *         - E.g.: Setting the parameter IsCoreEnabled as empty means that the
  *                 configuration isCoreEnabled will be used instead
- *      2. (Advanced)The this pointer referring to the battler involved as the
+ *      2. Operators + and - are associative chaining rules, whereas *, /, %
+ *         and = aren't
+ *         Associative operators run faster(higher and more stable FPS) but
+ *         only non associative ones support the last arguments of NOTEX in
+ *         the configuration plugin
+ *         (Reference tag: ASSOCIATIVE_CHAINING_RULE)
+ *      3. (Advanced)The this pointer referring to the battler involved as the
  *         function contexts are Game_Battler.prototype
  *         (Reference tag: THIS_GAME_BATTLER)
- *      3. (Advanced)Don't change the name nor the ordering of any function
+ *      4. (Advanced)Don't change the name nor the ordering of any function
  *         arguments unless you really know what you're truly doing
- *      4. (Advanced)The functions supposedly to return a value should be
+ *      5. (Advanced)The functions supposedly to return a value should be
  *         Nullipotent
- *      5. (Advanced)Returning highly nondeterministic values like random ones
+ *      6. (Advanced)Returning highly nondeterministic values like random ones
  *         will have to manually invalidate the corresponding cache first or
  *         those values might be ignored due to the cached ones being used
  *         (Setting _isCached on will free you from doing this, but can have
 *           very severe performance penalties if you use lots of notetags)
- *      6. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
+ *      7. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
  *         change from using some switch/variables to using some others or
  *         from not using those to using those or vice versa, without wanting
  *         to explicitly update the switch/variable note factor mapping
@@ -187,7 +193,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *                       coreBaseFillATBSec, depending on the value of
  *                       _coreBaseFillUnit
  *      5. coreTurnATBAct
- *      6. canCoreTurnOverflow
+ *      6. canCoreTurnClockOverflow
  *      7. coreMaxATBVal
  *         None
  *    # Valid values
@@ -203,7 +209,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         Any valid Javascript returning a positive Number
  *      5. coreTurnATBAct
  *         Any valid Javascript returning a natural Number
- *      6. canCoreTurnOverflow
+ *      6. canCoreTurnClockOverflow
  *         Any valid Javascript(It'll always be regarded as truthy/falsy)
  *      7. coreMaxATBVal
  *         Any valid Javascript returning a positive Number
@@ -232,11 +238,12 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         Setting coreTurnATBAct as
  *         return BattleManager.allBattleMembers().length; will cause the
  *         turn to consist of the number of turns equal to that of all battler
- *      6. canCoreTurnOverflow
- *         Setting canCoreTurnOverflow as return true; will cause the current
- *         turn time/action counter to overflow to next turn(If the counter
- *         and max was 15 and 10 respectively, then new turn will immediately
- *         come with the current turn/action counter becoming 15 - 10 = 5)
+ *      6. canCoreTurnClockOverflow
+ *         Setting canCoreTurnClockOverflow as return true; will cause the
+ *         current turn progress clock based on time/action to overflow to
+ *         next turn(If the counter and max was 15 and 10 respectively, then
+ *         new turn will immediately come with the current turn/action
+ *         counter becoming roughly 15 - 10 = 5)
  *      7. coreMaxATBVal
  *         Setting coreMaxATBVal as return 200.0; will cause the maximum ATB
  *         value of each battler to be 200.0
