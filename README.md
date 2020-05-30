@@ -25,6 +25,7 @@ Getting Started:
 
 Fellow Plugin Developers:
 1. The SATB folder stores the flowchart of some parts of the implementations of this plugin
-2. You're welcome to raise issues for this project(especially compatibility requests)
-3. You're welcome to submit pull requests for this project
-4. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
+2. Reference tags in this plugin are supposed to be searched across the same plugin file and multiple plugin files
+3. You're welcome to raise issues for this project(especially compatibility requests)
+4. You're welcome to submit pull requests for this project
+5. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
