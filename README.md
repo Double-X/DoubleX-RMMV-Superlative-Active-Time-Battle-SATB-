@@ -1,4 +1,8 @@
 Videos:
+1. Core Module Only -
+
+
+Articles(For fellow plugin developers who're interesting in thoroughly comprehending ATB system plugins):
 
 
 Installation Instructions:
@@ -20,6 +24,7 @@ Getting Started:
 3. Enable other compatible plugins to determine whether SATB suits your needs with those plugins
 
 Fellow Plugin Developers:
-1. You're welcome to raise issues for this project(especially compatibility requests)
-2. You're welcome to submit pull requests for this project
-3. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
+1. The SATB folder stores the flowchart of some parts of the implementations of this plugin
+2. You're welcome to raise issues for this project(especially compatibility requests)
+3. You're welcome to submit pull requests for this project
+4. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
