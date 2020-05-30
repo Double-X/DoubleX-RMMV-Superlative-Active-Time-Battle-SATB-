@@ -6,6 +6,20 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
 /*:
  * @plugindesc The configuration plugin of DoubleX RMMV Superlative ATB
  * @author DoubleX
+ * @help
+ *
+ * Plugins Ordering:
+ * DoubleX RMMV Superlative ATB Parameters(Optional but highly recommended to make this plugin easier to use)
+ * DoubleX RMMV Superlative ATB Configurations(Mandatory even if you never access the configurations yourselves)
+ * DoubleX RMMV Superlative ATB Implementations(Mandatory)
+ * DoubleX RMMV Superlative ATB Unit Test(Optional but useful when debugging by validating parameters/configuration/notetag values and script call/plugin command arguments)
+ * DoubleX RMMV Superlative ATB Compatibility(Optional but should be placed below all addressed plugins when needed)
+ * DoubleX RMMV Superlative ATB Documentations(Optional but highly recommended to check plugin versions and make reading documentations easier)
+ *
+ * Getting Started:
+ * Only the core module should be enabled when you first experience SATB
+ * Enable other modules of interest one at a time to be familiar with them one by one
+ * Enable other compatible plugins to determine whether SATB suits your needs with those plugins
  */
 
 /*============================================================================
@@ -29,7 +43,6 @@ DoubleX_RMMV.SATB = {
         core: {
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -40,16 +53,14 @@ DoubleX_RMMV.SATB = {
             }, // IsCoreEnabled
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @returns {+ve Number} The number of ATB frames
+             * @returns {Natural Number} The number of ATB frames
              */
             coreBaseFillATBFrame: function() { return 600; },
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -58,7 +69,6 @@ DoubleX_RMMV.SATB = {
             coreBaseFillATBSec: function() { return 5.0; },
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -73,7 +83,6 @@ DoubleX_RMMV.SATB = {
             }, // coreTurnATBTime
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -86,7 +95,6 @@ DoubleX_RMMV.SATB = {
             }, // coreTurnATBAct
 
             /**
-             * The this pointer refers to the actor involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -95,7 +103,7 @@ DoubleX_RMMV.SATB = {
             canCoreTurnOverflow: function() { return false; },
 
             /**
-             * The this pointer refers to the actor involved
+             * The this pointer refers to the battler involved
              * Sets whether this plugin will be enabled
              * Nullipotent
              * @since v0.00a @version v0.00a
@@ -132,16 +140,20 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - Refers to reference tag
-             *                                   NOTE_DATA_TYPES
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
              * @param {+ve Number} latestMax - Max ATB value up to latest note
+             *                                 DON'T USE IT IF THE CHAINING RULE
+             *                                 IS AN ASSOCIATIVE OPERATOR
+             *                                 Refer to reference tag
+             *                                 ASSOCIATIVE_CHAINING_RULE
              * @returns {+ve Number} The maximum ATB value(Which should be
              *                       positive) for the battler involved
              */
             CMATB_MAX: function(datum, datumType, latestMax) {
                 // Returns 2 and 1 if max is greater and not greater than 100
-                return max > 100.0 ? 2 : 1;
+                return latestMax > 100.0 ? 2 : 1;
                 //
             }, // CMATB_MAX
 
@@ -149,10 +161,14 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - Refers to reference tag
-             *                                   NOTE_DATA_TYPES
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
              * @param {+ve Number} latestMax - Max ATB value up to latest note
+             *                                 DON'T USE IT IF THE CHAINING RULE
+             *                                 IS AN ASSOCIATIVE OPERATOR
+             *                                 Refer to reference tag
+             *                                 ASSOCIATIVE_CHAINING_RULE
              * @returns {+ve Number} The maximum ATB value(Which should be
              *                       positive) for the battler involved
              */
@@ -164,10 +180,14 @@ DoubleX_RMMV.SATB = {
              * The this pointer refers to the battler involved
              * Nullipotent
              * @since v0.00a @version v0.00a
-             * @param {{*}} datum - The datum having this notetag
-             * @enum @param {String} datumType - Refers to reference tag
-             *                                   NOTE_DATA_TYPES
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
              * @param {+ve Number} latestMax - Max ATB value up to latest note
+             *                                 DON'T USE IT IF THE CHAINING RULE
+             *                                 IS AN ASSOCIATIVE OPERATOR
+             *                                 Refer to reference tag
+             *                                 ASSOCIATIVE_CHAINING_RULE
              * @returns {+ve Number} The maximum ATB value(Which should be
              *                       positive) for the battler involved
              */
