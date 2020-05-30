@@ -100,7 +100,7 @@
  *----------------------------------------------------------------------------
  *    # Links
  *      Demo:
- *      1.
+ *      1. https://github.com/Double-X/DoubleX-RMMV-Superlative-Active-Time-Battle-SATB-
  *      Videos:
  *      1.
  *----------------------------------------------------------------------------
@@ -274,14 +274,23 @@
  *    ## Script Call Info
  *----------------------------------------------------------------------------
  *    # (Advanced)Configuration manipulations
- *      1. $gameSystem.satbParam(param)
+ *      1. $gameSystem.satbParamFunc(param)
+ *         - Returns the function of param listed in the parameter plugin
+ *         - The name of param mustn't start with an underscore
+ *         - Please check the configuration counterparts in the configuration
+ *           plugin to know how to pass the param function arguments with
+ *           what contexts
+ *         - E.g.:
+ *           $gameSystem.satbParamFunc("isCoreEnabled")() will return whether
+ *           this plugin's enabled
+ *      2. $gameSystem.satbParam(param)
  *         - Returns the stored value of param listed in the parameter plugin
  *           or their configuration counterparts in the configuration plugin
  *         - E.g.:
  *           $gameSystem.satbParam("IsCoreEnabled") will return the String
  *           contents of a function returning a Boolean indicating whether
  *           this plugin's enabled
- *      2. $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors)
+ *      3. $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors)
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
  *           funcContents, which is the String contents of a function
@@ -311,14 +320,14 @@
  *           configuration plugin as "return false;", causing corresponding
  *           function to always return false, thus always disabling the plugin
  *         - Such function content changes will be saved in save files
- *      3. $gameSystem.satbNote(type, NOTEX)
+ *      4. $gameSystem.satbNote(type, NOTEX)
  *         - Basically the same as $gameSystem.satbParam(param), except that
  *           this script call applies to notetag values of NOTEX of the
  *           notetag type found in the configuration plugin
  *         - E.g.:
  *           $gameSystem.satbNote("coreMax", "CMATB_MAX") will return the
  *           String contents of function CATBM_MAX of the coreMax notetag type
- *      4. $gameSystem.setSATBNote(type, NOTEX, funcContent, switchVar, id, factors)
+ *      5. $gameSystem.setSATBNote(type, NOTEX, funcContent, switchVar, id, factors)
  *         - Basically the same as
  *           $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors), except that this
  *           script call applies to notetag values of NOTEX of the notetag
@@ -366,14 +375,14 @@
  *         - (Advanced)It's supposed to be Nullipotent other than possibly
  *           recaching the return value
  *      10. (Advanced)raiseAllSATBNoteChangeFactors()
- *          - Applies the script call raiseSATBNoteChangeFactor(note, factor)
- *            to all notes and factors
- *      11. (Advanced)raiseSATBNoteChangeFactor(note, factor)
+ *          - Applies the script call
+ *            raiseSATBNoteChangeFactors(note, factors) to all notes
+ *      11. (Advanced)raiseSATBNoteChangeFactors(note, factors)
  *         - Notifies that the notetag note might need to be recached due to
- *           potential changes in factor factor
+ *           potential changes in factors factors
  *         - note is either of the following:
  *           "coreMax"(corresponds to notetag content coreMax suffix: entry)
- *         - factor is either of the following:
+ *         - factors is the list whose elements are either of the following:
  *           "states"(Changes in state notetags)
  *           "skills"(Changes in skill notetags)
  *           "items"(Changes in item notetags)
@@ -387,10 +396,10 @@
  *           "result"(Changes in all intermediate results for the note)
  *         - It's supposed to be Idempotent
  *         - E.g.:
- *           $gameParty.aliveMembers()[0].raiseSATBNoteChangeFactor("coreMax", "states")
+ *           $gameParty.aliveMembers()[0].raiseSATBNoteChangeFactors("coreMax", ["states", "skills"])
  *           will notify the 1st alive party member that the coreMax notetags
  *           might need to be recached due to potential changes in the states
- *           or their coreMax notetags
+ *           and skills or their coreMax notetags
  *      12. (Advanced)invalidateSATBNoteResult(note, part)
  *         - Invalidates the cached intermediate result of part part in note
  *           note for the actor involved
@@ -475,18 +484,14 @@
  *            actor is movable
  *       (Reference tag: PLUGIN_CMD_TARGET)
  *----------------------------------------------------------------------------
- *      1. coreMaxSATB targetType target
- *         - The same as the script call coreMaxSATB() in Battler
- *           manipulations with the designated target in the designated
- *           targetType
  *      10. raiseAllSATBNoteChangeFactors targetType target
  *          - The same as the script call raiseAllSATBNoteChangeFactors() in
  *            Battler manipulations with the designated target in the
  *            designated targetType
- *      11. raiseSATBNoteChangeFactor targetType target note factor
- *          - The same as the script call coreMaxSATB(note, factor) in Battler
- *            manipulations with the designated target in the designated
- *            targetType
+ *      11. raiseSATBNoteChangeFactors targetType target note factors
+ *          - The same as the script call coreMaxSATB(note, factors) in
+ *            Battler manipulations with the designated target in the
+ *            designated targetType
  *      12. invalidateSATBNoteResult targetType target note part
  *          - The same as the script call invalidateSATBNoteResult(note, part)
  *            in Battler manipulations with the designated target in the
