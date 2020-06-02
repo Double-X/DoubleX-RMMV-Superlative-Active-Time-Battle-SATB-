@@ -365,7 +365,45 @@
  *           $gameSystem._satb.switchIds or $gameSystem._satb.varIds manually
  *           (You can check the method _updateIds in DataManager for help)
  *    # Battler manipulations
- *      1. coreMaxSATB()
+ *      1. setCoreSATB(val)
+ *         - Sets the new current ATB value of the battler involved as val
+ *         - (Advanced)val is supposed to be a Number
+ *         - E.g.:
+ *           $gameParty.members()[1].setCoreSATB(0) will set the new current
+ *           ATB value of the 2nd party member as 0
+ *         - (Advanced)It's supposed to be Idempotent
+ *      2. setCoreSATBProportion(proportion)
+ *         - The same as the script call setCoreSATB(val) except that this
+ *           one sets the proportion of the new current ATB value of the
+ *           battler involved relative to the maximum counterpart as
+ *           proportion
+ *      3. addCoreSATB(increment)
+ *         - Adds the current ATB value of the battler involved by increment
+ *         - (Advanced)val is supposed to be a Number
+ *         - E.g.:
+ *           $gameTroop.members()[0].addCoreSATB(-100) will subtract the
+ *           current ATB value of the 1st troop member by 100
+ *      4. addCoreSATBProportion(increment)
+ *         - The same as the script call addCoreSATB(increment) except that
+ *           this one adds the current ATB value of the battler involved by
+ *           the amount in which its proportion relative to the maximum
+ *           counterpart is proportion
+ *      5. clearCoreSATB()
+ *         - Sets the new current ATB value of the battler involved as 0 if
+ *           it was positive(otherwise it'll remain unchanged)
+ *         - (Advanced)val is supposed to be a Number
+ *         - E.g.:
+ *           $gameTroop.deadMembers()[1].clearCoreSATB() won't have any effect
+ *           if the current ATB value of the 2nd dead troop member is negative
+ *         - (Advanced)It's supposed to be Idempotent
+ *      6. coreSATB()
+ *         - Returns the current ATB value of the battler involved
+ *         - (Advanced)It's supposed to return a Number
+ *         - E.g.:
+ *           $gameActors.actor(0).coreSATB() will return the current value of
+ *           the 1st actor
+ *         - (Advanced)It's supposed to be Nullipotent
+ *      7. coreMaxSATB()
  *         - Returns the maximum ATB value of the battler involved
  *         - (Advanced)It's supposed to return a positive Number
  *         - E.g.:
@@ -456,7 +494,7 @@
  *          can be targets
  *          The plugin command won't be effective with an invalid targetType
  *       (Reference tag: PLUGIN_CMD_TARGET_TYPE)
- *       2. target means one of the following:
+ *       2. targets is the list of target, each meaning one of the following:
  *          targetType has Party/Troop as suffix - target can be either the
  *                                                 list of indices of the
  *                                                 designated party/troop
@@ -474,9 +512,9 @@
  *          that mixing indices, id and names in the same list can cause the
  *          plugin command to fail very badly
  *          E.g.:
- *          - Setting target as ["Slime", "Bat"] with targetType as allTroop
- *            will apply the plugin command to all enemies whose name are
- *            either exactly Silme or Bat
+ *          - Setting target as ["Slime", 3] with targetType as allTroop
+ *            will apply the plugin command to all enemies whose names are
+ *            Silme or indices in the troop are 3
  *          - Setting target as [0, 2] with targetType as aliveParty will
  *            apply the plugin command to the 1st and 3rd alive party member
  *          - Setting target as [1] with targetType as movableActors will
@@ -484,21 +522,41 @@
  *            actor is movable
  *       (Reference tag: PLUGIN_CMD_TARGET)
  *----------------------------------------------------------------------------
- *      10. raiseAllSATBNoteChangeFactors targetType target
+ *      1. setCoreSATB targetType targets val
+ *          - The same as the script call setCoreSATB(val) in Battler
+ *            manipulations with the designated targets in the designated
+ *            targetType
+ *      2. setCoreSATBProportion targetType targets proportion
+ *          - The same as the script call setCoreSATBProportion(proportion) in
+ *            Battler manipulations with the designated targets in the
+ *            designated targetType
+ *      3. addCoreSATB targetType targets increment
+ *          - The same as the script call addCoreSATB(increment) in Battler
+ *            manipulations with the designated targets in the designated
+ *            targetType
+ *      4. addCoreSATBProportion targetType targets increment
+ *          - The same as the script call addCoreSATBProportion(increment) in
+ *            Battler manipulations with the designated targets in the
+ *            designated targetType
+ *      5. clearCoreSATB targetType targets
+ *          - The same as the script call clearCoreSATB() in Battler
+ *            manipulations with the designated targets in the designated
+ *            targetType
+ *      10. raiseAllSATBNoteChangeFactors targetType targets
  *          - The same as the script call raiseAllSATBNoteChangeFactors() in
- *            Battler manipulations with the designated target in the
+ *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      11. raiseSATBNoteChangeFactors targetType target note factors
+ *      11. raiseSATBNoteChangeFactors targetType targets note factors
  *          - The same as the script call coreMaxSATB(note, factors) in
- *            Battler manipulations with the designated target in the
+ *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      12. invalidateSATBNoteResult targetType target note part
+ *      12. invalidateSATBNoteResult targetType targets note part
  *          - The same as the script call invalidateSATBNoteResult(note, part)
- *            in Battler manipulations with the designated target in the
+ *            in Battler manipulations with the designated targets in the
  *            designated targetType
- *      13. invalidateSATBNoteList targetType target note part
+ *      13. invalidateSATBNoteList targetType targets note part
  *          - The same as the script call invalidateSATBNoteList(note, part)in
- *            Battler manipulations with the designated target in the
+ *            Battler manipulations with the designated targets in the
  *            designated targetType
  *============================================================================
  */
