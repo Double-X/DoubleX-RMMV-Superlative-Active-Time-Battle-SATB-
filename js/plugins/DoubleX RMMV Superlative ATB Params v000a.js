@@ -158,7 +158,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         in the configuration plugin will be used instead
  *         (Reference tag: PARAMETERS_CONFIGURATIONS)
  *         - E.g.: Setting the parameter IsCoreEnabled as empty means that the
- *                 configuration isCoreEnabled will be used instead
+ *                 configuration IsCoreEnabled will be used instead
  *      2. Operators + and - are associative chaining rules, whereas *, /, %
  *         and = aren't
  *         Associative operators run faster(higher and more stable FPS) but
