@@ -202,6 +202,70 @@ DoubleX_RMMV.SATB = {
 
         }, // coreMax
 
+        /*--------------------------------------------------------------------
+         *    Core Act State Functions
+         *    - Setups CASX used by this plugin's coreActState notetags
+         *--------------------------------------------------------------------*/
+        /* CASX names can only use alphanumeric characters
+         * The 1st character of CASX can't be a number
+         * The below CASX are examples added to help you set your CASX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)CASX can be used on notetags other than coreActState if you
+         * know what you're truly doing
+         * (Advanced)You're encouraged and recommended to write modular CASX
+         */
+        coreActState: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @returns {Boolean} The check result
+             */
+            CASX_TRUE: function(datum, datumType) {
+                // Always set the state as an action state
+                return true;
+                //
+            }, // CASX_TRUE
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @returns {Boolean} The check result
+             */
+            CASX_BATTLER_NAME: function(datum, datumType) {
+                // Set the state as an action state if the battler name is Test
+                return this.name() === "Test";
+                //
+            }, // CASX_BATTLER_NAME
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.00a @version v0.00a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @returns {Boolean} The check result
+             */
+            CASX_SWITCH: function(datum, datumType) {
+                // Set the state as an action state if switch with id x is on
+                return $gameSwitches.value(x);
+                //
+            }, // CASX_SWITCH
+
+            // Adds new CASX here
+
+
+        }, // coreActState
+
     } // notes
 
 }; // DoubleX_RMMV.SATB
