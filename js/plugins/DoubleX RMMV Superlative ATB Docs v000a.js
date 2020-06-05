@@ -40,25 +40,25 @@
  *         damage to user-friendliness as I can
  *      2. The configuration plugin is generally for more advanced uses, as
  *         most ordinary cases should be covered by parameters and notetags
- *      3. (Advanced)You might have to have a basic knowledge on what this
+ *      3. This is an advanced complex plugin, meaning that you're expected to
+ *         use the default parameters and configuration values first to be
+ *         familiar with playing the game with this plugin before changing
+ *         any of those values and/or using any notetags
+ *      4. You might have to use some script calls in RMMV and some of those
+ *         provided by this plugin to realize some of the more advanced uses
+ *      5. (Advanced)You might have to have a basic knowledge on what this
  *         Plugin Implementation does to fully utilize this plugin in intended
  *         ways and solid understanding on how this Plugin Implementation
  *         works to fully utilize this plugin with creative and unintended
  *         uses
- *      4. This is an advanced complex plugin, meaning that you're expected to
- *         use the default parameters and configuration values first to be
- *         familiar with playing the game with this plugin before changing
- *         any of those values and/or using any notetags
- *      5. You might have to use some script calls in RMMV and some of those
- *         provided by this plugin to realize some of the more advanced uses
- *      6. (Advanced)You might have to read some new variables/functions to
+ *      6. If you want to keep things easy, simple and small, you may want to
+ *         use DoubleX RMMV Popularized ATB instead
+ *      7. (Advanced)You might have to read some new variables/functions to
  *         have a basic knowledge on what they do in order to realize some
  *         intended cases
- *      7. (Advanced)You might have to dig into the mechanisms of some new
+ *      8. (Advanced)You might have to dig into the mechanisms of some new
  *         variables/functions to have a solid underatanding on how they work
  *         alone in order to realize some unintended usages
- *      8. If you want to keep things easy, simple and small, you may want to
- *         use DoubleX RMMV Popularized ATB instead
  *----------------------------------------------------------------------------
  *    # FAQ
  *    Q1. What's the main differences between DoubleX RMMV Popularized ATB and
