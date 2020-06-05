@@ -250,10 +250,14 @@
  *      1. coreMax suffix: entry
  *         - Sets the maximum ATB value of the battler involved
  *         - suffix can be cfg, val, var or script
- *         - (Advanced)Please refer to Max Functions in the core module of the
- *           configuration plugin for using cfg or script suffixes, or the
- *           eval variant
+ *         - (Advanced)Please refer to Core ATB Max Functions in the core
+ *           module of the configuration plugin for using cfg or script
+ *           suffixes, or the eval variant
  *         - The result of entry can be any positive Number
+ *         - If the end result of the maximum ATB value of the battler's
+ *           larger/smaller than the default value of all battlers, then the
+ *           ATB value of that battler will take more/less time to fill from
+ *           empty to full
  *         - Having an invalid entry value will make the notetag ineffective
  *           (Reference tag: INVALID_NOTE)
  *         - If the maximum ATB value of the battler decreases to become not
@@ -264,12 +268,47 @@
  *           greater than the inputability threshold, the battler will become
  *           not inputable
  *           (Reference tag: INCREASED_MAX_CORE_ATB_NOT_INPUTABLE)
+ *         - (Advanced) The maximum ATB value of the battler must be much
+ *           larger than Number.EPSILON
  *         - E.g.:
  *           If _coreMaxATBValNoteChainingRule is set as *, and the only
  *           coreMax notetag is <satb coreMax var: 1>, then this notetag will
  *           set the maximum ATB value of the battler involved to be
  *           multiplied by the value of the game variable with id 1 as long as
  *           that value is a positive Number
+ *----------------------------------------------------------------------------
+ *    # State Notetag contents:
+ *      Core Module:
+ *      1. coreActState suffix: entry
+ *         - Sets the state to be an action state, which will have its turn
+ *           updated when the battler having this state prepares to execute
+ *           actions(this includes charging but not inputting actions) rather
+ *           than upon turn end or action end
+ *           (Reference tag: ACT_STATE)
+ *         - suffix can be cfg, val, var or script
+ *         - (Advanced)Please refer to Act State Functions in the core module
+ *           of the configuration plugin for using cfg or script suffixes, or
+ *           the eval variant
+ *         - The result of entry can be anything as it only checks whether
+ *           it's truthy or falsy
+ *         - If the end result chaining all entries are truthy, then the state
+ *           will be an action state, otherwise it'll be a normal state
+ *         - It's highly encouraged and recommended to use a plugin showing
+ *           the icons of effective states to make action states more clear
+ *         - E.g.:
+ *           If _coreActStateNoteChainingRule is set as some, and the only
+ *           coreActState notetag is <satb coreActState switch: 1> and
+ *           <satb coreActState switch: 2>, then this notetag will set this
+ *           state as an action state if at least either of the game switch
+ *           with id 1 or 2 is on
+ *           In the case of the guard state from the guard action, the state
+ *           won't be erased even when the actor becomes inputable with the
+ *           guard pose removed, thus having inconsistencies between the
+ *           existence of the guard state and the absence of the guard pose
+ *           (It's an intentional compromise between making the guard state
+ *           and other action state useful enough by not removing them upon
+ *           becoming inputable, and chaning the pose upon becoming inputable
+ *           to make it more clear that the actor becomes inputable)
  *============================================================================
  *    ## Script Call Info
  *----------------------------------------------------------------------------
@@ -294,17 +333,27 @@
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
  *           funcContents, which is the String contents of a function
+ *         - If the name of the parameter starts with an underscore, then that
+ *           parameter doesn't use functions so funcContent becomes the raw
+ *           parameter value that's used directly rather than being function
+ *           contents
  *         - (Advanced)switchVar, id and factors are all optional, and should
  *           only be used if the parameter changes from using some
  *           switches/variables to using some others or from not using those
  *           to using those or vice versa
  *         - (Advanced)If funcContent uses switches, switchVar must be
  *           "switch", id must be the switch id and factors must be the list
- *           of types of data using NOTEX
+ *           of types of data using NOTEX, unless all those switches involved
+ *           are explicitly written in the form of $gameSwitches.value(x),
+ *           where x is a Number literal instead of a variable, or
+ *           _isAlwaysRecacheAllSwitchVars is ON
  *           (Reference tag: SWITCH_VAR)
  *         - (Advanced)If funcContent uses variables, switchVar must be "var",
  *           id must be the variable id and factors must be the list of types
- *           of data using NOTEX
+ *           of data using NOTEX, unless all those variables involved are
+ *           explicitly written in the form of $gameVariables.value(x), where
+ *           x is a Number literal instead of a variable, or
+ *           _isAlwaysRecacheAllSwitchVars is ON
  *           (Reference tag: SWITCH_VAR)
  *         - (Advanced)factors being an empty Array means the switch/variable
  *           id becomes no longer used by any NOTEX of the specified type
@@ -329,9 +378,9 @@
  *           String contents of function CATBM_MAX of the coreMax notetag type
  *      5. $gameSystem.setSATBNote(type, NOTEX, funcContent, switchVar, id, factors)
  *         - Basically the same as
- *           $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors), except that this
- *           script call applies to notetag values of NOTEX of the notetag
- *           type found in the configuration plugin
+ *           $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors),
+ *           except that this script call applies to notetag values of NOTEX
+ *           of the notetag type found in the configuration plugin
  *         - E.g.:
  *           $gameSystem.satbNote("coreMax", "CMATB_MAX", "return $gameVariables.value(1);", "var", 1, ["states"])
  *           will set the function content of CMATB_MAX as
@@ -512,14 +561,17 @@
  *          that mixing indices, id and names in the same list can cause the
  *          plugin command to fail very badly
  *          E.g.:
- *          - Setting target as ["Slime", 3] with targetType as allTroop
- *            will apply the plugin command to all enemies whose names are
- *            Silme or indices in the troop are 3
- *          - Setting target as [0, 2] with targetType as aliveParty will
- *            apply the plugin command to the 1st and 3rd alive party member
- *          - Setting target as [1] with targetType as movableActors will
- *            apply the plugin command to the actor with id 1 as long as that
- *            actor is movable
+ *          - Setting target as "Slime",3 with targetType as allTroop will
+ *            apply the plugin command to all enemies whose names are Silme or
+ *            indices in the troop are 3
+ *            Note that no space's allowed in target so target won't work with
+ *            battler names with spaces
+ *          - Setting target as 0,2 with targetType as aliveParty will apply
+ *            the plugin command to the 1st and 3rd alive party member
+ *            Note that no space's allowed in target
+ *          - Setting target as 1 with targetType as movableActors will apply
+ *            the plugin command to the actor with id 1 as long as that actor
+ *            is movable
  *       (Reference tag: PLUGIN_CMD_TARGET)
  *----------------------------------------------------------------------------
  *      1. setCoreSATB targetType targets val
