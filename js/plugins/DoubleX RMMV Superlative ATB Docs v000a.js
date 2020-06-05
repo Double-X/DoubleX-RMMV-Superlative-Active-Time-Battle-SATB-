@@ -268,8 +268,9 @@
  *           greater than the inputability threshold, the battler will become
  *           not inputable
  *           (Reference tag: INCREASED_MAX_CORE_ATB_NOT_INPUTABLE)
- *         - (Advanced) The maximum ATB value of the battler must be much
- *           larger than Number.EPSILON
+ *         - (Advanced) The maximum ATB value of the battler must be much,
+ *           much larger than 2 ^ -32
+ *           (Reference tag: SMALLEST_ATB_VAL_INCREMENT)
  *         - E.g.:
  *           If _coreMaxATBValNoteChainingRule is set as *, and the only
  *           coreMax notetag is <satb coreMax var: 1>, then this notetag will
