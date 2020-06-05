@@ -682,9 +682,9 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._extractSaveContents = function() {
+        $gameParty.initSATBNotes();
         ["params", "notes"].forEach(
                 $gameSystem.extractSATBFuncContents, $gameSystem);
-        $gameParty.initSATBNotes();
     }; // _SATB._extractSaveContents
 
 })(DoubleX_RMMV.SATB);
@@ -934,8 +934,8 @@ function Game_SATBRules() {
      * @param {Game_Actor} actor - The actor to become inputable
      */
     BattleManager.addSATBInputableActor = function(actor) {
-        // No actor should be both inputable and able to execute actions
-        this.eraseSATBActBattler(actor); // It's just to play safe
+        // Actors that can execute actions shouldn't be able to input actions
+        if (this._actionBattlers.contains(actor)) return;
         //
         // Extracting them into a new method can lead to invalid states
         if (this._satb.inputableActors.contains(actor)) return;
@@ -968,7 +968,10 @@ function Game_SATBRules() {
     BattleManager.eraseSATBInputableActor = function(actor) {
         var index = this._satb.inputableActors.indexOf(actor);
         if (index >= 0) this._satb.inputableActors.splice(index, 1);
-        if (this.actor() === actor) this.clearActor();
+        if (this.actor() === actor) return this.clearActor();
+        // Otherwise inputable actors not being selected will have wrong poses
+        actor.setActionState('');
+        //
     }; // BattleManager.eraseSATBInputableActor
 
     /**
@@ -1094,8 +1097,8 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._init = function() {
-        if (this.isSATB()) this._satb = {
-            inputableActors: [],
+        this._satb = {
+            inputableActors: [], // It's a FIFO queu so an Array must be used
             coreTurnClock: _SATB._coreTurnClock.call(this)
         };
     }; // _SATB._init
@@ -1159,9 +1162,7 @@ function Game_SATBRules() {
         // Not calling refreshStatus is to avoid redundant status win refresh
         _SATB._procScene.call(this, "refreshSATBInputWins");
         //
-        // It doesn't hurt much to run this even when this plugin's disabled
         this._satb.isRefreshNeeded = false;
-        //
     }; // _SATB._refreshStatus
 
     /**
@@ -1816,6 +1817,7 @@ function Game_SATBRules() {
      * @param {Param} name - The name of the stored function content
      */
     _SATB._extractParamFuncContent = function(module, name) {
+        if (!_SATB._IS_FUNC_PARAM(name)) return;
         // Converts the stored function content into a parameter function
         var func = _SATB.PARAM_NOTE_FUNCS.params[name](this.satbParam(name));
         SATB.params[module][name] = func;
@@ -1962,7 +1964,7 @@ function Game_SATBRules() {
         //
         _GBB.addNewState.apply(this, arguments);
         // Autobattle actors with full ATB value needs to become not inputable
-        if (isAutoBattle) this.onAutoInputSATBActs();
+        if (!isAutoBattle && this.isAutoBattle()) this.onAutoInputSATBActs();
         //
     }; // $.addNewState
 
@@ -1979,8 +1981,8 @@ function Game_SATBRules() {
      */
     $.onAutoInputSATBActs = function() {
         // Ensures the actions are remade without changing the current ATB value
-        this.addCoreSATB(-Number.EPSILON);
-        //
+        this.addCoreSATB(-Number.EPSILON * 2);
+        // Only differences greater than-Number.EPSILON can be detected
     }; // $.onAutoInputSATBActs
 
     /**
@@ -2091,7 +2093,10 @@ function Game_SATBRules() {
     _GB.makeActionTimes = $.makeActionTimes;
     _SATB.makeActionTimes = $.makeActionTimes = function() {
     // v0.00a - v0.00a; Extended
-        return 1; // Rewritten to simplify the action input and execution logic
+        // Added to simplify the action input and execution logic
+        if (BattleManager.isSATB()) return 1;
+        //
+        return _GB.makeActionTimes.apply(this, arguments);
     }; // $.makeActionTimes
 
     _GB.onAllActionsEnd = $.onAllActionsEnd;
@@ -2151,7 +2156,7 @@ function Game_SATBRules() {
     $.raiseSATBChangeFactors = function(noteFactors) {
         Object.keys(noteFactors).forEach(function(note) {
             this.raiseSATBNoteChangeFactors(note, noteFactors[note]);
-        });
+        }, this);
     }; // $.raiseSATBChangeFactors
 
     /**
@@ -2176,7 +2181,7 @@ function Game_SATBRules() {
             this._satb[helper].clear();
             delete this._satb[helper];
             //
-        });
+        }, this);
         //
     }; // $.clearSATBNotes
 
@@ -2384,7 +2389,7 @@ function Game_SATBRules() {
         _GA.makeActions.apply(this, arguments);
         // Added to mark that this battler becomes inputable as well
         BattleManager.addSATBInputableActor(this);
-        //
+        // This must be placed here or clearActions make the actor not inputable
     }; // $.makeActions
 
     _GA.clearActions = $.clearActions;
@@ -2574,8 +2579,8 @@ function Game_SATBRules() {
      */
     $.setCoreATB = function(val) {
         // It must be here or checkUpdatedCoreMax would use wrong _coreATB val
-        this._coreATB = val;
-        //
+        this._coreATB = Math.min(val, this.coreMax());
+        // _coreATB must be capped by coreMax here to maximize performance gain
         this.checkUpdatedCoreMax();
         // It must be here or checkUpdatedCoreMax would use wrong _lastCoreATB
         this._lastCoreATB = val;
@@ -3657,12 +3662,12 @@ function Game_SATBRules() {
         return new Function("note", "argObj_", "result", "pairFunc", content);
     }; // _SATB._OPERATOR_RESULT_FUNC
     // The this pointer is Game_SATBRules.prototype
-    _SATB._FIRST_LIST_MONO_FUNC = function(list, argObj_, note) {
+    _SATB._FIRST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
         if (list.length <= 0) return this._pairs.default(note, argObj_);
         return this._pairs.run_(argObj_, note, list[0]);
     }; // _SATB._FIRST_LIST_MONO_FUNC
-    _SATB._LAST_LIST_MONO_FUNC = function(list, argObj_, note) {
+    _SATB._LAST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
         if (list.length <= 0) return this._pairs.default(note, argObj_);
         return this._pairs.run_(argObj_, note, list[list.length - 1]);
@@ -3684,7 +3689,10 @@ function Game_SATBRules() {
             }
             var op = _SATB._RESULT_CHAINING_OPERATION[note];
             // The initial value of concat must be an Array
-            return op === "concat" ? list.reduce(f, []) : list.reduce(f);
+            if (op === "concat") return list.reduce(f, []);
+            //
+            // An empty list without a default value must return invalid value
+            return list.length > 0 ? list.reduce(f) : undefined;
             //
         };
         //
@@ -3873,7 +3881,7 @@ function Game_SATBRules() {
 
     SATB.Game_Interpreter = { orig: {}, new: {} };
     var _GI = SATB.Game_Interpreter.orig, $ = Game_Interpreter.prototype;
-    var _SATB = SATB.Game_Interpreter.new;
+    var _SATB = SATB.Game_Interpreter.new, GB = SATB.Game_Battler.new;
 
     _SATB._FILTERED_TARGETS = function(targetType, targets, targetGroup) {
         // Refers to reference tag PLUGIN_CMD_TARGET
@@ -3927,7 +3935,10 @@ function Game_SATBRules() {
         } // movableActors
     }; // _SATB._TARGET_TYPES
 
-    _SATB._CMDS = SATB.Game_Battler.new.NOTE_FORWARDED_FUNCS;
+    // Functions returning results aren't commands but they're not listed anyway
+    _SATB._CMDS = Object.keys(GB.NOTE_FORWARDED_FUNCS).concat(
+            GB.PHASE_TYPE_FORWARDED_FUNCS);
+    //
     _SATB._TARGET_ID = "id", _SATB._TARGET_INDEX = "index";
 
     _SATB._TARGET_GROUPS = {
@@ -3961,7 +3972,8 @@ function Game_SATBRules() {
      * @param {PluginArgs} args - Plugin command arguments
      */
     _SATB._pluginCmd = function(cmd, args) {
-        if (_SATB._IS_PLUGIN_CMD(cmd)) _SATB._usePluginCmd.call(this, args);
+        if (!_SATB._IS_PLUGIN_CMD(cmd)) return;
+        _SATB._usePluginCmd.call(this, cmd, args);
     }; // _SATB._pluginCmd
 
     /**
@@ -3973,7 +3985,7 @@ function Game_SATBRules() {
      */
     _SATB._usePluginCmd = function(cmd, args) {
         // The 1st and 2nd arguments must always be the target type and target
-        var targetType = args.shift(), targets = args.shift();
+        var targetType = args.shift(), targets = args.shift().split(",");
         //
         var battlers = _SATB._pluginCmdTargets.call(this, targetType, targets);
         battlers.forEach(function(t) { t[cmd].apply(this, args); }, this);
