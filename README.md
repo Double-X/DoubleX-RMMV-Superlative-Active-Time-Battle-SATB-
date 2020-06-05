@@ -8,7 +8,7 @@ Articles(For fellow plugin developers who're interesting in thoroughly comprehen
 Installation Instructions:
 1. Create a new RMMV project
 2. Download this repository as a zipped file
-3. Unzip the file into that new RMMV project
+3. Unzip the zipped file into that new RMMV project(After clicking into the "DoubleX-RMMV-Superlative-Active-Time-Battle-SATB--master" folder)
 
 Plugins Ordering:
 1. DoubleX RMMV Superlative ATB Parameters(Optional but highly recommended to make this plugin easier to use)
