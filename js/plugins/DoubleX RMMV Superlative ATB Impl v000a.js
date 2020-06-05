@@ -1939,6 +1939,19 @@ function Game_SATBRules() {
      var _GBB = SATB.Game_BattlerBase.orig, _SATB = SATB.Game_BattlerBase.new;
      var $ = Game_BattlerBase.prototype;
 
+    _GBB.eraseState = $.eraseState;
+    _SATB.eraseState = $.eraseState = function(stateId) {
+    // v0.00a - v0.00a; Extended
+        // Added to check if the battler becomes was in the auto input mode
+        var wasAutoBattle = this.isAutoBattle();
+        var wasRestricted = this.isRestricted();
+        //
+        _GBB.eraseState.apply(this, arguments);
+        // Added to check if battler becomes input act automatically/manually
+        _SATB._checkIsToggleAutoInput.call(this, wasAutoBattle, wasRestricted);
+        //
+    }; // $.eraseState
+
     _GBB.updateStateTurns = $.updateStateTurns;
     _SATB.updateStateTurns = $.updateStateTurns = function() {
     // v0.00a - v0.00a; Extended
@@ -1959,12 +1972,13 @@ function Game_SATBRules() {
     _GBB.addNewState = $.addNewState;
     _SATB.addNewState = $.addNewState = function(stateId) {
     // v0.00a - v0.00a; Extended
-        // Added to check if the battler becomes in the auto battle mode
-        var isAutoBattle = this.isAutoBattle();
+        // Added to check if the battler becomes was in the auto input mode
+        var wasAutoBattle = this.isAutoBattle();
+        var wasRestricted = this.isRestricted();
         //
         _GBB.addNewState.apply(this, arguments);
-        // Autobattle actors with full ATB value needs to become not inputable
-        if (!isAutoBattle && this.isAutoBattle()) this.onAutoInputSATBActs();
+        // Added to check if battler becomes input act automatically/manually
+        _SATB._checkIsToggleAutoInput.call(this, wasAutoBattle, wasRestricted);
         //
     }; // $.addNewState
 
@@ -1979,11 +1993,11 @@ function Game_SATBRules() {
     /**
      * @interface @since v0.00a @version v0.00a
      */
-    $.onAutoInputSATBActs = function() {
+    $.onToggleAutoInputSATBActs = function() {
         // Ensures the actions are remade without changing the current ATB value
-        this.addCoreSATB(-Number.EPSILON * 2);
-        // Only differences greater than-Number.EPSILON can be detected
-    }; // $.onAutoInputSATBActs
+        this._satb.phaseTypes.addSmallestCoreSATBIncrement();
+        // $.onToggleAutoInputSATBActs is a useful event listener callback
+    }; // $.onToggleAutoInputSATBActs
 
     /**
      * The this pointer is Game_BattlerBase.prototype
@@ -1998,6 +2012,30 @@ function Game_SATBRules() {
             this._stateTurns[id] -= 1;
         }
     }; // _SATB._updateStateTurn
+
+    /**
+     * The this pointer is Game_BattlerBase.prototype
+     * @since v0.00a @version v0.00a
+     * @enum @param {Boolean} wasAutoBattle - Whether battler was auto battle
+     * @param {Boolean} wasRestricted - Whether the battler was restricted
+     */
+    _SATB._checkIsToggleAutoInput = function(wasAutoBattle, wasRestricted) {
+        if (_SATB._isToggleAutoInput.call(this, wasAutoBattle, wasRestricted)) {
+            this.onToggleAutoInputSATBActs();
+        }
+    }; // _SATB._checkIsToggleAutoInput
+
+    /**
+     * The this pointer is Game_BattlerBase.prototype
+     * @since v0.00a @version v0.00a
+     * @enum @param {Boolean} wasAutoBattle - Whether battler was auto battle
+     * @param {Boolean} wasRestricted - Whether the battler was restricted
+     * @returns {Boolean} The check result
+     */
+    _SATB._isToggleAutoInput = function(wasAutoBattle, wasRestricted) {
+        if (wasAutoBattle !== this.isAutoBattle()) return true;
+        return wasRestricted !== this.isRestricted();
+    }; // _SATB._isToggleAutoInput
 
 })(DoubleX_RMMV.SATB);
 
@@ -2120,8 +2158,8 @@ function Game_SATBRules() {
     _SATB.onBattleEnd = $.onBattleEnd = function() {
     // v0.00a - v0.00a; Extended
         _GB.onBattleEnd.apply(this, arguments);
-        // Added to ensure all battler ATB states will be cleaned up
-        this.clearCoreSATB();
+        // Added to ensure the ATB value will be reset(-ve value isn't wanted)
+        this.setCoreSATB(0);
         //
     }; // $.onBattleEnd
 
@@ -2209,7 +2247,7 @@ function Game_SATBRules() {
      * Idempotent
      * @interface @since v0.00a @version v0.00a
      */
-    $.setNormStartSATB = function() { this.clearCoreSATB(); };
+    $.setNormStartSATB = function() { this.setCoreSATB(0); };
 
     /**
      * Idempotent
@@ -2217,7 +2255,7 @@ function Game_SATBRules() {
      * @param {Number} val - The starting ATB value of the battler
      */
     $.setStartSATB = function(val) {
-        if (!this.canMove()) return this.clearCoreSATB();
+        if (!this.canMove()) return this.setCoreSATB(0);
         this.setCoreSATB(val);
     }; // $.setStartSATB
 
@@ -2276,7 +2314,7 @@ function Game_SATBRules() {
         if (!this.canMove()) return this.clearCoreSATB();
         //
         // Confused battlers with full ATB needs to become not inputable
-        this.onAutoInputSATBActs();
+        this.onToggleAutoInputSATBActs();
         //
     }; // _SATB._onRestrict
 
@@ -2491,6 +2529,11 @@ function Game_SATBRules() {
     "use strict";
 
     var $ = Game_SATBPhaseTypes.prototype;
+    var _SATB = SATB.Game_SATBPhaseTypes = {};
+
+    // Refer to reference tag SMALLEST_ATB_VAL_INCREMENT
+    _SATB._SMALLEST_ATB_VAL_INCREMENT = Math.pow(2, -32);
+    // Using Number.EPSILON would be too dangerous here
 
     /*------------------------------------------------------------------------
      *    New private instance variables
@@ -2536,6 +2579,17 @@ function Game_SATBRules() {
         this.addCoreATB(fillRate * BattleManager.coreBaseMaxSATB());
         //
     }; // $.fillCoreATB
+
+    /**
+      * @interface @since v0.00a @version v0.00a
+      * @param {Number} increment - Increment of current ATB value proportion
+      */
+    $.addSmallestCoreSATBIncrement = function() {
+        // Otherwise the increment would be too small for huge max ATB values
+        var addMultiplier = Math.min(this.coreMax(), 1);
+        // It's derived from extensive testing
+        this.addCoreATB(-_SATB._SMALLEST_ATB_VAL_INCREMENT * addMultiplier);
+    }; // $.addSmallestCoreSATBIncrement
 
     /**
      * Script Call
@@ -3848,10 +3902,10 @@ function Game_SATBRules() {
     "use strict";
 
     SATB.Game_Party = { orig: {}, new: {} };
-    var _GP = SATB.Game_Party.orig, $ = Game_Party.prototype;
-    var _SATB = SATB.Game_Party.new;
+    var _GP = SATB.Game_Party.orig, _SATB = SATB.Game_Party.new;
+    var $ = Game_Party.prototype, $$ = Game_Unit.prototype;
 
-    _GP.clearActions = $.clearActions;
+    _GP.clearActions = $.clearActions || $$.clearActions;
     _SATB.clearActions = $.clearActions = function() {
     // v0.00a - v0.00a; Extended
         _GP.clearActions.apply(this, arguments);
@@ -3860,6 +3914,15 @@ function Game_SATBRules() {
         //
     }; // $.clearActions
 
+    _GP.removeActor = $.removeActor;
+    _SATB.removeActor = $.removeActor = function(actorId) {
+    // v0.00a - v0.00a; Extended
+        // Added to ensure actors being add back will have the ATB value cleared
+        _SATB._removeActor.call(this);
+        // This must be placed here or it won't know if actorId is in the party
+        _GP.removeActor.apply(this, arguments);
+    }; // $.removeActor
+
     ["initSATBNotes", "clearSATBNotes"].forEach(function(f) {
         /**
          * Idempotent
@@ -3867,6 +3930,19 @@ function Game_SATBRules() {
          */
         $[f] = function() { this.members().forEach(function(m) { m[f](); }); };
     });
+
+    /**
+     * The this pointer is Game_Party.prototype
+     * @since v0.00a @version v0.00a
+     * @param {Id} actorId - The id of the actor to be removed from the party
+     */
+    _SATB._removeActor = function(actorId) {
+    // v0.00a - v0.00a; Extended
+        if (!this._actors.contains(actorId)) return;
+        // clearCoreSATB shouldn't be used as -ve ATB value isn't desirable
+        $gameActors.actor(actorId).setCoreSATB(0);
+        //
+    }; // _SATB._removeActor
 
 })(DoubleX_RMMV.SATB);
 
