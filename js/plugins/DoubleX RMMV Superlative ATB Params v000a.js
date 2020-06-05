@@ -146,6 +146,21 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @desc Sets the data type priorities of coreMax notetags
  * You can use script calls to change this list later in game
  * @default ["states", "armors","weapons","class","actor","enemy"]
+
+ * @param _coreActStateNoteChainingRule
+ * @parent IsCoreEnabled
+ * @type select
+ * @option Uses the 1st effective notetag value only
+ * @value first
+ * @option Regard the result as true only if all effective notetag value results are truthy
+ * @value every
+ * @option Regard the result as true if at least 1 effective notetag value results are truthy
+ * @value some
+ * @option Uses the last effective notetag value only
+ * @value last
+ * @desc Sets how to use multiple coreActState notetags
+ * You can use script calls to change this choice later in game
+ * @default *
  *
  * @help
  *============================================================================
@@ -165,19 +180,27 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         only non associative ones support the last arguments of NOTEX in
  *         the configuration plugin
  *         (Reference tag: ASSOCIATIVE_CHAINING_RULE)
- *      3. (Advanced)The this pointer referring to the battler involved as the
+ *      3. If the value of a parameter is the contents of a function using
+ *         switches/variablees, all those switches/variables must be
+ *         explicitly written as $gameSwitches.value(x) or
+ *         $gameVariables.value(x), where x must be a Number literal instead
+ *         of a variable, unless _isAlwaysRecacheAllSwitchVars is ON
+ *         (Reference tag: SWITCH_VAR)
+ *      4. If a notetag chaining rule is invalid, it'll default to "first"
+ *         (Reference tag: DEFAULT_CHAINING_RULE_FIRST)
+ *      5. (Advanced)The this pointer referring to the battler involved as the
  *         function contexts are Game_Battler.prototype
  *         (Reference tag: THIS_GAME_BATTLER)
- *      4. (Advanced)Don't change the name nor the ordering of any function
+ *      6. (Advanced)Don't change the name nor the ordering of any function
  *         arguments unless you really know what you're truly doing
- *      5. (Advanced)The functions supposedly to return a value should be
+ *      7. (Advanced)The functions supposedly to return a value should be
  *         Nullipotent
- *      6. (Advanced)Returning highly nondeterministic values like random ones
+ *      8. (Advanced)Returning highly nondeterministic values like random ones
  *         will have to manually invalidate the corresponding cache first or
  *         those values might be ignored due to the cached ones being used
  *         (Setting _isCached on will free you from doing this, but can have
 *           very severe performance penalties if you use lots of notetags)
- *      7. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
+ *      9. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
  *         change from using some switch/variables to using some others or
  *         from not using those to using those or vice versa, without wanting
  *         to explicitly update the switch/variable note factor mapping
@@ -213,6 +236,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         Any valid Javascript(It'll always be regarded as truthy/falsy)
  *      7. coreMaxATBVal
  *         Any valid Javascript returning a positive Number
+ *         (Advanced)It must return a Number much larger than Number.EPSILON
  *    # Examples
  *      Core Module:
  *      1. IsCoreEnabled
