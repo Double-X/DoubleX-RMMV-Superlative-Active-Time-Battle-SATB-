@@ -629,15 +629,10 @@ DoubleX_RMMV.SATB_VERS = {
 }; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
     var current = DoubleX_RMMV["Superlative ATB " + plugin];
-    if (current) {
-        var latest = "v" + DoubleX_RMMV.SATB_VERS[plugin];
-        if (current !== latest) {
-            console.warn("The version of DoubleX RMMV Superlative ATB " +
-                    plugin + " should be" + latest + " but is " + current);
-        }
-    } else {
-          console.warn("DoubleX RMMV Superlative ATB " + plugin + " should " +
-                  "be above DoubleX RMMV Superlative ATB Documentations");
-    }
+    if (!current) return alert("DoubleX RMMV Superlative ATB " + plugin +
+            " should be above DoubleX RMMV Superlative ATB Documentations");
+    var latest = "v" + DoubleX_RMMV.SATB_VERS[plugin];
+    if (current !== latest) alert("The version of DoubleX RMMV Superlative " +
+            " ATB " + plugin + " should be " + latest + " but is " + current);
 });
 // DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
