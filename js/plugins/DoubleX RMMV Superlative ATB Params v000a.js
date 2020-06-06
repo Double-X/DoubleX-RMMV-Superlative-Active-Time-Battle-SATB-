@@ -5,7 +5,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.00a";
 
 // Edit this to be the same of the name of this parameter plugin file
 DoubleX_RMMV.Superlative_ATB_Parameters_File =
-        "DoubleX RMMV Superlative ATB Params v100a";
+        "DoubleX RMMV Superlative ATB Params v000a";
 //
 
 /*:
@@ -79,7 +79,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type note
  * @desc Sets the number of actions constituting a turn
  * It'll be contents of a function returning a Natural Number
- * @default "return BattleManager.allBattleMembers().length;"
+ * @default "return BattleManager.allBattleMembers().length * 2;"
  *
  * @param canCoreTurnClockOverflow
  * @parent IsCoreEnabled
@@ -160,7 +160,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @value last
  * @desc Sets how to use multiple coreActState notetags
  * You can use script calls to change this choice later in game
- * @default *
+ * @default some
  *
  * @help
  *============================================================================
