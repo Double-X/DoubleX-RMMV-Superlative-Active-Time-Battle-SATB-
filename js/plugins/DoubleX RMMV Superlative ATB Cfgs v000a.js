@@ -17,8 +17,9 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
  * DoubleX RMMV Superlative ATB Documentations(Optional but highly recommended to check plugin versions and make reading documentations easier)
  *
  * Getting Started:
- * Only the core module should be enabled when you first experience SATB
- * Enable other modules of interest one at a time to be familiar with them one by one
+ * Only the core, bar and hotkey modules should be enabled when you first experience SATB
+ * Play the demo to be familiar with the essential features and the demo first
+ * Enable other modules of interest one at a time to be familiar with them one by one by playing the demo
  * Enable other compatible plugins to determine whether SATB suits your needs with those plugins
  */
 
