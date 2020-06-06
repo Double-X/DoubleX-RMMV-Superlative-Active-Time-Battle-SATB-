@@ -25,9 +25,12 @@ Getting Started:
 2. Enable other modules of interest one at a time to be familiar with them one by one
 3. Enable other compatible plugins to determine whether SATB suits your needs with those plugins
 
+Plugin Users:
+1. You're welcome to make bug reports, compatibility problem reports and feature requests as raising issues
+2. You'll be in the contributor list for raising accetped issues if you want(you can also tell me how you want me to credit you)
+
 Fellow Plugin Developers:
 1. The SATB folder stores the flowchart of some parts of the implementations of this plugin
 2. Reference tags in this plugin are supposed to be searched across the same plugin file and multiple plugin files
-3. You're welcome to raise issues for this project(especially compatibility requests)
 4. You're welcome to submit pull requests for this project
-5. You'll be credited for raising accetped issues and/or submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
+5. You'll be in the contributor list for submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
