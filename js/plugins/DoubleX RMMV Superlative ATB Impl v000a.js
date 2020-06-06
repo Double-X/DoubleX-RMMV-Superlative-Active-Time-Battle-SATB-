@@ -25,6 +25,10 @@ DoubleX_RMMV["Superlative ATB Implementations"] = "v0.00a";
  *----------------------------------------------------------------------------
  */
 
+if (DoubleX_RMMV.SATB) {
+
+/*----------------------------------------------------------------------------*/
+
 /*----------------------------------------------------------------------------
  *    # New classes:
  *      - Implements the note result/running helper for SATB
@@ -410,7 +414,7 @@ function Game_SATBRules() {
     */
     //
 
-})();
+})(); // Array.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: DataManager
@@ -687,7 +691,7 @@ function Game_SATBRules() {
                 $gameSystem.extractSATBFuncContents, $gameSystem);
     }; // _SATB._extractSaveContents
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // DataManager
 
 /*----------------------------------------------------------------------------
  *    # Edit class: BattleManager
@@ -746,6 +750,7 @@ function Game_SATBRules() {
     //       {Boolean} isRefresh: Whether at least 1 battler's refreshed
     //       {[Game_Actor]} inputableActors: The list of all inputable actors
     //       {{Number}} coreTurnClock: Mapping of all turn clock unit counters
+    //       {Number} avgAgi - The average agi of all battlers in the battle
 
     _BM.initMembers = BattleManager.initMembers;
     _SATB.initMembers = BattleManager.initMembers = function() {
@@ -944,7 +949,6 @@ function Game_SATBRules() {
     }; // BattleManager.addSATBInputableActor
 
     /**
-     * Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {Game_Battler} battler - The battler to become able to exec acts
      */
@@ -958,6 +962,7 @@ function Game_SATBRules() {
         battler.onBecomeActable();
         this._actionBattlers.push(battler);
         //
+        _SATB._sortActBattlers.call(this);
     }; // BattleManager.addSATBActBattler
 
     /**
@@ -1098,6 +1103,7 @@ function Game_SATBRules() {
      */
     _SATB._init = function() {
         this._satb = {
+            avgAgi: _SATB._avgAgi.call(this),
             inputableActors: [], // It's a FIFO queu so an Array must be used
             coreTurnClock: _SATB._coreTurnClock.call(this)
         };
@@ -1162,6 +1168,7 @@ function Game_SATBRules() {
         // Not calling refreshStatus is to avoid redundant status win refresh
         _SATB._procScene.call(this, "refreshSATBInputWins");
         //
+        this._satb.avgAgi = _SATB._avgAgi.call(this);
         this._satb.isRefreshNeeded = false;
     }; // _SATB._refreshStatus
 
@@ -1200,6 +1207,19 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Nullipotent
+     * @since v0.00a @version v0.00a
+     * @returns {Number} The average agi of all battlers in the battle
+     */
+    _SATB._avgAgi = function() {
+        var mems = this.allBattleMembers();
+        return mems.reduce(function(agiSum, mem) {
+            return agiSum + mem.agi;
+        }, 0) / mems.length;
+    }; // _SATB._avgAgi
+
+    /**
+     * The this pointer is BattleManager
      * Hotspot/Nullipotent
      * @since v0.00a @version v0.00a
      * @returns {Number} The proportion of the ATB to be filled on this frame
@@ -1220,13 +1240,57 @@ function Game_SATBRules() {
     }; // _SATB._coreBaseFillSecRate
 
     /**
+     * This method's semantically idempotent but not technically so
+     * The this pointer is BattleManager
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._sortActBattlers = function() {
+        _SATB._updateActSpeeds.call(this);
+        _SATB._sortActBattlersBySpeed.call(this);
+    }; // _SATB._sortActBattlers
+
+    /**
+     * This method's semantically idempotent but not technically so
+     * The this pointer is BattleManager
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._updateActSpeeds = function() {
+        // 2000 is the action speed cap in the default RMMV editor
+        var speedIncrement = 2000 / this._actionBattlers.length;
+        //
+        // Otherwise battlers with slow actions might never execute any action
+        this._actionBattlers.forEach(function(battler) {
+            var item = battler.latestSATBItem;
+            // 2000 is the action speed cap in the default RMMV editor
+            item.speed = Math.min(item.speed + speedIncrement, 2000);
+            //
+        });
+        //
+    }; // _SATB._updateActSpeeds
+
+    /**
+     * Idempotent
+     * The this pointer is BattleManager
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._sortActBattlersBySpeed = function() {
+        this._actionBattlers.sort(function(a, b) {
+            return b.latestSATBItem.speed - a.latestSATBItem.speed;
+        });
+    }; // _SATB._sortActBattlersBySpeed
+
+    /**
      * The this pointer is BattleManager
      * Hotspot
      * @since v0.00a @version v0.00a
      */
     _SATB._addCoreATB = function() {
-        var rate = this.coreBaseSATBFillRate();
-        this.allBattleMembers().forEach(function(m) { m.fillCoreSATB(rate); });
+        // It's better for the agi logic to stick together than spread out
+        var fillRate = this.coreBaseSATBFillRate() / this._satb.avgAgi;
+        this.allBattleMembers().forEach(function(mem) {
+            mem.fillCoreSATB(fillRate * mem.agi);
+        });
+        //
     }; // _SATB._addCoreATB
 
     /**
@@ -1389,7 +1453,7 @@ function Game_SATBRules() {
         this._logWindow.displayRegeneration(mem);
     }; // _SATB._endMemTurn
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // BattleManager
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_System
@@ -1404,6 +1468,9 @@ function Game_SATBRules() {
     var _GS = SATB.Game_System.orig, _SATB = SATB.Game_System.new;
     var $ = Game_System.prototype, DM = SATB.DataManager.new;
 
+    _SATB._BOOL_PARAM = function(param) {
+        return param === "true" || param !== "false";
+    };
     _SATB._ERASE_SWITCH_VAR_IDS = function(type, id, ids) {
         if (ids[id]) delete ids[id][type];
     }; // _SATB._ERASE_SWITCH_VAR_IDS
@@ -1423,8 +1490,11 @@ function Game_SATBRules() {
         var params = JSON.parse(JSON.stringify(origParams));
         //
         Object.keys(params).forEach(function(param) {
-            if (!_SATB._IS_JSON_PARAM[param]) return;
-            params[param] = _SATB._TRY_JSON_PARAM(param, params[param]);
+            if (_SATB._BOOL_PARAMS.contains(param)) {
+                params[param] = _SATB._BOOL_PARAM(param);
+            } else if (_SATB._JSON_PARAMS.contains(param)) {
+                params[param] = _SATB._TRY_JSON_PARAM(param, params[param]);
+            }
         });
         return params;
     }; // _SATB._RAW_PARAMS
@@ -1509,6 +1579,18 @@ function Game_SATBRules() {
         } // _coreActStateNoteChainingRule
     }; // _SATB._PARAM_UPDATES
 
+    _SATB._BOOL_PARAMS = ["_isCached", "_isAlwaysRecacheAllSwitchVars"];
+    _SATB._JSON_PARAMS = [
+        "IsCoreEnabled",
+        "coreBaseFillATBFrame",
+        "coreBaseFillATBSec",
+        "coreTurnATBTime",
+        "coreTurnATBAct",
+        "canCoreTurnClockOverflow",
+        "coreMaxATBVal",
+        "_coreMaxATBValNotePriorities"
+    ]; // _SATB._JSON_PARAMS
+
     // Refer to reference tag SWITCH_VAR
     _SATB._SWITCH_VAR_REGEXES = {
         switch: /\$gameSwitches *\. *value *\( *(\d+) *\)/gim,
@@ -1516,23 +1598,6 @@ function Game_SATBRules() {
     }; // _SATB._SWITCH_VAR_REGEXES
     //
     _SATB._CACHED_PARAMS = { coreMaxATBVal: "coreMax" };
-    _SATB._IS_JSON_PARAM = {
-        _isCached: false,
-        _isAlwaysRecacheAllSwitchVars: false,
-        IsCoreEnabled: true,
-        _coreBaseFillUnit: false,
-        coreBaseFillATBFrame: true,
-        coreBaseFillATBSec: true,
-        _coreTurnUnit: false,
-        coreTurnATBTime: true,
-        coreTurnATBAct: true,
-        canCoreTurnClockOverflow: true,
-        coreMaxATBVal: true,
-        _coreMaxATBValNoteChainingRule: false,
-        _coreMaxATBValNotePriorities: true,
-        _coreActStateNoteChainingRule: false
-    }; // _SATB._IS_JSON_PARAM
-
     // Not parsing from the parameter names directly's just to play safe
     _SATB._PARAM_MODULES = {
         _isCached: "core",
@@ -1867,7 +1932,7 @@ function Game_SATBRules() {
         //
     }; // _SATB._storeSwitchVarIds
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_System.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Switches/Game_Variables
@@ -1924,7 +1989,7 @@ function Game_SATBRules() {
 
     });
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Switches/Game_Variables.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_BattlerBase
@@ -1965,7 +2030,7 @@ function Game_SATBRules() {
     _SATB.hide = $.hide = function() { // v0.00a - v0.00a; Extended
         _GBB.hide.apply(this, arguments);
         // Added to ensure hidden battlers won't be able to execute or input act
-        this.clearCoreSATB();
+        this.eraseCoreSATBActs();
         //
     }; // $.hide
 
@@ -1991,11 +2056,20 @@ function Game_SATBRules() {
     }; // $.updateSATBStateTurns
 
     /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     */
+    $.eraseCoreSATBActs = function() {
+        this.clearCoreSATB();
+        this._satb.actTimes = 0;
+    }; // $.eraseCoreSATBActs
+
+    /**
      * @interface @since v0.00a @version v0.00a
      */
     $.onToggleAutoInputSATBActs = function() {
         // Ensures the actions are remade without changing the current ATB value
-        this._satb.phaseTypes.addSmallestCoreSATBIncrement();
+        this._satb.phaseTypes.addSmallestCoreSATBDecrement();
         // $.onToggleAutoInputSATBActs is a useful event listener callback
     }; // $.onToggleAutoInputSATBActs
 
@@ -2037,7 +2111,7 @@ function Game_SATBRules() {
         return wasRestricted !== this.isRestricted();
     }; // _SATB._isToggleAutoInput
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_BattlerBase.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Battler
@@ -2073,7 +2147,7 @@ function Game_SATBRules() {
     /*------------------------------------------------------------------------
      *    New public instance variables
      *------------------------------------------------------------------------*/
-    // {{String, {Skill|Item}}} latestSATBItem: The latest inputted skill/item
+    // {{Number, {Skill|Item}}} latestSATBItem: The latest inputted skill/item
 
     /*------------------------------------------------------------------------
      *    New private instance variables
@@ -2081,6 +2155,7 @@ function Game_SATBRules() {
     // {{*}} _satb: The container of all other new variables
     //       {Game_SATBNotes} notes: The notetag results
     //       {Game_SATBPhaseTypes} phaseTypes: All ATB phase/state manipulations
+    //       {Non-ve Integer} actTimes: The virtual number of action slots
 
     _GB.initialize = $.initialize;
     _SATB.initialize = $.initialize = function(actorId) {
@@ -2137,11 +2212,20 @@ function Game_SATBRules() {
         return _GB.makeActionTimes.apply(this, arguments);
     }; // $.makeActionTimes
 
+    _GB.makeActions = $.makeActions;
+    _SATB.makeActions = $.makeActions = function() {
+    // v0.00a - v0.00a; Extended
+        _GB.makeActions.apply(this, arguments);
+        // Added to store the number of action slots using _GB.makeActionTimes
+        _SATB._makeActs.call(this);
+        //
+    }; // $.makeActions
+
     _GB.onAllActionsEnd = $.onAllActionsEnd;
     _SATB.onAllActionsEnd = $.onAllActionsEnd = function() {
     // v0.00a - v0.00a; Extended
         // Added to update state turn in actions and clear ATB value as well
-        _SATB._onAllActsEnd.call(this);
+        this.onAllSATBActsEnd(this);
         // This must be placed here or removeStatesAuto will miss expired states
         _GB.onAllActionsEnd.apply(this, arguments);
     }; // $.onAllActionsEnd
@@ -2158,8 +2242,8 @@ function Game_SATBRules() {
     _SATB.onBattleEnd = $.onBattleEnd = function() {
     // v0.00a - v0.00a; Extended
         _GB.onBattleEnd.apply(this, arguments);
-        // Added to ensure the ATB value will be reset(-ve value isn't wanted)
-        this.setCoreSATB(0);
+        // Added to reset the action times and ATB value(-ve value isn't wanted)
+        this.initCoreSATBActs(0);
         //
     }; // $.onBattleEnd
 
@@ -2247,7 +2331,7 @@ function Game_SATBRules() {
      * Idempotent
      * @interface @since v0.00a @version v0.00a
      */
-    $.setNormStartSATB = function() { this.setCoreSATB(0); };
+    $.setNormStartSATB = function() { this.initCoreSATBActs(0); };
 
     /**
      * Idempotent
@@ -2255,8 +2339,7 @@ function Game_SATBRules() {
      * @param {Number} val - The starting ATB value of the battler
      */
     $.setStartSATB = function(val) {
-        if (!this.canMove()) return this.setCoreSATB(0);
-        this.setCoreSATB(val);
+        this.initCoreSATBActs(this.canMove() ? val : 0);
     }; // $.setStartSATB
 
     /**
@@ -2276,6 +2359,28 @@ function Game_SATBRules() {
         _SATB._updateActStateTurns.call(this);
         _SATB._setLatestItem.call(this);
     }; // $.onBecomeActable
+
+    /**
+     * @interface @since v0.00a @version v0.00a
+     */
+    $.onAllSATBActsEnd = function() {
+        if (!BattleManager.isSATB()) return;
+        this.updateSATBStateTurns(1);
+        delete this.latestSATBItem;
+        this._satb.actTimes -= 1;
+        if (this._satb.actTimes <= 0) return this.clearCoreSATB();
+        this._satb.phaseTypes.addSmallestCoreSATBDecrement();
+    }; // $.onAllSATBActsEnd
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {Number} atbVal - The new current ATB value of this battler
+     */
+    $.initCoreSATBActs = function(atbVal) {
+        this.setCoreSATB(atbVal);
+        this._satb.actTimes = 0;
+    }; // $.initCoreSATBActs
 
     /**
      * The this pointer is Game_Battler.prototype
@@ -2311,22 +2416,20 @@ function Game_SATBRules() {
      */
     _SATB._onRestrict = function() {
         // It doesn't hurt much to clear ATB value when this plugin's disabled
-        if (!this.canMove()) return this.clearCoreSATB();
-        //
-        // Confused battlers with full ATB needs to become not inputable
-        this.onToggleAutoInputSATBActs();
-        //
+        if (!this.canMove()) return this.eraseCoreSATBActs();
+        // Calling onToggleAutoInputSATBActs here makes it being called twice
     }; // _SATB._onRestrict
 
     /**
      * The this pointer is Game_Battler.prototype
      * @since v0.00a @version v0.00a
      */
-    _SATB._onAllActsEnd = function() {
-        if (!BattleManager.isSATB()) return;
-        this.updateSATBStateTurns(1);
-        this.clearCoreSATB();
-    }; // _SATB._onAllActsEnd
+    _SATB._makeActs = function() {
+        // The number of action slots should always be 1 so the counter's needed
+        if (this._satb.actTimes > 0) return;
+        this._satb.actTimes = _GB.makeActionTimes.apply(this, arguments);
+        //
+    }; // _SATB._makeActs
 
     /**
      * The this pointer is Game_Battler.prototype
@@ -2362,10 +2465,12 @@ function Game_SATBRules() {
      */
     _SATB._setLatestItem = function() {
         var currentAct = this.currentAction();
-        if (currentAct) this.latestSATBItem = currentAct.item();
+        if (!currentAct) return;
+        var item = currentAct.item();
+        if (item) this.latestSATBItem = { speed: item.speed, item: item };
     }; // _SATB._setLatestItem
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Battler.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Actor
@@ -2459,7 +2564,7 @@ function Game_SATBRules() {
         //
     }; // _SATB._setup
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Actor.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Enemy
@@ -2517,7 +2622,7 @@ function Game_SATBRules() {
         }; // $[func]
     });
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Enemy.prototype
 
 /*----------------------------------------------------------------------------
  *    # New class: Game_SATBPhaseTypes
@@ -2584,12 +2689,12 @@ function Game_SATBRules() {
       * @interface @since v0.00a @version v0.00a
       * @param {Number} increment - Increment of current ATB value proportion
       */
-    $.addSmallestCoreSATBIncrement = function() {
+    $.addSmallestCoreSATBDecrement = function() {
         // Otherwise the increment would be too small for huge max ATB values
         var addMultiplier = Math.min(this.coreMax(), 1);
         // It's derived from extensive testing
         this.addCoreATB(-_SATB._SMALLEST_ATB_VAL_INCREMENT * addMultiplier);
-    }; // $.addSmallestCoreSATBIncrement
+    }; // $.addSmallestCoreSATBDecrement
 
     /**
      * Script Call
@@ -2683,7 +2788,7 @@ function Game_SATBRules() {
         //
     }; // $._onCoreATBBecomeFull
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_SATBPhaseTypes.prototype
 
 /*----------------------------------------------------------------------------
  *    # New class: Game_SATBNotes
@@ -2850,10 +2955,12 @@ function Game_SATBRules() {
      * @returns {*} The chained result from all effective notetags involved
      */
     $._associativeResult = function(note, argObj_, funcNameSuffix) {
+        // These are the list of value results of all parts rather than PairFunc
         var partResults = this._partResults(note, argObj_, funcNameSuffix);
+        //
         var defaultResult = this._pairs.default(note, argObj_);
         // Refer to reference tag ASSOCIATIVE_CHAINING_RULE
-        return this._rules.chainedResult(
+        return this._rules.chainedValResult(
                 partResults, note, argObj_, defaultResult);
         //
     }; // $._associativeResult
@@ -2936,9 +3043,10 @@ function Game_SATBRules() {
     $._uncachedPartResult_ = function(note, argObj_, part, funcNameSuffix) {
         var funcName = "_pairFuncListPart" + funcNameSuffix;
         var list = this[funcName](note, part, argObj_);
-        // The 1st datum in the part list must be the initial value of the part
+        // The result of the 1st pairFunc must be the initial result of the list
         if (list.length <= 0) return undefined;
-        return this._rules.chainedResult(list, note, argObj_);
+        var initVal = this._pairs.run_(argObj_, note, list[0]);
+        return this._rules.chainedResult(list.slice(1), note, argObj_, initVal);
         // Refer to reference tag ASSOCIATIVE_CHAINING_RULE
     }; // $._uncachedPartResult_
 
@@ -3074,7 +3182,7 @@ function Game_SATBRules() {
         //
     }; // $._pairFuncListPartWithoutCache
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_SATBNotes.prototype
 
 /*----------------------------------------------------------------------------
  *    # New private class: Game_SATBCache
@@ -3171,9 +3279,10 @@ function Game_SATBRules() {
             return battler._states ? battler.states() : [];
             //
         }, // states
-        thisState: function(battler, argObj) { return argObj.state; },
+        thisState: function(battler, argObj) { return [argObj.state]; },
         latestSkillItem: function(battler) {
-            return battler.latestSATBItem ? [battler.latestSATBItem] : [];
+            var item = battler.latestSATBItem;
+            return item ? [item.item] : [];
         }, // latestSkillItem
         priority: function() { return []; },
         chainingRule: function() { return []; },
@@ -3455,7 +3564,7 @@ function Game_SATBRules() {
         this._changeFactorMarks[note][factor] = false;
     }; // $._raiseChangeFactor
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_SATBCache.prototype
 
 /*----------------------------------------------------------------------------
  *    # New private class: Game_SATBPairs
@@ -3663,51 +3772,72 @@ function Game_SATBRules() {
     // Potential Hotspot
         if (result.length <= 0) return result;
         var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        if (!runResult) return [];
-        // Only elements present in all arrays can stay
-        return runResult.filter(function(r) { return result.contains(r); });
-        //
+        return runResult ? _SATB._CONCAT_EVERY_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult) : [];
     }; // _SATB._CONCAT_EVERY_RESULT_FUNC
+    // The control coupling's to simplify the use of these functions
+    _SATB._CONCAT_EVERY_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
+    // Potential Hotspot
+        if (result.length <= 0) return result;
+        // Only elements present in all arrays can stay
+        return valResult.filter(function(r) { return result.contains(r); });
+        //
+    }; // _SATB._CONCAT_EVERY_VAL_RESULT_FUNC
     _SATB._CONCAT_SOME_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
         var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        if (!runResult) return result;
+        return runResult ? _SATB._CONCAT_SOME_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult) : result;
+    }; // _SATB._CONCAT_SOME_RESULT_FUNC
+    _SATB._CONCAT_SOME_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
+    // Potential Hotspot
         // It makes no sense to have duplicated elements
-        return result.concat(runResult).filter(function(r, i, self) {
+        return result.concat(valResult).filter(function(r, i, self) {
             // These array elements should be Javascript literals
             return self.indexOf(r) === i;
             //
         });
         // fastMerge can't be used as result might be initVal_ that can't change
-    }; // _SATB._CONCAT_SOME_RESULT_FUNC
+    }; // _SATB._CONCAT_SOME_VAL_RESULT_FUNC
     _SATB._MIX_EVERY_OBJ_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
         var keys = Object.keys(result);
         if (keys.length <= 0) return result;
         var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        if (!runResult) return {};
+        return runResult ? _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult) : {};
+    }; // _SATB._MIX_EVERY_OBJ_RESULT_FUNC
+    _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
+    // Potential Hotspot
+        var keys = Object.keys(result);
+        if (keys.length <= 0) return result;
         // Only key value pairs present in all objects can stay
-        var ks = Object.keys(runResult);
+        var ks = Object.keys(valResult);
         keys.forEach(function(key) {
-            if (!ks.contains(key) || result[key] !== runResult[key]) {
+            if (!ks.contains(key) || result[key] !== valResult[key]) {
                 return delete result[key];
             }
         });
         //
         return result;
-    }; // _SATB._MIX_EVERY_OBJ_RESULT_FUNC
+    }; // _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC
     _SATB._MIX_SOME_OBJ_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
         var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        if (!runResult) return result;
+        return runResult ? _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult) : result;
+    }; // _SATB._MIX_SOME_OBJ_RESULT_FUNC
+    _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
+    // Potential Hotspot
         // Objects with lower priorities shouldn't override the higher ones
-        Object.keys(runResult).forEach(function(key) {
-            if (!result[key]) result[key] = runResult[key];
+        Object.keys(valResult).forEach(function(key) {
+            if (!result[key]) result[key] = valResult[key];
         });
         //
         return result;
-    }; // _SATB._MIX_SOME_OBJ_RESULT_FUNC
+    }; // _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC
     //
+    // Such little duplications in fnction contents won't hurt much
     _SATB._OPERATOR_RESULT_FUNC = function(operator) { // Potential Hotspot
         var content = [
             "var runResult = this._pairs.run_(argObj_, note, pairFunc, result);",
@@ -3715,21 +3845,42 @@ function Game_SATBRules() {
         ].join("\n");
         return new Function("note", "argObj_", "result", "pairFunc", content);
     }; // _SATB._OPERATOR_RESULT_FUNC
+    _SATB._OPERATOR_VAL_RESULT_FUNC = function(operator) { // Potential Hotspot
+        var content = "return result " + operator + " valResult;";
+        return new Function("note", "argObj_", "result", "valResult", content);
+    }; // _SATB._OPERATOR_VAL_RESULT_FUNC
+    //
     // The this pointer is Game_SATBRules.prototype
     _SATB._FIRST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
         if (list.length <= 0) return this._pairs.default(note, argObj_);
         return this._pairs.run_(argObj_, note, list[0]);
     }; // _SATB._FIRST_LIST_MONO_FUNC
+    _SATB._FIRST_VAL_MONO_FUNC = function(list, note, argObj_) {
+     // Potential Hotspot
+        return list[0] || this._pairs.default(note, argObj_);
+    }; // _SATB._FIRST_VAL_MONO_FUNC
     _SATB._LAST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
         if (list.length <= 0) return this._pairs.default(note, argObj_);
         return this._pairs.run_(argObj_, note, list[list.length - 1]);
     }; // _SATB._LAST_LIST_MONO_FUNC
+    _SATB._LAST_VAL_MONO_FUNC = function(list, note, argObj_) {
+     // Potential Hotspot
+        return list[list.length - 1] || this._pairs.default(note, argObj_);
+    }; // _SATB._LAST_VAL_MONO_FUNC
     //
-    _SATB._MONO_RESULT_CHAINING_RULES = function(func) { // Potential Hotspot
+    _SATB._MONO_RESULT_CHAINING_RULES = function(func, valFunc) {
+    // Potential Hotspot
         // It's understood that associativity means nothing when running a list
-        return { concat: func, mixObj: func, operator: func };
+        return {
+            concat: func,
+            concatVal: valFunc,
+            mixObj: func,
+            mixObjVal: valFunc,
+            operator: func,
+            operatorVal: valFunc
+        };
         //
     }; // _SATB._MONO_RESULT_CHAINING_RULES
     _SATB._RESULT_CHAINING_RULE_FUNC = function(func) { // Potential Hotspot
@@ -3755,37 +3906,53 @@ function Game_SATBRules() {
         coreMax: function() {
             return $gameSystem.satbParam("_coreMaxATBValNotePriorities");
         },
-        coreActState: function() { return ["states"]; }
+        coreActState: function() { return ["thisState"]; }
     }; // _SATB._NOTE_PRIORITIES
     _SATB._RESULT_CHAINING_RULES = { // Potential Hotspot
         every: {
+            isAssociative: true,
             concat: _SATB._RESULT_CHAINING_RULE_FUNC(
                     _SATB._CONCAT_EVERY_RESULT_FUNC),
-            isAssociative: true,
+            concatVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._CONCAT_EVERY_VAL_RESULT_FUNC),
             mixObj: _SATB._RESULT_CHAINING_RULE_FUNC(
                     _SATB._MIX_EVERY_OBJ_RESULT_FUNC),
+            mixObjVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC),
             operator: _SATB._RESULT_CHAINING_RULE_FUNC(
-                    _SATB._OPERATOR_RESULT_FUNC("&&"))
+                    _SATB._OPERATOR_RESULT_FUNC("&&")),
+            operatorVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._OPERATOR_VAL_RESULT_FUNC("&&"))
         }, // every
         some: {
+            isAssociative: true,
             concat: _SATB._RESULT_CHAINING_RULE_FUNC(
                     _SATB._CONCAT_SOME_RESULT_FUNC),
-            isAssociative: true,
+            concatVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._CONCAT_SOME_VAL_RESULT_FUNC),
             mixObj: _SATB._RESULT_CHAINING_RULE_FUNC(
                     _SATB._MIX_SOME_OBJ_RESULT_FUNC),
+            mixObjVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC),
             operator: _SATB._RESULT_CHAINING_RULE_FUNC(
-                    _SATB._OPERATOR_RESULT_FUNC("||"))
+                    _SATB._OPERATOR_RESULT_FUNC("||")),
+            operatorVal: _SATB._RESULT_CHAINING_RULE_FUNC(
+                    _SATB._OPERATOR_VAL_RESULT_FUNC("||"))
         }, // some
         // Conforms with the chaining rule interface
-        first: _SATB._MONO_RESULT_CHAINING_RULES(_SATB._FIRST_LIST_MONO_FUNC),
-        last: _SATB._MONO_RESULT_CHAINING_RULES(_SATB._LAST_LIST_MONO_FUNC),
+        first: _SATB._MONO_RESULT_CHAINING_RULES(
+                _SATB._FIRST_LIST_MONO_FUNC, _SATB._FIRST_VAL_MONO_FUNC),
+        last: _SATB._MONO_RESULT_CHAINING_RULES(
+                _SATB._LAST_LIST_MONO_FUNC, _SATB._LAST_VAL_MONO_FUNC),
         //
     }; // _SATB._RESULT_CHAINING_RULES
     Object.keys(_SATB._IS_ASSOCIATIVE_OPERATORS).forEach(function(operator) {
         var func = _SATB._OPERATOR_RESULT_FUNC(operator);
+        var valFunc = _SATB._OPERATOR_VAL_RESULT_FUNC(operator);
         _SATB._RESULT_CHAINING_RULES[operator] = {
             isAssociative: _SATB._IS_ASSOCIATIVE_OPERATORS[operator],
-            operator: _SATB._RESULT_CHAINING_RULE_FUNC(func)
+            operator: _SATB._RESULT_CHAINING_RULE_FUNC(func),
+            operatorVal: _SATB._RESULT_CHAINING_RULE_FUNC(valFunc)
         }; // _SATB._RESULT_CHAINING_RULES[operator]
     });
     _SATB._RUN_LIST_CHAINING_RULES = { // Potential Hotspot
@@ -3859,6 +4026,24 @@ function Game_SATBRules() {
     /**
      * Potential Hotspot/Nullipotent
      * @interface @since v0.00a @version v0.00a
+     * @param {[<T>]} list - The effective notetag results to be chained
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {<T>?} initVal_ - The initial result to chain the notetag list
+     * @returns {<T>} The chained result from the notetag results involved
+     */
+    $.chainedValResult = function(list, note, argObj_, initVal_) {
+        var chainingRule = this._chainingRule(note);
+        var valOp = _SATB._RESULT_CHAINING_OPERATION[note] + "Val";
+        // Checks _SATB._RESULT_CHAINING_RULE_FUNC for details
+        var resultFunc = _SATB._RESULT_CHAINING_RULES[chainingRule][valOp];
+        return resultFunc.call(this, list, note, argObj_, initVal_);
+        //
+    }; // $.chainedValResult
+
+    /**
+     * Potential Hotspot/Nullipotent
+     * @interface @since v0.00a @version v0.00a
      * @param {[PairFunc]} list - The effective notetag list to be chained
      * @param {NoteType} note - The note to have its effective results chained
      * @returns {([PairFunc]) -> [PairFunc]} The function chaining the note list
@@ -3890,7 +4075,7 @@ function Game_SATBRules() {
         return $gameSystem.satbParam(rule) || _SATB._DEFAULT_CHAINING_RULE;
     }; // $._chainingRule
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_SATBPairs.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Party
@@ -3910,7 +4095,7 @@ function Game_SATBRules() {
     // v0.00a - v0.00a; Extended
         _GP.clearActions.apply(this, arguments);
         // Added to clear the ATB value of all actors upon a failed escape
-        this.members().forEach(function(mem) { mem.clearCoreSATB(); });
+        _SATB._onAllActsEnd.call(this);
         //
     }; // $.clearActions
 
@@ -3933,6 +4118,15 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is Game_Party.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._onAllActsEnd = function() {
+        this.members().forEach(function(mem) { mem.onAllSATBActsEnd(); });
+    }; // _SATB._onAllActsEnd
+
+    /**
+     * The this pointer is Game_Party.prototype
      * @since v0.00a @version v0.00a
      * @param {Id} actorId - The id of the actor to be removed from the party
      */
@@ -3940,11 +4134,11 @@ function Game_SATBRules() {
     // v0.00a - v0.00a; Extended
         if (!this._actors.contains(actorId)) return;
         // clearCoreSATB shouldn't be used as -ve ATB value isn't desirable
-        $gameActors.actor(actorId).setCoreSATB(0);
+        $gameActors.actor(actorId).initCoreSATBActs(0);
         //
     }; // _SATB._removeActor
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Party.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_Interpreter
@@ -4093,7 +4287,7 @@ function Game_SATBRules() {
         return _SATB._TARGET_TYPES[targetType]();
     }; // _SATB._pluginCmdTargetGroup
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Game_Interpreter.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Scene_Battle
@@ -4114,6 +4308,7 @@ function Game_SATBRules() {
      // {{*}} _satb: The container of all other new variables
      //       {Boolean} canLastEsc: Whether the party can escape in last frame
      //       {Boolean} canLastDisplayWins: Whether the windows can be displayed
+     //       {{Boolean}} wasWinActive: Whether the windows were active before
 
     _SB.initialize = $.initialize;
     _SATB.initialize = $.initialize = function() { // v0.00a - v0.00a; Extended
@@ -4203,18 +4398,18 @@ function Game_SATBRules() {
             this._enemyWindow.refresh();
             return this._actorWindow.deselect();
         }
-        //
+        // Invisible selection wins are active only when they can't be shown
         // It's to ensure that the stale targets aren't displayed as selected
         this._actorWindow.deselect();
         this._enemyWindow.deselect();
-        //
+        // Invisible selection wins are active only when they can't be shown
         // It's possible for the skill/item usability/cost to be changed
         if (this._skillWindow.visible) return this._skillWindow.refresh();
         if (this._itemWindow.visible) return this._itemWindow.refresh();
-        //
-        if (!this._actorCommandWindow.visible) return;
+        // Invisible selection wins are active only when they can't be shown
         // It's possible for the command list/availability to be changed
-        this._actorCommandWindow.refresh();
+        if (this._actorCommandWindow.active) this._actorCommandWindow.refresh();
+        //
     }; // $.refreshSATBInputWins
 
     /**
@@ -4222,8 +4417,9 @@ function Game_SATBRules() {
      * @interface @since v0.00a @version v0.00a
      */
     $.closeSATBInputWins = function() {
-        _SATB._hideSelectionWins.call(this);
+        _SATB._deactivateHideSelectionWins.call(this);
         // It's not worth making _cmdWins just to group these codes together
+        this._actorCommandWindow.deactivate();
         this._actorCommandWindow.close();
         this._partyCommandWindow.close();
         //
@@ -4234,7 +4430,7 @@ function Game_SATBRules() {
      * Idempotent
      * @since v0.00a @version v0.00a
      */
-    _SATB._init = function() { this._satb = {}; };
+    _SATB._init = function() { this._satb = { wasWinActive: {} }; };
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -4314,8 +4510,12 @@ function Game_SATBRules() {
      */
     _SATB._onDeselectActor = function() {
         _SATB._deselectOpenStatusWin.call(this);
-        _SATB._hideActiveSelectionWins.call(this);
-        if (this._actorCommandWindow.active) this._actorCommandWindow.close();
+        _SATB._deactivateHideSelectionWins.call(this);
+        // It's possible for the open actor command window to be inactive
+        this._actorCommandWindow.close();
+        if (!this._actorCommandWindow.active) return;
+        this._actorCommandWindow.deactivate();
+        //
     }; // _SATB._onDeselectActor
 
     /**
@@ -4337,13 +4537,16 @@ function Game_SATBRules() {
      * Idempotent
      * @since v0.00a @version v0.00a
      */
-    _SATB._hideActiveSelectionWins = function() {
+    _SATB._deactivateHideSelectionWins = function() {
         // Close all selection windows for selected actor becoming not inputable
         _SATB._selectionWins.call(this).forEach(function(win) {
-            if (win.active) win.hide();
+            // It's pointless to extract these codes into a new method
+            if (win.active) win.deactivate();
+            if (win.visible) win.hide();
+            // These selection windows can't be inactive but visible
         });
         //
-    }; // _SATB._hideActiveSelectionWins
+    }; // _SATB._deactivateHideSelectionWins
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -4380,15 +4583,26 @@ function Game_SATBRules() {
      * The this pointer is Scene_Battle.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
+     * @todo Breaks this excessive large method into several smaller methods
      */
     _SATB._displayWins = function() {
-        if (this._actorWindow.active) return this.selectActorSelection();
-        if (this._enemyWindow.active) return this.selectEnemySelection();
-        if (this._skillWindow.active) return this.commandSkill();
-        if (this._itemWindow.active) return this.commandItem();
-        var actor = BattleManager.actor();
-        if (actor) return this._actorCommandWindow.setup(actor);
-        if (this._partyCommandWindow.active) this._partyCommandWindow.setup();
+        if (!BattleManager.actor()) {
+            if (this._partyCommandWindow.active) {
+                this._partyCommandWindow.setup();
+            }
+            return;
+        }
+        this._actorCommandWindow.open();
+        if (this._satb.wasWinActive._actorWindow) {
+            return this.selectActorSelection();
+        } else if (this._satb.wasWinActive._enemyWindow) {
+            return this.selectEnemySelection();
+        }
+        if (this._satb.wasWinActive._skillWindow) return this.commandSkill();
+        if (this._satb.wasWinActive._itemWindow) return this.commandItem();
+        /** @todo Ensures the actor command window really selects last cmd */
+        this.startActorCommandSelection();
+        //
     }; // _SATB._displayWins
 
     /**
@@ -4397,8 +4611,28 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._hideSelectionWins = function() {
-        _SATB._selectionWins.call(this).forEach(function(win) { win.hide(); });
+        [
+            "_actorWindow",
+            "_enemyWindow",
+            "_skillWindow",
+            "_itemWindow"
+        ].forEach(_SATB._hideSelectionWin, this);
     }; // _SATB._hideSelectionWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     * @param {String} winName - The name of the selection window to be hidden
+     */
+    _SATB._hideSelectionWin = function(winName) {
+        // The currently active window will be activated after it can be shown
+        var win = this[winName], isActive = win.active;
+        this._satb.wasWinActive[winName] = isActive;
+        if (isActive) win.deactivate();
+        //
+        win.hide();
+    }; // _SATB._hideSelectionWin
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -4436,8 +4670,8 @@ function Game_SATBRules() {
      * @returns {Boolean} The check result
      */
     _SATB._isUpdateActorWinPos = function() {
-        if (!BattleManager.isSATB() || !this._actorWindow.active) return false;
-        return this._actorWindow.x === this._statusWindow.x;
+        if (!BattleManager.isSATB() || !this._actorWindow.visible) return false;
+        return this._actorWindow.x !== this._statusWindow.x;
     }; // _SATB._isUpdateActorWinPos
 
     /**
@@ -4477,6 +4711,13 @@ function Game_SATBRules() {
         this.endCommandSelection();
     }; // _SATB._selectNextCmd
 
-})(DoubleX_RMMV.SATB);
+})(DoubleX_RMMV.SATB); // Scene_Battle.prototype
+
+/*----------------------------------------------------------------------------*/
+
+} else {
+    alert("DoubleX RMMV Superlative ATB Configurations should be above " +
+            "DoubleX RMMV Superlative ATB Implementations");
+} // if (DoubleX_RMMV.SATB)
 
 /*============================================================================*/
