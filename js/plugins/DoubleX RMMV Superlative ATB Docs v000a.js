@@ -34,6 +34,99 @@
  *      4. Decent RMMV plugin development proficiency to fully utilize this
  *         plugin with creative and unintended uses
  *----------------------------------------------------------------------------
+ *    # Inherited Behaviors From The Default RMMV Battle System
+ *      Action Speed:
+ *      1. The battlers that are ready to execute actions will be pushed into
+ *         the First-In-First-Out action execution queue, which is sorted by
+ *         the speed of the action to be executed by the battlers descendingly
+ *      2. To ensure battlers with extremely slow actions can still execute
+ *         them, the action speed of all battlers in the action execution
+ *         queue will be added by the same certain constant determined by the
+ *         number of such battlers whenever a battler's pushed into the queue,
+ *         meaning that the longer the battler's in the queue, the more such
+ *         action speed bonuses will be received by that battler, so that
+ *         battler will be placed more and more up front in the queue
+ *      Action Times+(Not fully applicable with the Action Module enabled):
+ *      1. Every battler always has at most 1 real action slot, meaning that
+ *         each battler can only input 1 action at a time
+ *      2. A battler also has at most the number of virtual action slots equal
+ *         to the number of action slots with Action Times+ in the default
+ *         RMMV battle system
+ *      3. When a battler's no virtual action slot and becomes able to input
+ *         actions, Action Times+ will be used to determine the new number of
+ *         virtual action slots
+ *      4. When a battler has finished executing an action, the number of
+ *         virtual action slot will be reduced by 1. If that battler still has
+ *         virtual action slots, then the ATB value of that battler won't be
+ *         reduced(Technically, it's reduced by an extremely small amount) and
+ *         can immediately input actions again(unless the ATB value's changed
+ *         by some other reasons like battler script calls); If that battler
+ *         has no more virtual action slots, then the ATB value of that
+ *         battler will be cleared to become 0 or remain unchanged if it was
+ *         negative
+ *      Party Escape(Not fully applicable with the Action and/or Escape Module
+ *      enabled):
+ *      1. Each actor will have his/her/its virtual action slot reduced by 1
+ *         upon a failed party escape attempt, as if it were just another
+ *         normnal action costing 1 virtual action slot
+ *      Agility(Not fully applicable with the Rate Module enabled):
+ *      1. The fill rate of the battler ATB value will be multiplied by the
+ *         agility of that battler divided by the average of those of all
+ *         battlers in the battle
+ *      States With Removal Timing As Action End(Not fully applicable with the
+ *      Countdown Module enabled):
+ *      1. The turn counter of such states will be reduced by 1 when the
+ *         battler owning these states have just finished executing an action
+ *      States With Removal Timing As Turn End(Not fully applicable with the
+ *      Countdown Module enabled):
+ *      1. The turn counter of such states will be reduced by 1 when the
+ *         battle turn counter increases by 1(i.e., the current turn ends)
+ *      Buff Turns Are Updated Upon Turn End Rather Than Action End
+ *      Battler ATB Value With Preemptive Battle Start(Not fully applicable
+ *      with the Start Module enabled):
+ *      1. The actor ATB value will be immediately fully filled while those of
+ *         enemies will be immediately empty
+ *      Battler ATB Value With Surprise Battle Start(Not fully applicable with
+ *      the Start Module enabled):
+ *      1. The enemy ATB value will be immediately fully filled while those of
+ *         actors will be immediately empty
+ *      Battler ATB Value With Normal Battle Start(Not fully applicable with
+ *      the Start Module enabled):
+ *      1. The ATB value of all battlers will be immediately empty
+ *      Battlers Becoming Hidden/Unmovable
+ *      1. Their ATB values will be reset to 0 if they're not negative before
+ *      2. Their number of virtual action slots will be reset to 0
+ *----------------------------------------------------------------------------
+ *    # Current Technical Limitations
+ *      1. The ATB frame update can never be run when either of the following
+ *         conditions are met:
+ *         - The battle's starting, aborting or ending
+ *         - The game message's showing in the battle
+ *         - The battle event's running
+ *         Violating any of these conditions might outright crash the game
+ *      2. Party escape's always disabled when either of the following
+ *         conditions are met:
+ *         - The battler sprites/action animations are animating/playing
+ *         - The log window's displaying messages
+ *         - Battlers are executing actions
+ *         - The game message's showing in the battle
+ *         Violating any of these conditions might outright crash the game
+ *         (Actually it should also be disabled when battle event's running
+ *         but trying to enforce this's itself a current technical limitation)
+ *      3. Only 1 actor can input actions at a time
+ *         - Violating this, if possible to be compatible with this plugin,
+ *           would be implemented with a separate plugin
+ *      4. Only 1 battler can execute actions at a time
+ *         - Violating this, if possible to be compatible with this plugin,
+ *           would be implemented with a separate plugin
+ *      5. A battler can only execute 1 action at a time
+ *         - Violating this, if possible to be compatible with this plugin,
+ *           would be implemented with a separate plugin
+ *      6. Having too many effective notetags full of nondeterministic results
+ *         will lead to severe performance issues especially on android device
+ *      7. Having too many effective notetags calling extremely long functions
+ *         will lead to the save files being too big
+ *----------------------------------------------------------------------------
  *    # Author Notes
  *      1. DoubleX RMMV Superlative ATB aims to give extreme control and
  *         freedom to users by making it as flexible as I can with as little
@@ -97,11 +190,39 @@
  *        there.
  *        Alternatively, you can ask for help if you still want to use this
  *        plugin.
+ *    Q3. Why the Core Module itself doesn't show the ATB value of any
+ *        battler and why doesn't it let players change among inputable
+ *        actors? All these are essential UX features. Without them, using
+ *        just the Core Module can only result in a fully broken ATB system.
+ *    A3. It's because these features aren't technically essential to run an
+ *        ATB system plugin, nor they're behaviors inherited from the default
+ *        RMMV battle system(It doesn't let you change the input sequence nor
+ *        show the actual action execution sequence). All these features that
+ *        are missing in the Core Module are covered in the Bar Module and
+ *        Hotkey Module. That's why only these 2 modules are enabled by
+ *        default(All the other optional modules are disabled so you don't
+ *        have to deal with so many modules all at once before being familiar
+ *        with this plugin).
+ *    Q4. (Advanced)Why the caching mechanism's so complicated and convoluted
+ *        in this plugin? It's extremely costly and troublesome to work around
+ *        when I've some unintended and creative uses of this plugin.
+ *    A4. It's because this plugin explicitly allows many effective notetags
+ *        to be used in the same frame, which can cause significant lag and
+ *        fps drop if the end result's not cached, epsecially when the
+ *        functions called by those notetags are computationally expensive.
+ *        This plugin's to balance among multiple key aspects, so I'm sorry
+ *        that your use cases have to be at least slightly sacrificed for
+ *        performance stability and ease of use for intended and ordinary use
+ *        cases, which are likely much more common and important. That's the
+ *        main reason why decent RMMV plugin development proficiency is needed
+ *        to fully utilize this plugin with creative and unintended uses.
  *----------------------------------------------------------------------------
  *    # Links
  *      Demo:
  *      1. https://github.com/Double-X/DoubleX-RMMV-Superlative-Active-Time-Battle-SATB-
  *      Videos:
+ *      1.
+ *      Posts:
  *      1.
  *----------------------------------------------------------------------------
  *    # Instructions
@@ -116,8 +237,13 @@
  *      3. If you wish to use DoubleX RMMV Superlative ATB Unit Test, place it
  *         right below DoubleX RMMV Superlative ATB Implementation
  *----------------------------------------------------------------------------
- *    # Author
- *      DoubleX
+ *    # Contributors
+ *      Authors:
+ *      1. DoubleX
+ *      Plugin Development Collaborators:
+ *      Bug Reporters:
+ *      Compatibility Issue Raisers:
+ *      Feature Requesters:
  *----------------------------------------------------------------------------
  *    # Changelog
  *      Documentations:
@@ -141,6 +267,8 @@
  *----------------------------------------------------------------------------
  *    # Todo
  *      1. Adds _isSaveParamNotes
+ *      2. Fixes the actor command window not selecting the last command when
+ *         it becomes able to be shown again bug
  *============================================================================*/
 /*:
  * @plugindesc To be the most flexible, performant and powerful ATB system
@@ -624,15 +752,20 @@ DoubleX_RMMV.SATB_VERS = {
     Parameters: "0.00a",
     Configurations: "0.00a",
     Implementations: "0.00a",
-    "Unit Test": "0.00a",
-    Compatibility: "0.00a"
+    "Unit Tests": "0.00a",
+    Compatibilities: "0.00a"
 }; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
     var current = DoubleX_RMMV["Superlative ATB " + plugin];
-    if (!current) return alert("DoubleX RMMV Superlative ATB " + plugin +
-            " should be above DoubleX RMMV Superlative ATB Documentations");
+    // console.warn should be used instead of alert as some of them are optional
+    if (!current) {
+        return console.warn("DoubleX RMMV Superlative ATB " + plugin +
+                " should be above DoubleX RMMV Superlative ATB Documentations");
+    }
     var latest = "v" + DoubleX_RMMV.SATB_VERS[plugin];
-    if (current !== latest) alert("The version of DoubleX RMMV Superlative " +
-            " ATB " + plugin + " should be " + latest + " but is " + current);
+    if (current === latest) return;
+    console.warn("The version of DoubleX RMMV Superlative ATB " + plugin +
+            " should be " + latest + " but is " + current);
+    //
 });
 // DON'T TOUCH THIS UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
