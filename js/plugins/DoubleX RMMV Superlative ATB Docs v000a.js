@@ -332,6 +332,13 @@
  *            The functions arguments are exactly the same as the counterpart
  *            with the cfg suffix
  *            This eval variant only applies to notetags having only 1 suffix
+ *            If an entry corresponds to the cfg, script or eval suffix and
+ *            the referred contents of the function uses switches/variablees,
+ *            all those switches/variables must be explicitly written as
+ *            $gameSwitches.value(x) or $gameVariables.value(x), where x must
+ *            be a Number literal instead of a variable, unless
+ *            _isAlwaysRecacheAllSwitchVars is ON
+ *            (Reference tag: SWITCH_VAR)
  *       4. (Advanced)The notetag results are cached as follows:
  *          - The effective notetag list's divided into these parts:
  *            Effective actor notetag list
@@ -414,7 +421,7 @@
  *           actions(this includes charging but not inputting actions) rather
  *           than upon turn end or action end
  *           (Reference tag: ACT_STATE)
- *         - suffix can be cfg, val, var or script
+ *         - suffix can be cfg, val, switch or script
  *         - (Advanced)Please refer to Act State Functions in the core module
  *           of the configuration plugin for using cfg or script suffixes, or
  *           the eval variant
@@ -535,13 +542,37 @@
  *         (Reference tag: MULTI_SUFFIX_ENTRY)
  *         - note is the same as that of meta.satb.note
  *         - Sets the notetag to be the same as <satb note suffixi: entryi>
+ *         - YOU'RE HIGHLY ENCOURAGED AND RECOMMENDED NOT TO USE THIS SCRIPT
+ *           CALL UNLESS YOU'VE AT LEAST DECENT RMMV PLUGIN DEVELOPMENT
+ *           PROCIFIENCY AS YOU'VE TO HAVE A SOLID UNDERSTANDING ON HOW GAME
+ *           VARIABLES AND SWITCHES CHANGE DETECTIONS IN THIS PLUGIN WORKS IN
+ *           DETAILS(NOT DETECTING SUCH CHANGES PROPERLY CAN LEAD TO THE
+ *           NOTETAG CACHES FAILING TO INVALIDATE PROPERLY, THUS RETURNING
+ *           STALE CACHED RESULTS AND CAUSING THE NOTETAG VALUES TO BE WRONG)
  *         - E.g.:
  *           $dataArmors[4].meta.satb.coreMax =
  *           [{ suffix: "var", entry: "2" }] will set the coreMax notetag of
  *           the armor with id 4 to be the same as <satb coreMax var: 1, 2>
- *         - If the notetag uses switches or variables, you must update
+ *         - If the notetag uses switches or variables(either via the
+ *           switch/var suffix or via getting switch/variable values in
+ *           the function called by the notetag), you must update
  *           $gameSystem._satb.switchIds or $gameSystem._satb.varIds manually
- *           (You can check the method _updateIds in DataManager for help)
+ *           $gameSystem._satb.switchIds is the same object as _SATB.switchIds
+ *           in DataManager
+ *           $gameSystem._satb.varIds is the same object as _SATB.varIds in
+ *           DataManager
+ *           (You can check the method _SATB._UPDATE_IDS in DataManager)
+ *         - As using DoubleX RMMV Dynamic Data will probably increase the
+ *           save file size drastically, which is unlikely to be favored by
+ *           players playing games using this plugin, I've decided not to
+ *           develop a much more convenient script call to facilitate changing
+ *           which data have what notetags, to ensure that you'll only do so
+ *           when absolutely necessary. THIS IS A CONSCIOUS PLUGIN DESIGN
+ *           DECISION THAT AIMS TO BALANCE FOR THE PLAYER NEEDS AND EMPHASIZE
+ *           THE PROBABLE HARMS OF CHANGING DATA ON THE FLY(Unless you're
+ *           already doing so for some other totally different reasons, in
+ *           this case you're likely already good enough to use this primirive
+ *           script call while still really knowing what you're truly doing)
  *    # Battler manipulations
  *      1. setCoreSATB(val)
  *         - Sets the new current ATB value of the battler involved as val
