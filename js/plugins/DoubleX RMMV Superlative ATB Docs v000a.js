@@ -461,10 +461,14 @@
  *      2. $gameSystem.satbParam(param)
  *         - Returns the stored value of param listed in the parameter plugin
  *           or their configuration counterparts in the configuration plugin
+ *           if such counterparts exist
  *         - E.g.:
  *           $gameSystem.satbParam("IsCoreEnabled") will return the String
  *           contents of a function returning a Boolean indicating whether
  *           this plugin's enabled
+ *           $gameSystem.satbParam("_isCached") will return the Boolean value
+ *           indicating whether the effective notetag lists and values will be
+ *           cached
  *      3. $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors)
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
@@ -538,7 +542,7 @@
  *           $dataWeapons[3].meta.satb.coreMax will return the Array of Object
  *           [{ suffix: "var", entry: "2" }] if the effective notetag of
  *           weapon with id 3 is <satb coreMax var: 1, 2>
- *      2. meta.satb.note = [{ suffixi: suffixi, entryi: entryi }]
+ *      (VERY ADVANCED)2. meta.satb.note = [{ suffixi: suffixi, entryi: entryi }]
  *         (Reference tag: MULTI_SUFFIX_ENTRY)
  *         - note is the same as that of meta.satb.note
  *         - Sets the notetag to be the same as <satb note suffixi: entryi>
