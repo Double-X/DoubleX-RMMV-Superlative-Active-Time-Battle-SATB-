@@ -237,7 +237,8 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         checkDataMeta: function(val, param, dataType) {
             var meta = val.meta;
             if (meta && meta.satb && meta.satb.datumType === dataType) return;
-            SATBUT.showFailMsg(val, param, "It should be a valid state data!");
+            SATBUT.showFailMsg(JSON.stringify(val), param,
+                    "It should be a valid state data!");
         }, // checkDataMeta
 
         /**
@@ -329,6 +330,127 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
 
 /*----------------------------------------------------------------------------
+ *    # Edit class: DataManager
+ *      - Reads all notetags for this plugin
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var _SATB = SATB.DataManager.new;
+
+    /**
+     * No-op
+     * @since v0.00a @version v0.00a
+     */
+    function testReadNotes() {
+        var satb = { datumType: "states" }, lines = [
+            "<doublex rmmv coremax>",
+            "<doublex rmmv satb coreMax cfg: CMATB_MAX>",
+            "<satb coreMax val: 100>",
+            "<doublex rmmv satb coreMax>",
+            "return 999.0 / this.agi;",
+            "</satb coreMax>",
+            "<doublex rmmv satb coreActsState cfg: CASX_FALSE>",
+            "<satb coreActState>",
+            "'<satb coreActsState val: false>';",
+            "return $gameSwtiches.value(1);",
+            "</doublex rmmv satb coreActState>",
+            "</satb coreActState>",
+            "<satb coreActState>",
+            "<satb coreActState val: 100.0/>"
+        ];
+        // switch, var and script suffix can't be tested as they've side effects
+        _SATB._readNote(satb, lines);
+        var satbLines = JSON.stringify({ satb: satb, lines: lines });
+        var coreMax = satb.coreMax;
+        if (!coreMax) {
+            SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                    "It should be able to read coreMax notetags!");
+        } else {
+            var firstCoreMax = coreMax[0];
+            if (firstCoreMax.suffix1 !== "cfg") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                        "The suffix of the 1st coreMax notetag should be cfg!");
+            }
+            if (firstCoreMax.entry1 !== "CMATB_MAX") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The entry " +
+                        "of the 1st coreMax notetag should be CMATB_MAX!");
+            }
+            var secondCoreMax = coreMax[1];
+            if (secondCoreMax.suffix1 !== "val") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                        "The suffix of the 2nd coreMax notetag should be val!");
+            }
+            if (secondCoreMax.entry1 !== "100") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The entry " +
+                        "of the 2nd coreMax notetag should be 100!");
+            }
+            var thirdCoreMax = coreMax[2];
+            if (thirdCoreMax.suffix1 !== "eval") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The suffix" +
+                        " of the 3rd coreMax notetag should be eval!");
+            }
+            if (thirdCoreMax.entry1 !== "return 999.0 / this.agi;") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The entry " +
+                        "of the 3rd coreMax notetag should be " +
+                        "return 999.0 / this.agi;!");
+            }
+            if (coreMax[3]) {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                        "There shouldn't be more than 3 coreMax notetags!");
+            }
+        }
+        var coreActsState = satb.coreActsState;
+        if (!coreActsState) {
+            SATBUT.showFailMsg(satbLines, "_SATB._readNote", "It should be " +
+                    "able to read coreActsState notetags" +
+                    "(even if it's invalid)!");
+        } else {
+            var firstCoreActsState = coreActsState[0];
+            if (firstCoreActsState.suffix1 !== "cfg") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The suffix" +
+                        " of the 1st coreActsState notetag should be cfg!");
+            }
+            if (firstCoreActsState.entry1 !== "CASX_FALSE") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The entry " +
+                        "of the 1st coreActsState notetag should be " +
+                        "CASX_FALSE(even if no such NOTEX exists)!");
+            }
+            if (coreActsState[1]) {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "There " +
+                        "shouldn't be more than 1 coreActsState notetag!");
+            }
+        }
+        var coreActState = satb.coreActState;
+        if (!coreActState) {
+            SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                    "It should be able to read coreActState notetags!");
+        } else {
+            var firstCoreActState = coreActState[0];
+            if (firstCoreActState.suffix1 !== "eval") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The suffix" +
+                        " of the 1st coreActState notetag should be eval!");
+            }
+            if (firstCoreActState.entry1 !== "'<satb coreActsState val: false>';\nreturn $gameSwtiches.value(1);") {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote", "The entry " +
+                        "of the 1st coreActState notetag should be " +
+                        "'<satb coreActsState val: false>';\nreturn $gameSwtiches.value(1);");
+            }
+            if (coreActState[1]) {
+                SATBUT.showFailMsg(satbLines, "_SATB._readNote",
+                        "There shouldn't be more than 1 coreActState notetag!");
+            }
+        }
+        //
+    } // testReadNotes
+
+    testReadNotes();
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // DataManager
+
+/*----------------------------------------------------------------------------
  *    # Edit class: Game_System
  *      - Extends all parameter/notetag functions upon load game
  *----------------------------------------------------------------------------*/
@@ -394,7 +516,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         SATBUT.checkFuncs[SATBUT.unitTests.params[module][param]](val, name);
     }; // $._checkParam
 
-})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_System
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_SATBNotes
@@ -457,7 +579,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
                 SATBUT.unitTests.noteArgObjs[note]);
     }; // _UT._checkRunResult
 
-})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_SATBNotes
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Game_SATBPairs
@@ -483,7 +605,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         return result;
     }; // $.run_
 
-})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_SATBPairs
 
 /*----------------------------------------------------------------------------*/
 
