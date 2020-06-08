@@ -41,10 +41,10 @@
  *         the speed of the action to be executed by the battlers descendingly
  *      2. To ensure battlers with extremely slow actions can still execute
  *         them, the action speed of all battlers in the action execution
- *         queue will be added by the same certain constant determined by the
- *         number of such battlers whenever a battler's pushed into the queue,
- *         meaning that the longer the battler's in the queue, the more such
- *         action speed bonuses will be received by that battler, so that
+ *         queue will be added by the 2000(the maximum action speed in the
+ *         default RMMV editor) divided by the number of battlers in that
+ *         queue, meaning that the longer the battler's in the queue, the more
+ *         such action speed bonuses will be received by that battler, so that
  *         battler will be placed more and more up front in the queue
  *      Action Times+(Not fully applicable with the Action Module enabled):
  *      1. Every battler always has at most 1 real action slot, meaning that
@@ -314,6 +314,8 @@
  *                            notetag, so the function arguments are exactly
  *                            the same as the cfg counterpart)
  *            (Reference tag: NOTE_SUFFIX)
+ *            USING eval AND script suffixes WITHOUT SETTING _isCached on CAN
+ *            LEAD TO SEVERE LAG AND FPS DROP
  *            It's highly encouraged and recommended not to change from using
  *            a switch/variable to using another, nor from not using one to
  *            using one or vice versa in the game, as the script calls needed
@@ -565,6 +567,7 @@
  *           in DataManager
  *           $gameSystem._satb.varIds is the same object as _SATB.varIds in
  *           DataManager
+ *           This applies only with _isAlwaysRecacheAllSwitchVars being off
  *           (You can check the method _SATB._UPDATE_IDS in DataManager)
  *         - As using DoubleX RMMV Dynamic Data will probably increase the
  *           save file size drastically, which is unlikely to be favored by
@@ -791,6 +794,7 @@ DoubleX_RMMV.SATB_VERS = {
     Compatibilities: "0.00a"
 }; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
+    "use strict";
     var current = DoubleX_RMMV["Superlative ATB " + plugin];
     // console.warn should be used instead of alert as some of them are optional
     if (!current) {
