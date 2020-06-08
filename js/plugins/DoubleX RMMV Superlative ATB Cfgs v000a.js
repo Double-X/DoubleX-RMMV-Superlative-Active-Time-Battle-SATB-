@@ -28,14 +28,16 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
  *       You only need to edit this part as it's about what this plugin does
  *----------------------------------------------------------------------------*/
 
-DoubleX_RMMV.SATB = {
+(function(SATB) {
 
-/*----------------------------------------------------------------------------
- *    # Parameter counterparts
- *    - These configurations will only be used when their counterparts' empty
- *----------------------------------------------------------------------------*/
+    "use strict";
 
-    params: {
+    /*------------------------------------------------------------------------
+     *    # Parameter counterparts
+     *    - These configurations are only used when their counterparts' empty
+     *------------------------------------------------------------------------*/
+
+    SATB.params = {
 
         /*--------------------------------------------------------------------
          *    Core Module
@@ -114,14 +116,14 @@ DoubleX_RMMV.SATB = {
 
         }, // core
 
-    }, // params
+    }; // SATB.params
 
-/*----------------------------------------------------------------------------
- *    # Notetag values
- *    - These functions are used by notetags using function name as values
- *----------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------
+     *    # Notetag values
+     *    - These functions are used by notetags using function name as values
+     *------------------------------------------------------------------------*/
 
-    notes: {
+    SATB.notes = {
 
         /*--------------------------------------------------------------------
          *    Core ATB Max Functions
@@ -173,7 +175,7 @@ DoubleX_RMMV.SATB = {
              * @returns {+ve Number} The maximum ATB value(Which should be
              *                       positive) for the battler involved
              */
-            CMATB_MAX: function(datum, datumType, latestMax) {
+            CMATB_AGI: function(datum, datumType, latestMax) {
                 return 999 - this.agi; // 999 - the battler's AGI
             }, // CMATB_AGI
 
@@ -192,10 +194,10 @@ DoubleX_RMMV.SATB = {
              * @returns {+ve Number} The maximum ATB value(Which should be
              *                       positive) for the battler involved
              */
-            CMATB_MAX: function(datum, datumType, latestMax) {
-                // Returns the value in the game variable with id x
-                return $gameVariables.value(x);
-                //
+            CMATB_VAR: function(datum, datumType, latestMax) {
+                // Returns the value in the game variable with id 4
+                return +$gameVariables.value(4);
+                // Numbers with decimals should be stored in the String form
             }, // CMATB_VAR
 
             // Adds new CMATBX here
@@ -267,6 +269,6 @@ DoubleX_RMMV.SATB = {
 
         }, // coreActState
 
-    } // notes
+    }; // SATB.notes
 
-}; // DoubleX_RMMV.SATB
+})(DoubleX_RMMV.SATB = {});
