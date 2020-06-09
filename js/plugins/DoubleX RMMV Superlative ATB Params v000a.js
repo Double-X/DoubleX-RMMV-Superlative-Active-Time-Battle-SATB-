@@ -13,9 +13,15 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @plugindesc The parameter plugin of DoubleX RMMV Superlative ATB
  * @author DoubleX
  *
- * @param _isCached
+ * @param _isParamFuncCached
  * @type boolean
- * @desc (Advanced)Sets whether value lists/results will be cached
+ * @desc (Advanced)Sets whether function parameters will be cached
+ * Sets this off if at least some of those results' random
+ * @default false
+ *
+ * @param _isNoteCached
+ * @type boolean
+ * @desc (Advanced)Sets whether notetag lists/results will be cached
  * Sets this off if at least some of those results' random
  * @default true
  *
@@ -198,8 +204,16 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *      8. (Advanced)Returning highly nondeterministic values like random ones
  *         will have to manually invalidate the corresponding cache first or
  *         those values might be ignored due to the cached ones being used
- *         (Setting _isCached on will free you from doing this, but can have
-*           very severe performance penalties if you use lots of notetags)
+ *         (Setting _isNoteCached on will free you from doing this, but can
+ *         have very severe performance penalties if you use lots of notetags)
+ *         This includes frequently changing the states of the game switches
+ *         and the values of the game variables used by the notetags
+ *         The similar issues present for some of the parameters storing
+ *         function contents with _isParamFuncCached, even though the
+ *         following are never cached regardless of the values of
+ *         _isParamFuncCached:
+ *        - Any parameter enabling/disabling a module/the whole plugin
+ *          (NONE OF THEM SHOULD BE CHANGED DURING THE SAME BATTLE AFTER ALL)
  *      9. (Advanced)_alwaysRecacheAllSwitchVars should be set on only if you
  *         change from using some switch/variables to using some others or
  *         from not using those to using those or vice versa, without wanting
