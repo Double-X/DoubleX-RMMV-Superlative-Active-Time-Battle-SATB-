@@ -807,9 +807,7 @@ function Game_SATBRules() {
         return { act: 0, frame: 0, sec: 0.0 };
     }; // _SATB._CORE_TURN_CLOCK
     //
-    _SATB._RAISE_ALL_NOTE_CHANGE_FACTORS = function(mem) {
-        mem.raiseAllSATBNoteChangeFactors();
-    }; // _SATB._RAISE_ALL_NOTE_CHANGE_FACTORS
+    _SATB._REFRESH_MEM = function(mem) { mem.refresh(); };
     _SATB._REDUCED_AVG_AGI = function(agiSum, mem) { return agiSum + mem.agi; };
     _SATB._SORT_BATTLER_SPEEDS_DESCENDINGLY = function(a, b) {
         return b.latestSATBItem.speed - a.latestSATBItem.speed;
@@ -853,13 +851,31 @@ function Game_SATBRules() {
         }]);
     }; // _BM._SEC_CORE_TURN_CLOCK_OVERFLOW_FUNC
 
+    _SATB.IS_VALID_RESULT = function(result) { // Hotspot
+        // Using undefined is most memory efficient and using null's play safe
+        return result !== null && result !== undefined;
+        //
+    }; // _SATB.IS_VALID_RESULT
+
     /*------------------------------------------------------------------------
      *    New private instance variables
      *------------------------------------------------------------------------*/
     // {{*}} _satb: The container of all other new variables
     //       {Boolean} isRefresh: Whether at least 1 battler's refreshed
+    //       {Boolean} canCoreTurnClockOverflow: Whether the turn clock counter
+    //                                           can overflow to the next turn
     //       {[Game_Actor]} inputableActors: The list of all inputable actors
     //       {{Number}} coreTurnClock: Mapping of all turn clock unit counters
+    //       {Natural Number} coreTurnActClockMax The turn clock maximum action
+    //                                            counter
+    //       {Natural Number} coreTurnFrameClockMax: The Turn clock maximum
+    //                                               frame counter
+    //       {+ve Number} coreTurnSecClockMax: The Turn clock maximum second
+    //                                         counter(in milliseconds)
+    //       {+ve Number} coreBaseFillFrameRate: The base ATB value fill rate by
+    //                                           frames
+    //       {+ve Number} coreBaseFillSecRate: The base ATB value fill rate by
+    //                                         seconds
     //       {Number} avgAgi - The average agi of all battlers in the battle
 
     _BM.initMembers = BattleManager.initMembers;
@@ -958,7 +974,9 @@ function Game_SATBRules() {
      * @returns {Boolean} The check result
      */
     BattleManager.isSATB = function() {
+        // IT CAN'T BE CHANGED DURING THE SAME BATTLE SO NO CACHING'S NEEDED
         return $gameSystem.satbParamFunc("IsCoreEnabled")();
+        //
     }; // BattleManager.isSATB
 
     /**
@@ -967,6 +985,7 @@ function Game_SATBRules() {
      * @returns {Number} The proportion of the ATB to be filled on this frame
      */
     BattleManager.coreBaseSATBFillRate = function() {
+        // This can't be cached as FPS can vary at any time
         switch ($gameSystem.satbParam("_coreBaseFillUnit")) {
             // Such invalid case will be reported in the unit test plugin
             case "coreBaseFillATBFrame": {
@@ -974,8 +993,9 @@ function Game_SATBRules() {
             } case "coreBaseFillATBSec": {
                 return _SATB._coreBaseFillSecRate.call(this);
             } default: return 0; // So none of the ATB values will ever fill
-            //
+            // Users should cache values themselves if there's costly computing
         }
+        //
     }; // BattleManager.coreBaseSATBFillRate
 
     /**
@@ -984,7 +1004,15 @@ function Game_SATBRules() {
      * @returns {Natural Number} The maximum number of actions a turn can have
      */
     BattleManager.coreTurnSATBActClockMax = function() {
-        return $gameSystem.satbParamFunc("coreTurnATBAct")();
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return $gameSystem.satbParamFunc("coreTurnATBAct")();
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreTurnActClockMax)) {
+            this._satb.coreTurnActClockMax =
+                    $gameSystem.satbParamFunc("coreTurnATBAct")();
+        }
+        return this._satb.coreTurnActClockMax;
     }; // BattleManager.coreTurnSATBActClockMax
 
     /**
@@ -993,8 +1021,17 @@ function Game_SATBRules() {
      * @returns {Natural Number} The maximum number of frames a turn can have
      */
     BattleManager.coreTurnSATBFrameClockMax = function() {
-        var baseFillFrame = $gameSystem.satbParamFunc("coreBaseFillATBFrame")();
-        return $gameSystem.satbParamFunc("coreTurnATBTime")(baseFillFrame);
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return $gameSystem.satbParamFunc("coreTurnATBTime")(
+                    $gameSystem.satbParamFunc("coreBaseFillATBFrame")());
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreTurnFrameClockMax)) {
+            var clockMax = $gameSystem.satbParamFunc("coreTurnATBTime")(
+                    $gameSystem.satbParamFunc("coreBaseFillATBFrame")());
+            this._satb.coreTurnFrameClockMax = clockMax;
+        }
+        return this._satb.coreTurnFrameClockMax;
     }; // BattleManager.coreTurnSATBFrameClockMax
 
     /**
@@ -1003,20 +1040,18 @@ function Game_SATBRules() {
      * @returns {+ve Number} The maximum number of seconds a turn can have
      */
     BattleManager.coreTurnSATBSecClockMaxInMs = function() {
-        var baseFillSec = $gameSystem.satbParamFunc("coreBaseFillATBSec")();
-        var maxInS = $gameSystem.satbParamFunc("coreTurnATBTime")(baseFillSec);
-        return maxInS * 1000.0;
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return $gameSystem.satbParamFunc("coreTurnATBTime")(
+                    $gameSystem.satbParamFunc("coreBaseFillATBSec")()) * 1000.0;
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreTurnSecClockMax)) {
+            var clockMax = $gameSystem.satbParamFunc("coreTurnATBTime")(
+                    $gameSystem.satbParamFunc("coreBaseFillATBSec")()) * 1000.0;
+            this._satb.coreTurnSecClockMax = clockMax;
+        }
+        return this._satb.coreTurnSecClockMax;
     }; // BattleManager.coreTurnSATBSecClockMaxInMs
-
-    /**
-     * Hotspot/Nullipotent
-     * @interface @since v0.00a @version v0.00a
-     * @param {Game_Battler} battler - The battler to have the maximum ATB value
-     * @returns {+ve Number} The maximum ATB value of the battler involved
-     */
-    BattleManager.coreBaseMaxSATB = function(battler) {
-        return $gameSystem.satbParamFunc("coreMaxATBVal").call(battler);
-    }; // BattleManager.coreBaseMaxSATB
 
     /**
      * Hotspot/Nullipotent
@@ -1049,6 +1084,7 @@ function Game_SATBRules() {
      * @param {Game_Actor} actor - The actor to become inputable
      */
     BattleManager.addSATBInputableActor = function(actor) {
+        if (!$gameParty.inBattle()) return;
         // Actors that can execute actions shouldn't be able to input actions
         if (this._actionBattlers.contains(actor)) return;
         //
@@ -1065,7 +1101,7 @@ function Game_SATBRules() {
     BattleManager.addSATBActBattler = function(battler) {
         if (!this.isSATB()) return;
         // No actor should be both inputable and able to execute actions
-        this.eraseSATBInputableActor(battler);
+        if (battler.isActor()) this.eraseSATBInputableActor(battler);
         //
         // Extracting them into a new method can lead to invalid states
         if (this._actionBattlers.contains(battler)) return;
@@ -1081,6 +1117,7 @@ function Game_SATBRules() {
      * @param {Game_Actor} actor - The actor to become not inputable
      */
     BattleManager.eraseSATBInputableActor = function(actor) {
+        if (!$gameParty.inBattle()) return;
         var index = this._satb.inputableActors.indexOf(actor);
         if (index >= 0) this._satb.inputableActors.splice(index, 1);
         if (this.actor() === actor) return this.clearActor();
@@ -1095,6 +1132,7 @@ function Game_SATBRules() {
      * @param {Game_Battler} battler - The battler to become unable to exec acts
      */
     BattleManager.eraseSATBActBattler = function(battler) {
+        if (!$gameParty.inBattle() || !this.isSATB()) return;
         // _subject shouldn't be in _actionBattlers so it's safe to always erase
         var index = this._actionBattlers.indexOf(battler);
         if (index >= 0) this._actionBattlers.splice(index, 1);
@@ -1117,20 +1155,20 @@ function Game_SATBRules() {
      * Idempotent
      * @interface @since v0.00a @version v0.00a
      */
-    BattleManager.raiseAllSATBMemNoteChangeFactors = function() {
-        this.satbMems().forEach(_SATB._RAISE_ALL_NOTE_CHANGE_FACTORS);
-    }; // BattleManager.raiseAllSATBMemNoteChangeFactors
+    BattleManager.refreshAllSATBMems = function() {
+        this.satbMems().forEach(_SATB._REFRESH_MEM);
+    }; // BattleManager.refreshAllSATBMems
 
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {{[DatumType]}?} noteFactors_ - The notes and factors to be raised
      */
-    BattleManager.raiseSATBMemChangeFactors = function(noteFactors) {
+    BattleManager.raiseRefreshedSATBMemChangeFactors = function(noteFactors) {
         this.satbMems().forEach(function(mem) {
-            mem.raiseSATBChangeFactors(noteFactors);
+            mem.raiseSATBChangeFactorsWithRefresh(noteFactors);
         });
-    }; // BattleManager.raiseSATBMemChangeFactors
+    }; // BattleManager.raiseRefreshedSATBMemChangeFactors
 
     /**
      * Nullipotent
@@ -1177,7 +1215,9 @@ function Game_SATBRules() {
         if (!this.canUpdateSATB()) return;
         _SATB._addCoreATB.call(this);
         _SATB._procTurn.call(this);
+        // It's ok to run this even if the turn clock counter isn't time now
         _SATB._updateCoreTurnByTime.call(this);
+        //
         if (!this._satb.isRefreshNeeded) return;
         this._satb.isRefreshNeeded = false;
         _SATB._procScene.call(this, "refreshStatus");
@@ -1271,19 +1311,36 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._refreshStatus = function() {
+        _SATB._updateCachedVals.call(this);
         // Not calling refreshStatus is to avoid redundant status win refresh
         _SATB._procScene.call(this, "refreshSATBInputWins");
         //
-        this._satb.avgAgi = _SATB._avgAgi.call(this);
         this._satb.isRefreshNeeded = false;
     }; // _SATB._refreshStatus
+
+    /**
+     * The this pointer is BattleManager
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._updateCachedVals = function() {
+        delete this._satb.canCoreTurnClockOverflow;
+        delete this._satb.coreTurnActClockMax;
+        delete this._satb.coreTurnFrameClockMax;
+        delete this._satb.coreTurnSecClockMax;
+        delete this._satb.coreBaseFillFrameRate;
+        delete this._satb.coreBaseFillSecRate;
+        this._satb.avgAgi = _SATB._avgAgi.call(this);
+    }; // _SATB._updateCachedVals
 
     /**
      * The this pointer is BattleManager
      * @since v0.00a @version v0.00a
      */
     _SATB._endAct = function() {
+        // It's ok to run this even if the turn clock counter isn't action now
         if (this.isSATB()) _SATB._updateCoreTurnClockByAct.call(this, 1);
+        //
     }; // _SATB._endAct
 
     /**
@@ -1329,7 +1386,15 @@ function Game_SATBRules() {
      * @returns {Number} The proportion of the ATB to be filled on this frame
      */
     _SATB._coreBaseFillFrameRate = function() {
-        return 1.0 / $gameSystem.satbParamFunc("coreBaseFillATBFrame")();
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return 1.0 / $gameSystem.satbParamFunc("coreBaseFillATBFrame")();
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreBaseFillFrameRate)) {
+            this._satb.coreBaseFillFrameRate =
+                    1.0 / $gameSystem.satbParamFunc("coreBaseFillATBFrame")();
+        }
+        return this._satb.coreBaseFillFrameRate;
     }; // _SATB._coreBaseFillFrameRate
 
     /**
@@ -1339,8 +1404,18 @@ function Game_SATBRules() {
      * @returns {Number} The proportion of the ATB to be filled on this frame
      */
     _SATB._coreBaseFillSecRate = function() {
-        var fillS = $gameSystem.satbParamFunc("coreBaseFillATBSec")();
-        return (1.0 / Graphics._fpsMeter.fps) / fillS;
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return (1.0 / Graphics._fpsMeter.fps) /
+                    $gameSystem.satbParamFunc("coreBaseFillATBSec")();
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreBaseFillSecRate)) {
+            this._satb.coreBaseFillSecRate =
+                    1.0 / $gameSystem.satbParamFunc("coreBaseFillATBSec")();
+        }
+        // The FPS can't be cached as it can vary per frame
+        return this._satb.coreBaseFillSecRate / Graphics._fpsMeter.fps;
+        //
     }; // _SATB._coreBaseFillSecRate
 
     /**
@@ -1480,7 +1555,7 @@ function Game_SATBRules() {
      */
     _SATB._onMaxCoreTurnClock = function(clockMax, overflowFunc) {
         // It's possible to change ATB turn clock unit during the same battle
-        if ($gameSystem.satbParamFunc("canCoreTurnClockOverflow")()) {
+        if (_SATB._canCoreTurnClockOverflow.call(this)) {
             // The other maximum ATB turn clock units must be calculated here
             overflowFunc(clockMax);
             //
@@ -1488,6 +1563,24 @@ function Game_SATBRules() {
         //
         _SATB._endTurn.call(this);
     }; // _SATB._onMaxCoreTurnClock
+
+    /**
+     * The this pointer is BattleManager
+     * Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @returns {Boolean} The check result
+     */
+    _SATB._canCoreTurnClockOverflow = function() {
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return $gameSystem.satbParamFunc("canCoreTurnClockOverflow")();
+            //
+        } else if (!_SATB.IS_VALID_RESULT(this._satb.coreTurnSecClockMax)) {
+            this._satb.canCoreTurnClockOverflow =
+                    $gameSystem.satbParamFunc("canCoreTurnClockOverflow")();
+        }
+        return this._satb.canCoreTurnClockOverflow;
+    }; // _SATB._canCoreTurnClockOverflow
 
     /**
      * The this pointer is BattleManager
@@ -1665,7 +1758,11 @@ function Game_SATBRules() {
         } // _coreActStateNoteChainingRule
     }; // _SATB._PARAM_UPDATES
 
-    _SATB._BOOL_PARAMS = ["_isCached", "_isAlwaysRecacheAllSwitchVars"];
+    _SATB._BOOL_PARAMS = [
+        "_isParamFuncCached",
+        "_isNoteCached",
+        "_isAlwaysRecacheAllSwitchVars"
+    ];
     _SATB._JSON_PARAMS = [
         "IsCoreEnabled",
         "coreBaseFillATBFrame",
@@ -1680,7 +1777,8 @@ function Game_SATBRules() {
     _SATB._CACHED_PARAMS = { coreMaxATBVal: "coreMax" };
     // Not parsing from the parameter names directly's just to play safe
     _SATB._PARAM_MODULES = {
-        _isCached: "core",
+        _isParamFuncCached: "core",
+        _isNoteCached: "core",
         _isAlwaysRecacheAllSwitchVars: "core",
         IsCoreEnabled: "core",
         _coreBaseFillUnit: "core",
@@ -2061,8 +2159,13 @@ function Game_SATBRules() {
          * @param {id} id - The id of the game switch/variable
          */
         _SATB._raiseMemChangeFactors = function(id) {
+            // Parameters not depending on battlers can still use switch/vars
+            if ($gameParty.inBattle()) BattleManager.refreshStatus();
+            //
             if ($gameSystem.satbParam("_isAlwaysRecacheAllSwitchVars")) {
-                return BattleManager.raiseAllSATBMemNoteChangeFactors();
+                // refresh raises these factors and also instantly update values
+                return BattleManager.refreshAllSATBMems();
+                //
             }
             _SATB._raiseMappedMemChangeFactors.call(this, id);
         }; // _SATB._raiseMemChangeFactors
@@ -2076,7 +2179,9 @@ function Game_SATBRules() {
         _SATB._raiseMappedMemChangeFactors = function(id) {
             var noteFactors_ = DM[switchVarIds][id];
             if (!noteFactors_) return;
-            BattleManager.raiseSATBMemChangeFactors(noteFactors_);
+            // Such changes should instantly update values depending on these
+            BattleManager.raiseRefreshedSATBMemChangeFactors(noteFactors_);
+            //
         }; // _SATB._raiseMappedMemChangeFactors
 
     });
@@ -2117,6 +2222,14 @@ function Game_SATBRules() {
         //
         _GBB.updateStateTurns.apply(this, arguments);
     }; // $.updateStateTurns
+
+    _GBB.refresh = $.refresh;
+    _SATB.refresh = $.refresh = function() { // v0.00a - v0.00a; Extended
+        _GBB.refresh.apply(this, arguments);
+        // Added to refresh all superlative ATB notetags lists/results
+        _SATB._refresh.call(this);
+        // Adding this in Game_Battler could wrongly raise the state factor
+    }; // $.refresh
 
     _GBB.hide = $.hide;
     _SATB.hide = $.hide = function() { // v0.00a - v0.00a; Extended
@@ -2181,6 +2294,35 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is Game_BattlerBase.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._refresh = function() {
+        BattleManager.onSATBBattlerRefresh();
+        // Refers to reference tag BATTLER_REFRESH_RECACHE_NOTE
+        this._satb.notes.raiseMarkedChangeFactors();
+        //
+        // It's just to play safe as it might clear or make actions unexpectedly
+        if (BattleManager.isSATB()) _SATB._checkUpdatedResults.call(this);
+        //
+    }; // _SATB._refresh
+
+    /**
+     * The this pointer is Game_BattlerBase.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._checkUpdatedResults = function() {
+        // It must be placed here or checkUpdatedCoreMax would use wrong max val
+        delete this._satb.cachedBaseCoreMax;
+        //
+        // It's possible to change maximum ATB value without ATB frame updates
+        this._satb.phaseTypes.checkUpdatedCoreMax();
+        //
+    }; // _SATB._checkUpdatedResults
+
+    /**
+     * The this pointer is Game_BattlerBase.prototype
      * @since v0.00a @version v0.00a
      * @enum @param {Boolean} wasAutoBattle - Whether battler was auto battle
      * @param {Boolean} wasRestricted - Whether the battler was restricted
@@ -2217,6 +2359,7 @@ function Game_SATBRules() {
     SATB.Game_Battler = { orig: {}, new: {} };
     var _GB = SATB.Game_Battler.orig, _SATB = SATB.Game_Battler.new;
     var $ = Game_Battler.prototype, $$ = Game_BattlerBase.prototype;
+    var BM = SATB.BattleManager.new;
 
     // All these functions are battler script calls
     _SATB.NOTE_FORWARDED_FUNCS = {
@@ -2248,6 +2391,7 @@ function Game_SATBRules() {
     //       {Game_SATBNotes} notes: The notetag results
     //       {Game_SATBPhaseTypes} phaseTypes: All ATB phase/state manipulations
     //       {Non-ve Integer} actTimes: The virtual number of action slots
+    //       {+ve Number} cachedBaseCoreMax: The cached coreMaxATBVal value
 
     _GB.initialize = $.initialize;
     _SATB.initialize = $.initialize = function(actorId) {
@@ -2258,17 +2402,31 @@ function Game_SATBRules() {
         _GB.initialize.apply(this, arguments);
     }; // $.initialize
 
-    ["addState", "removeState"].forEach(function(func) {
-        // It's to avoid overwriting func in Game_BattlerBase from other plugins
-        _GB[func] = $[func] || $$[func];
-        //
-        _SATB[func] = $[func] = function(stateId) { // v0.00a - v0.00a; Extended
-            // Added to mark that state notetags might have changed
+    // It's to avoid overwriting func in Game_BattlerBase from other plugins
+    _GB.addState = $.addState || $$.addState;
+    //
+    _SATB.addState = $.addState = function(stateId) {
+    // v0.00a - v0.00a; Extended
+        // Added to mark that state notetags might have changed
+        if (this.isStateAffected(stateId) && !this.isStateAffected(stateId)) {
             this._satb.notes.markChangeFactors(["states"]);
-            // This must be placed here before calling refresh
-            _GB[func].apply(this, arguments);
-        }; // $[func]
-    });
+        }
+        // This must be placed here before calling refresh
+        _GB.addState.apply(this, arguments);
+    }; // $.addState
+
+    // It's to avoid overwriting func in Game_BattlerBase from other plugins
+    _GB.removeState = $.removeState || $$.removeState;
+    //
+    _SATB.removeState = $.removeState = function(stateId) {
+    // v0.00a - v0.00a; Extended
+        // Added to mark that state notetags might have changed
+        if (this.isStateAffected(stateId)) {
+            this._satb.notes.markChangeFactors(["states"]);
+        }
+        // This must be placed here before calling refresh
+        _GB.removeState.apply(this, arguments);
+    }; // $.removeState
 
     _GB.clearActions = $.clearActions;
     _SATB.clearActions = $.clearActions = function() {
@@ -2278,14 +2436,6 @@ function Game_SATBRules() {
         BattleManager.eraseSATBActBattler(this);
         //
     }; // $.clearActions
-
-    _GB.refresh = $.refresh;
-    _SATB.refresh = $.refresh = function() { // v0.00a - v0.00a; Extended
-        _GB.refresh.apply(this, arguments);
-        // Added to refresh all superlative ATB notetags lists/results
-        _SATB._refresh.call(this);
-        //
-    }; // $.refresh
 
     _GB.onRestrict = $.onRestrict;
     _SATB.onRestrict = $.onRestrict = function() {  // v0.00a - v0.00a; Extended
@@ -2367,11 +2517,14 @@ function Game_SATBRules() {
      * @interface @since v0.00a @version v0.00a
      * @param {{[DatumType]}?} noteFactors_ - The notes and factors to be raised
      */
-    $.raiseSATBChangeFactors = function(noteFactors) {
+    $.raiseSATBChangeFactorsWithRefresh = function(noteFactors) {
         Object.keys(noteFactors).forEach(function(note) {
-            this.raiseSATBNoteChangeFactors(note, noteFactors[note]);
+            // There's no need to extract these codes into a new method
+            this._satb.notes.markNoteChangeFactors(note, noteFactors[note]);
+            //
         }, this);
-    }; // $.raiseSATBChangeFactors
+        this.refresh();
+    }; // $.raiseSATBChangeFactorsWithRefresh
 
     /**
      * Idempotent
@@ -2442,9 +2595,28 @@ function Game_SATBRules() {
     $.fillCoreSATB = function(fillRate) {
         if (this.canMove()) return this._satb.phaseTypes.fillCoreATB(fillRate);
         // Unmovable battlers still need to show the right maximum ATB value
-        this._satb.phaseTypes.checkUpdatedCoreMax();
+        this._satb.phaseTypes.checkUpdatedCoreMax(); // It's just to play safe
         //
     }; // $.fillCoreSATB
+
+    /**
+     * Hotspot/Nullipotent
+     * @interface @since v0.00a @version v0.00a
+     * @returns {+ve Number} The maximum ATB value of the battler involved
+     */
+    $.baseCoreMaxSATB = function() {
+        // It shouldn't be in Game_SATBPhaseTypes as Game_SATBPairs uses it
+        if (!$gameSystem.satbParam("_isParamFuncCached")) {
+            // It must be called here or it'd defeat the purpose of the cache
+            return $gameSystem.satbParamFunc("coreMaxATBVal").call(this);
+            //
+        } else if (!BM.IS_VALID_RESULT(this._satb.cachedBaseCoreMax)) {
+            this._satb.cachedBaseCoreMax =
+                    $gameSystem.satbParamFunc("coreMaxATBVal").call(this);
+        }
+        return this._satb.cachedBaseCoreMax;
+        //
+    }; // $.baseCoreMaxSATB
 
     /**
      * Idempotent
@@ -2488,21 +2660,6 @@ function Game_SATBRules() {
         this.initSATBNotes();
         //
     }; // _SATB._init
-
-    /**
-     * The this pointer is Game_Battler.prototype
-     * Idempotent
-     * @since v0.00a @version v0.00a
-     */
-    _SATB._refresh = function() {
-        BattleManager.onSATBBattlerRefresh();
-        // Refers to reference tag BATTLER_REFRESH_RECACHE_NOTE
-        this._satb.notes.raiseMarkedChangeFactors();
-        //
-        // It's just to play safe as it might clear or make actions unexpectedly
-        if (BattleManager.isSATB()) this._satb.phaseTypes.checkUpdatedCoreMax();
-        // It's possible to change maximum ATB value without ATB frame updates
-    }; // _SATB._refresh
 
     /**
      * The this pointer is Game_Battler.prototype
@@ -2588,7 +2745,7 @@ function Game_SATBRules() {
         // This must be placed here as the actor needs to be fully setup first
     }; // $.setup
 
-    ["initEquips", "changeEquip", "forceChangeEquip"].forEach(function(func) {
+    ["initEquips", "forceChangeEquip"].forEach(function(func) {
         _GA[func] = $[func];
         // It's ok to skip the arguments in the signature as there's arguments
         _SATB[func] = $[func] = function() { // v0.00a - v0.00a; Extended
@@ -2599,6 +2756,18 @@ function Game_SATBRules() {
         }; // $[func]
         //
     });
+
+    _GA.changeEquip = $.changeEquip;
+    _SATB.changeEquip = $.changeEquip = function(slotId, item) {
+    // v0.00a - v0.00a; Extended
+        // Added to mark that weapon/armor notetags might have changed
+        if (this.tradeItemWithParty(item, this.equips()[slotId]) &&
+                (!item || this.equipSlots()[slotId] === item.etypeId)) {
+            this._satb.notes.markChangeFactors(["weapons", "armors"]);
+        }
+        // This must be placed here before calling refresh
+        _GA.changeEquip.apply(this, arguments);
+    }; // $[func]
 
     _GA.changeClass = $.changeClass;
     _SATB.changeClass = $.changeClass = function(classId, keepExp) {
@@ -2759,7 +2928,7 @@ function Game_SATBRules() {
     }; // $.initialize
 
     /**
-     * Idempotent
+     * Destructor/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.clear = function() {
@@ -2775,15 +2944,15 @@ function Game_SATBRules() {
      * @param {Number} fillRate - The increment of current ATB value proportion
      */
     $.fillCoreATB = function(fillRate) {
+        var baseCoreMax = this._battler.baseCoreMaxSATB();
         // The base max should be used or changing max won't change fill rate
-        this.addCoreATB(fillRate * BattleManager.coreBaseMaxSATB());
+        this.addCoreATB(fillRate * baseCoreMax);
         //
     }; // $.fillCoreATB
 
     /**
-      * @interface @since v0.00a @version v0.00a
-      * @param {Number} increment - Increment of current ATB value proportion
-      */
+     * @interface @since v0.00a @version v0.00a
+     */
     $.addSmallestCoreSATBDecrement = function() {
         // Otherwise the increment would be too small for huge max ATB values
         var addMultiplier = Math.min(this.coreMax(), 1);
@@ -2895,12 +3064,7 @@ function Game_SATBRules() {
     "use strict";
 
     var $ = Game_SATBNotes.prototype, _SATB = SATB.Game_SATBNotes = {};
-
-    _SATB.IS_VALID_RESULT = function(result) { // Hotspot
-        // Using undefined is most memory efficient and using null's play safe
-        return result !== null && result !== undefined;
-        //
-    }; // _SATB.IS_VALID_RESULT
+    var BM = SATB.BattleManager.new;
 
     // The suffix of the names of funcions with and without the cache enabled
     _SATB._FUNC_WITH_CACHE = "WithCache";
@@ -2933,7 +3097,7 @@ function Game_SATBRules() {
     }; // $.initialize
 
     /**
-     * Idempotent
+     * Destructor/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.clear = function() {
@@ -2946,6 +3110,7 @@ function Game_SATBRules() {
 
     [
         "markChangeFactors",
+        "markNoteChangeFactors",
         "raiseMarkedChangeFactors",
         "raiseAllChangeFactors",
         "raiseChangeFactors",
@@ -2969,7 +3134,7 @@ function Game_SATBRules() {
      * @returns {*} The chained result from all effective notetags involved
      */
     $.result = function(note, argObj_) {
-        if ($gameSystem.satbParam("_isCached")) {
+        if ($gameSystem.satbParam("_isNoteCached")) {
             return this._resultWithCache(note, argObj_);
         }
         // Refers to reference tag NOTE_RESULT_CACHE
@@ -2987,7 +3152,7 @@ function Game_SATBRules() {
         // Refers to reference tag RUN_DEFAULT_FIRST
         this._pairs.default(note, argObj_);
         //
-        var isCached = $gameSystem.satbParam("_isCached");
+        var isCached = $gameSystem.satbParam("_isNoteCached");
         var funcNameSuffix =
                 isCached ? _SATB._FUNC_WITH_CACHE : _SATB._FUNC_WITHOUT_CACHE;
         var list = this["_pairFuncList" + funcNameSuffix](note, argObj_);
@@ -3003,8 +3168,8 @@ function Game_SATBRules() {
      * @returns {*} The chained result from all effective notetags involved
      */
     $._resultWithCache = function(note, argObj_) {
-        var cache = this._cache.result_(note, argObj_);
-        if (_SATB.IS_VALID_RESULT(cache)) return cache;
+        var cache_ = this._cache.result_(note, argObj_);
+        if (BM.IS_VALID_RESULT(cache_)) return cache_;
         return this._updatedResultWithCache(note, argObj_);
     }; // $._resultWithCache
 
@@ -3075,8 +3240,8 @@ function Game_SATBRules() {
         var funcName = "_partResult" + funcNameSuffix + "_";
         var resultFunc = this[funcName].bind(this, note, argObj_);
         //
-        // _SATB.IS_VALID_RESULT doesn't use the original array
-        return priorities.mapFilter(resultFunc, _SATB.IS_VALID_RESULT);
+        // BM.IS_VALID_RESULT doesn't use the original array
+        return priorities.mapFilter(resultFunc, BM.IS_VALID_RESULT);
         //
     }; // $._partResults
 
@@ -3104,8 +3269,8 @@ function Game_SATBRules() {
      * @returns {*?} The chained result from this effective notetags part
      */
     $._partResultWithCache_ = function(note, argObj_, part) {
-        var cache = this._cache.partResult_(note, argObj_, part);
-        if (_SATB.IS_VALID_RESULT(cache)) return cache;
+        var cache_ = this._cache.partResult_(note, argObj_, part);
+        if (BM.IS_VALID_RESULT(cache_)) return cache_;
         return this._updatedPartResultWithCache_(note, argObj_, part);
     }; // $._partResultWithCache_
 
@@ -3119,10 +3284,10 @@ function Game_SATBRules() {
      */
     $._updatedPartResultWithCache_ = function(note, argObj_, part) {
         // Refers to reference tag NOTE_RESULT_CACHE
-        var result = this._uncachedPartResult_(
+        var result_ = this._uncachedPartResult_(
                 note, argObj_, part, _SATB._FUNC_WITH_CACHE);
-        this._cache.updatePartResult(note, argObj_, part, result);
-        return result;
+        this._cache.updatePartResult(note, argObj_, part, result_);
+        return result_;
         //
     }; // $._updatedPartResultWithCache_
 
@@ -3138,10 +3303,11 @@ function Game_SATBRules() {
     $._uncachedPartResult_ = function(note, argObj_, part, funcNameSuffix) {
         var funcName = "_pairFuncListPart" + funcNameSuffix;
         var list = this[funcName](note, part, argObj_);
-        // The result of the 1st pairFunc must be the initial result of the list
         if (list.length <= 0) return undefined;
-        var initVal = this._pairs.run_(argObj_, note, list[0]);
-        return this._rules.chainedResult(list.slice(1), note, argObj_, initVal);
+        // The result of the 1st pairFunc must be the initial result of the list
+        var initVal_ = this._pairs.run_(argObj_, note, list[0]);
+        return this._rules.chainedResult(
+                list.slice(1), note, argObj_, initVal_);
         // Refer to reference tag ASSOCIATIVE_CHAINING_RULE
     }; // $._uncachedPartResult_
 
@@ -3180,10 +3346,10 @@ function Game_SATBRules() {
      */
     $._pairFuncListWithCache = function(note, argObj_) {
         // The functions in the list aren't bound yet so argObj_ is not needed
-        var cache = this._cache.pairFuncList_(note);
+        var cache_ = this._cache.pairFuncList_(note);
         //
         // A valid list must be an Array which must be truthy
-        return cache || this._updatedPairFuncListWithCache(note, argObj_);
+        return cache_ || this._updatedPairFuncListWithCache(note, argObj_);
         //
     }; // $._pairFuncListWithCache
 
@@ -3245,10 +3411,10 @@ function Game_SATBRules() {
      */
     $._pairFuncListPartWithCache = function(note, part, argObj_) {
         // The functions in the list aren't bound yet so argObj_ is not needed
-        var cache = this._cache.pairFuncListPart_(note, part, argObj_);
+        var cache_ = this._cache.pairFuncListPart_(note, part, argObj_);
         //
         // A valid list must be an Array which must be truthy
-        if (cache) return cache;
+        if (cache_) return cache_;
         return this._updatedPairFuncListPartWithCache(note, part, argObj_);
         //
     }; // $._pairFuncListPartWithCache
@@ -3442,6 +3608,18 @@ function Game_SATBRules() {
     $.markChangeFactors = function(factors) {
         factors.forEach(this._markChangeFactor, this);
     }; // $.markChangeFactors
+
+    /**
+     * Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {NoteType} note - The note to have its change factor marked
+     * @param {[Factor]} factors - The change factors to be marked for this note
+     */
+    $.markNoteChangeFactors = function(note, factors) {
+        factors.forEach(function(factor) {
+            this._markNoteChangeFactor(factor, note);
+        }, this);
+    }; // $.markNoteChangeFactors
 
     /**
      * Potential Hotspot/Idempotent
@@ -3722,9 +3900,7 @@ function Game_SATBRules() {
 
     // Refers to reference tag NOTE_DEFAULT_RESULTS
     _SATB._DEFAULT_RESULTS = { // Hotspot
-        coreMax: function() {
-            return BattleManager.coreBaseMaxSATB(this._battler);
-        },
+        coreMax: function() { return this._battler.baseCoreMaxSATB(); },
         // A notetag chaining boolean values can't have any valid default value
         coreActState: function() { return undefined; }
         //
@@ -3742,7 +3918,7 @@ function Game_SATBRules() {
     //
     _SATB._RESULT_TYPES = { // Potential Hotspot
         bool: function(result) { return result.toLowerCase() === "true"; },
-        num: function(result) { return +result; },
+        num: _SATB._STRING_TO_NUM,
         numArray: function(result) {
             // Refers to reference tag NUMBER_ARRAY
             return result.split("_").fastMap(_SATB._STRING_TO_NUM);
@@ -3812,7 +3988,7 @@ function Game_SATBRules() {
     $.initialize = function(battler) { this._battler = battler; };
 
     /**
-     * Idempotent
+     * Destructor/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.clear = function() { delete this._battler; /* Avoids memory leaks */ };
@@ -3829,7 +4005,7 @@ function Game_SATBRules() {
     }; // $.default
 
     /**
-     * Potential Hotspot/Pure Function
+     * Potential Hotspot/Nullipotent
      * @interface @since v0.00a @version v0.00a
      * @param {NoteType} note - The note to have its pairs retrieved
      * @param {Datum?} datum_ - The datum having the notetag involved
@@ -3840,7 +4016,9 @@ function Game_SATBRules() {
         var pairs = datum_.meta.satb[note];
         if (!pairs) return [];
         var isValidPairFunc = _SATB._IS_VALID_PAIR.bind(_SATB, note);
+        // It's not pure due to the cfg, switch, event, var and script suffixes
         var pairFunc = _SATB._PAIR_FUNC.bind(this, note, datum_);
+        //
         return pairs.filterMap(isValidPairFunc, pairFunc);
     }; // $.pairFuncs
 
@@ -3850,8 +4028,8 @@ function Game_SATBRules() {
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {NoteType} note - The note to have its contents run
      * @param {PairFunc} pairFunc - The unbounded function notetag pair
-     * @param {<T>?} latestChainedResult_ - The latest chained notetag result
-     * @returns {<T>?} The result of the notetag function involved
+     * @param {*?} latestChainedResult_ - The latest chained notetag result
+     * @returns {*?} The result of the notetag function involved
      */
     $.run_ = function(argObj_, note, pairFunc, latestChainedResult_) {
         // Using _NOTE_ARG_OBJS on the wrong suffix will have the wrong context
@@ -3875,7 +4053,7 @@ function Game_SATBRules() {
     "use strict";
 
     var $ = Game_SATBRules.prototype, _SATB = SATB.Game_SATBRules = {};
-    var GSATBN = SATB.Game_SATBNotes;
+    var BM = SATB.BattleManager.new;
 
     // Refers to reference tag NOTE_OPERATORS
     _SATB._IS_ASSOCIATIVE_OPERATORS = {
@@ -3894,9 +4072,9 @@ function Game_SATBRules() {
     _SATB._CONCAT_EVERY_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
         if (result.length <= 0) return result;
-        var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        return runResult ? _SATB._CONCAT_EVERY_VAL_RESULT_FUNC(
-                note, argObj_, result, runResult) : [];
+        var runResult_ = this._pairs.run_(argObj_, note, pairFunc, result);
+        return runResult_ ? _SATB._CONCAT_EVERY_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult_) : [];
     }; // _SATB._CONCAT_EVERY_RESULT_FUNC
     // The control coupling's to simplify the use of these functions
     _SATB._CONCAT_EVERY_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
@@ -3908,9 +4086,9 @@ function Game_SATBRules() {
     }; // _SATB._CONCAT_EVERY_VAL_RESULT_FUNC
     _SATB._CONCAT_SOME_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
-        var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        return runResult ? _SATB._CONCAT_SOME_VAL_RESULT_FUNC(
-                note, argObj_, result, runResult) : result;
+        var runResult_ = this._pairs.run_(argObj_, note, pairFunc, result);
+        return runResult_ ? _SATB._CONCAT_SOME_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult_) : result;
     }; // _SATB._CONCAT_SOME_RESULT_FUNC
     _SATB._CONCAT_SOME_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
     // Potential Hotspot
@@ -3927,9 +4105,9 @@ function Game_SATBRules() {
     // Potential Hotspot
         var keys = Object.keys(result);
         if (keys.length <= 0) return result;
-        var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        return runResult ? _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC(
-                note, argObj_, result, runResult) : {};
+        var runResult_ = this._pairs.run_(argObj_, note, pairFunc, result);
+        return runResult_ ? _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult_) : {};
     }; // _SATB._MIX_EVERY_OBJ_RESULT_FUNC
     _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
     // Potential Hotspot
@@ -3947,9 +4125,9 @@ function Game_SATBRules() {
     }; // _SATB._MIX_EVERY_OBJ_VAL_RESULT_FUNC
     _SATB._MIX_SOME_OBJ_RESULT_FUNC = function(note, argObj_, result, pairFunc) {
     // Potential Hotspot
-        var runResult = this._pairs.run_(argObj_, note, pairFunc, result);
-        return runResult ? _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC(
-                note, argObj_, result, runResult) : result;
+        var runResult_ = this._pairs.run_(argObj_, note, pairFunc, result);
+        return runResult_ ? _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC(
+                note, argObj_, result, runResult_) : result;
     }; // _SATB._MIX_SOME_OBJ_RESULT_FUNC
     _SATB._MIX_SOME_OBJ_VAL_RESULT_FUNC = function(note, argObj_, result, valResult) {
     // Potential Hotspot
@@ -3965,8 +4143,8 @@ function Game_SATBRules() {
     _SATB._OPERATOR_RESULT_FUNC = function(operator) { // Potential Hotspot
         var content = [
             "'use strict';",
-            "var runResult = this._pairs.run_(argObj_, note, pairFunc, result);",
-            "return result " + operator + " runResult;"
+            "var runResult_ = this._pairs.run_(argObj_, note, pairFunc, result);",
+            "return result " + operator + " runResult_;"
         ].join("\n");
         return new Function("note", "argObj_", "result", "pairFunc", content);
     }; // _SATB._OPERATOR_RESULT_FUNC
@@ -4017,9 +4195,7 @@ function Game_SATBRules() {
             // binding func directly would break the shared constant functions
             var f = func.bind(this, note, argObj_);
             //
-            if (GSATBN.IS_VALID_RESULT(initVal_)) {
-                return list.reduce(f, initVal_);
-            }
+            if (BM.IS_VALID_RESULT(initVal_)) return list.reduce(f, initVal_);
             var op = _SATB._RESULT_CHAINING_OPERATION[note];
             // The initial value of concat must be an Array
             if (op === "concat") return list.reduce(f, []);
@@ -4117,7 +4293,7 @@ function Game_SATBRules() {
     $.initialize = function(pairs) { this._pairs = pairs; };
 
     /**
-     * Idempotent
+     * Destructor/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
     $.clear = function() { this._pairs.clear(); /* Avoids memory leaks */ };
