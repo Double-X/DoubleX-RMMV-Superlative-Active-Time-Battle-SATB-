@@ -69,6 +69,8 @@
  *      1. Each actor will have his/her/its virtual action slot reduced by 1
  *         upon a failed party escape attempt, as if it were just another
  *         normnal action costing 1 virtual action slot
+ *      2. However, failed escape attempts won't increase the turn clock
+ *         counter even if its unit is the number of actions executed
  *      Agility(Not fully applicable with the Rate Module enabled):
  *      1. The fill rate of the battler ATB value will be multiplied by the
  *         agility of that battler divided by the average of those of all
@@ -314,8 +316,8 @@
  *                            notetag, so the function arguments are exactly
  *                            the same as the cfg counterpart)
  *            (Reference tag: NOTE_SUFFIX)
- *            USING eval AND script suffixes WITHOUT SETTING _isCached on CAN
- *            LEAD TO SEVERE LAG AND FPS DROP
+ *            USING eval AND script suffixes WITHOUT SETTING _isNoteCached on
+ *            CAN LEAD TO SEVERE LAG AND FPS DROP
  *            It's highly encouraged and recommended not to change from using
  *            a switch/variable to using another, nor from not using one to
  *            using one or vice versa in the game, as the script calls needed
@@ -468,9 +470,9 @@
  *           $gameSystem.satbParam("IsCoreEnabled") will return the String
  *           contents of a function returning a Boolean indicating whether
  *           this plugin's enabled
- *           $gameSystem.satbParam("_isCached") will return the Boolean value
- *           indicating whether the effective notetag lists and values will be
- *           cached
+ *           $gameSystem.satbParam("_isNoteCached") will return the Boolean
+ *           value indicating whether the effective notetag lists and values
+ *           will be cached
  *      3. $gameSystem.setSATBParam(param, funcContent, switchVar, id, factors)
  *         - Sets the stored value of param listed in the parameter plugin or
  *           their configuration counterpart in the configuration plugin as
@@ -631,6 +633,9 @@
  *      10. (Advanced)raiseAllSATBNoteChangeFactors()
  *          - Applies the script call
  *            raiseSATBNoteChangeFactors(note, factors) to all notes
+ *          - You should probably use refresh() instead of this script call
+ *            As refresh() will have all the effects this script call has, and
+ *            also immediately recache values that are no longer valid
  *      11. (Advanced)raiseSATBNoteChangeFactors(note, factors)
  *         - Notifies that the notetag note might need to be recached due to
  *           potential changes in factors factors
