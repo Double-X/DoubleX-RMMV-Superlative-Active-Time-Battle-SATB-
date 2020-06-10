@@ -33,6 +33,11 @@
  *         plugin in intended ways
  *      4. Decent RMMV plugin development proficiency to fully utilize this
  *         plugin with creative and unintended uses
+ *      Knowledge:
+ *      1. Basic knowledge on what the default RMMV editor does in general
+ *      2. Basic knowledge on what the default RMMV battle system does on the
+ *         user level
+ *      3. Basic knowledge on what an ATB system does in general
  *----------------------------------------------------------------------------
  *    # Inherited Behaviors From The Default RMMV Battle System
  *      Action Speed:
@@ -46,6 +51,7 @@
  *         queue, meaning that the longer the battler's in the queue, the more
  *         such action speed bonuses will be received by that battler, so that
  *         battler will be placed more and more up front in the queue
+ *      3. All these can be changed in the Speed Module
  *      Action Times+(Not fully applicable with the Action Module enabled):
  *      1. Every battler always has at most 1 real action slot, meaning that
  *         each battler can only input 1 action at a time
@@ -196,15 +202,16 @@
  *        battler and why doesn't it let players change among inputable
  *        actors? All these are essential UX features. Without them, using
  *        just the Core Module can only result in a fully broken ATB system.
+ *        (Well, not being able to change the ATB wait conditions sucks too)
  *    A3. It's because these features aren't technically essential to run an
  *        ATB system plugin, nor they're behaviors inherited from the default
  *        RMMV battle system(It doesn't let you change the input sequence nor
  *        show the actual action execution sequence). All these features that
  *        are missing in the Core Module are covered in the Bar Module and
- *        Hotkey Module. That's why only these 2 modules are enabled by
- *        default(All the other optional modules are disabled so you don't
- *        have to deal with so many modules all at once before being familiar
- *        with this plugin).
+ *        Hotkey Module(The similar logic applies to the Wait Module). That's
+ *        why only these 3 optional modules are enabled by default(All the
+ *        other optional modules are disabled so you don't have to deal with
+ *        so many modules all at once before being familiar with this plugin).
  *    Q4. (Advanced)Why the caching mechanism's so complicated and convoluted
  *        in this plugin? It's extremely costly and troublesome to work around
  *        when I've some unintended and creative uses of this plugin.
@@ -223,7 +230,8 @@
  *      Demo:
  *      1. https://github.com/Double-X/DoubleX-RMMV-Superlative-Active-Time-Battle-SATB-
  *      Videos:
- *      1.
+ *      1. Core Module Only
+ *      - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
  *      Posts:
  *      1.
  *----------------------------------------------------------------------------
@@ -408,7 +416,7 @@
  *           not inputable
  *           (Reference tag: INCREASED_MAX_CORE_ATB_NOT_INPUTABLE)
  *         - (Advanced) The maximum ATB value of the battler must be much,
- *           much larger than 2 ^ -32
+ *           much larger than 2 ^ -32, but much, much smaller than 2 ^ 32
  *           (Reference tag: SMALLEST_ATB_VAL_INCREMENT)
  *         - E.g.:
  *           If _coreMaxATBValNoteChainingRule is set as *, and the only

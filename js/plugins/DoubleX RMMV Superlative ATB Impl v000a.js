@@ -16,6 +16,8 @@ DoubleX_RMMV["Superlative ATB Implementations"] = "v0.00a";
  *         - Thorough comprehension on the essence of this plugin on the user
  *           level
  *         - Thorough comprehension on the essence of RMMV ATB system plugins
+ *         - Thorough comprehension on the essence of the default RMMV battle
+ *           system implementations
  *         - Advanced RMMV plugin development proficiency to fully comprehend
  *           this plugin
  *      2. All reference tags are to have clear references between the
@@ -1099,7 +1101,7 @@ function Game_SATBRules() {
      * @param {Game_Battler} battler - The battler to become able to exec acts
      */
     BattleManager.addSATBActBattler = function(battler) {
-        if (!this.isSATB()) return;
+        if (!$gameParty.inBattle() || !this.isSATB()) return;
         // No actor should be both inputable and able to execute actions
         if (battler.isActor()) this.eraseSATBInputableActor(battler);
         //
@@ -2270,6 +2272,7 @@ function Game_SATBRules() {
     }; // $.eraseCoreSATBActs
 
     /**
+     * It's practically idempotent but not theoretically so
      * @interface @since v0.00a @version v0.00a
      */
     $.onToggleAutoInputSATBActs = function() {
@@ -2285,7 +2288,7 @@ function Game_SATBRules() {
      * @param {State} state - The state to have its turn updated
      */
     _SATB._updateStateTurn = function(timing, state) {
-        if (this._satb.notes.result("coreActState", { state: state })) return;
+        if (this._satb.notes.result_("coreActState", { state: state })) return;
         var id = state.id;
         if (state.autoRemovalTiming === timing && this._stateTurns[id] > 0) {
             this._stateTurns[id] -= 1;
@@ -2705,7 +2708,7 @@ function Game_SATBRules() {
      * @param {State} state - The action state to have its turn updated
      */
     _SATB._updateActStateTurn = function(state) {
-        if (!this._satb.notes.result("coreActState", { state: state })) return;
+        if (!this._satb.notes.result_("coreActState", { state: state })) return;
         var id = state.id;
         if (this._stateTurns[id] > 0) return this._stateTurns[id] -= 1;
         this.removeState(id);
@@ -3022,7 +3025,7 @@ function Game_SATBRules() {
      * @interface @since v0.00a @version v0.00a
      * @returns {+ve Number} The maximum ATB value of the battler
      */
-    $.coreMax = function() { return this._notes.result("coreMax"); };
+    $.coreMax = function() { return this._notes.result_("coreMax"); };
 
     /**
      * Hotspot/Idempotent
@@ -3036,7 +3039,7 @@ function Game_SATBRules() {
         if (!wasFull && isFull) return this._onCoreATBBecomeFull(coreMax);
         //
         // Refers to reference tag INCREASED_MAX_CORE_ATB_NOT_INPUTABLE
-        if (wasFull && !isFull) this._battler.clearActions();
+        if (wasFull && !isFull) this._onCoreATBBecomeNotFull();
         //
     }; // $.checkUpdatedCoreMax
 
@@ -3048,9 +3051,17 @@ function Game_SATBRules() {
     $._onCoreATBBecomeFull = function(coreMax) {
         // Passing coreMax instead of calling this.coreMax() is for performance
         this._lastCoreATB = this._coreATB = coreMax;
+        //
+        // It's okay for unmovable battlers to have full atb which is be reset
         if (this._battler.canMove()) this._battler.makeActions();
         //
     }; // $._onCoreATBBecomeFull
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    $._onCoreATBBecomeNotFull = function() { this._battler.clearActions(); };
 
 })(DoubleX_RMMV.SATB); // Game_SATBPhaseTypes.prototype
 
@@ -3131,16 +3142,16 @@ function Game_SATBRules() {
      * @interface @since v0.00a @version v0.00a
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $.result = function(note, argObj_) {
+    $.result_ = function(note, argObj_) {
         if ($gameSystem.satbParam("_isNoteCached")) {
-            return this._resultWithCache(note, argObj_);
+            return this._resultWithCache_(note, argObj_);
         }
         // Refers to reference tag NOTE_RESULT_CACHE
-        return this._uncachedResult(note, argObj_, _SATB._FUNC_WITHOUT_CACHE);
+        return this._uncachedResult_(note, argObj_, _SATB._FUNC_WITHOUT_CACHE);
         //
-    }; // $.result
+    }; // $.result_
 
     /**
      * Hotspot
@@ -3150,7 +3161,7 @@ function Game_SATBRules() {
      */
     $.run = function(note, argObj_) {
         // Refers to reference tag RUN_DEFAULT_FIRST
-        this._pairs.default(note, argObj_);
+        this._pairs.default_(note, argObj_);
         //
         var isCached = $gameSystem.satbParam("_isNoteCached");
         var funcNameSuffix =
@@ -3165,29 +3176,29 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $._resultWithCache = function(note, argObj_) {
+    $._resultWithCache_ = function(note, argObj_) {
         var cache_ = this._cache.result_(note, argObj_);
         if (BM.IS_VALID_RESULT(cache_)) return cache_;
-        return this._updatedResultWithCache(note, argObj_);
-    }; // $._resultWithCache
+        return this._updatedResultWithCache_(note, argObj_);
+    }; // $._resultWithCache_
 
     /**
      * Potential Hotspot/Idempotent
      * @since v0.00a @version v0.00a
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $._updatedResultWithCache = function(note, argObj_) {
+    $._updatedResultWithCache_ = function(note, argObj_) {
         // Refers to reference tag NOTE_RESULT_CACHE
-        var result =
-                this._uncachedResult(note, argObj_, _SATB._FUNC_WITH_CACHE);
-        this._cache.updateResult(note, argObj_, result);
-        return result;
+        var result_ =
+                this._uncachedResult_(note, argObj_, _SATB._FUNC_WITH_CACHE);
+        this._cache.updateResult(note, argObj_, result_);
+        return result_;
         //
-    }; // $._updatedResultWithCache
+    }; // $._updatedResultWithCache_
 
     /**
      * Potential Hotspot/Idempotent
@@ -3195,16 +3206,16 @@ function Game_SATBRules() {
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @enum @param {String} funcNameSuffix - WithoutCache/WithCache
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $._uncachedResult = function(note, argObj_, funcNameSuffix) {
+    $._uncachedResult_ = function(note, argObj_, funcNameSuffix) {
         // Only associative results can directly reuse cached part results
         if (this._rules.isAssociative(note)) {
-            return this._associativeResult(note, argObj_, funcNameSuffix);
+            return this._associativeResult_(note, argObj_, funcNameSuffix);
         }
-        return this._nonAssociativeResult(note, argObj_, funcNameSuffix);
+        return this._nonAssociativeResult_(note, argObj_, funcNameSuffix);
         //
-    }; // $._uncachedResult
+    }; // $._uncachedResult_
 
     /**
      * Potential Hotspot/Idempotent
@@ -3212,18 +3223,18 @@ function Game_SATBRules() {
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @enum @param {String} funcNameSuffix - WithoutCache/WithCache
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $._associativeResult = function(note, argObj_, funcNameSuffix) {
+    $._associativeResult_ = function(note, argObj_, funcNameSuffix) {
         // These are the list of value results of all parts rather than PairFunc
         var partResults = this._partResults(note, argObj_, funcNameSuffix);
         //
-        var defaultResult = this._pairs.default(note, argObj_);
+        var defaultResult_ = this._pairs.default_(note, argObj_);
         // Refer to reference tag ASSOCIATIVE_CHAINING_RULE
-        return this._rules.chainedValResult(
-                partResults, note, argObj_, defaultResult);
+        return this._rules.chainedValResult_(
+                partResults, note, argObj_, defaultResult_);
         //
-    }; // $._associativeResult
+    }; // $._associativeResult_
 
     /**
      * Potential Hotspot/Idempotent
@@ -3232,7 +3243,6 @@ function Game_SATBRules() {
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @enum @param {String} funcNameSuffix - WithoutCache/WithCache
      * @returns {[*]} The chained results of all effective notetags parts
-     * @todo Combines map with filter to erase throwaway Array to be GC friendly
      */
     $._partResults = function(note, argObj_, funcNameSuffix) {
         // Refers to reference tag NOTE_LIST_PART
@@ -3306,7 +3316,7 @@ function Game_SATBRules() {
         if (list.length <= 0) return undefined;
         // The result of the 1st pairFunc must be the initial result of the list
         var initVal_ = this._pairs.run_(argObj_, note, list[0]);
-        return this._rules.chainedResult(
+        return this._rules.chainedResult_(
                 list.slice(1), note, argObj_, initVal_);
         // Refer to reference tag ASSOCIATIVE_CHAINING_RULE
     }; // $._uncachedPartResult_
@@ -3317,13 +3327,13 @@ function Game_SATBRules() {
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @enum @param {String} funcNameSuffix - WithoutCache/WithCache
-     * @returns {*} The chained result from all effective notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
      */
-    $._nonAssociativeResult = function(note, argObj_, funcNameSuffix) {
+    $._nonAssociativeResult_ = function(note, argObj_, funcNameSuffix) {
         var list = this["_pairFuncList" + funcNameSuffix](note, argObj_);
-        var defaultResult = this._pairs.default(note, argObj_);
-        return this._rules.chainedResult(list, note, argObj_, defaultResult);
-    }; // $._nonAssociativeResult
+        var defaultResult = this._pairs.default_(note, argObj_);
+        return this._rules.chainedResult_(list, note, argObj_, defaultResult);
+    }; // $._nonAssociativeResult_
 
     /**
      * Hotspot/Idempotent
@@ -3721,13 +3731,13 @@ function Game_SATBRules() {
      * @param {NoteType} note - The note to have its end result updated
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {DatumType} part - The note part to have its part result updated
-     * @param {*} result - The effective notetag list part result to be cached
+     * @param {*?} result_ - The effective notetag list part result to be cached
      */
-    $.updatePartResult = function(note, argObj_, part, result) {
+    $.updatePartResult = function(note, argObj_, part, result_) {
         // An undefined key means the part result shouldn't be cached
         var key = _SATB._NOTE_KEY(argObj_, part);
-        if (key) this._partResults[note][key] = result;
-        //
+        if (key) this._partResults[note][key] = result_;
+        // Caching an invalid result effectively means invalidating the cache
     }; // $.updatePartResult
 
     /**
@@ -4000,9 +4010,9 @@ function Game_SATBRules() {
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @returns {*} The default result of the note
      */
-    $.default = function(note, argObj_) {
+    $.default_ = function(note, argObj_) {
         return _SATB._DEFAULT_RESULTS[note].call(this, argObj_);
-    }; // $.default
+    }; // $.default_
 
     /**
      * Potential Hotspot/Nullipotent
@@ -4159,21 +4169,21 @@ function Game_SATBRules() {
     // The this pointer is Game_SATBRules.prototype
     _SATB._FIRST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
-        if (list.length <= 0) return this._pairs.default(note, argObj_);
+        if (list.length <= 0) return this._pairs.default_(note, argObj_);
         return this._pairs.run_(argObj_, note, list[0]);
     }; // _SATB._FIRST_LIST_MONO_FUNC
     _SATB._FIRST_VAL_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
-        return list[0] || this._pairs.default(note, argObj_);
+        return list[0] || this._pairs.default_(note, argObj_);
     }; // _SATB._FIRST_VAL_MONO_FUNC
     _SATB._LAST_LIST_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
-        if (list.length <= 0) return this._pairs.default(note, argObj_);
+        if (list.length <= 0) return this._pairs.default_(note, argObj_);
         return this._pairs.run_(argObj_, note, list[list.length - 1]);
     }; // _SATB._LAST_LIST_MONO_FUNC
     _SATB._LAST_VAL_MONO_FUNC = function(list, note, argObj_) {
      // Potential Hotspot
-        return list[list.length - 1] || this._pairs.default(note, argObj_);
+        return list[list.length - 1] || this._pairs.default_(note, argObj_);
     }; // _SATB._LAST_VAL_MONO_FUNC
     //
     _SATB._MONO_RESULT_CHAINING_RULES = function(func, valFunc) {
@@ -4318,14 +4328,14 @@ function Game_SATBRules() {
      * @param {*?} initVal_ - The initial result to chain the notetag list
      * @returns {*} The chained result from the notetag list of note involved
      */
-    $.chainedResult = function(list, note, argObj_, initVal_) {
+    $.chainedResult_ = function(list, note, argObj_, initVal_) {
         var chainingRule = this._chainingRule(note);
         var op = _SATB._RESULT_CHAINING_OPERATION[note];
         // Checks _SATB._RESULT_CHAINING_RULE_FUNC for details
         var resultFunc = _SATB._RESULT_CHAINING_RULES[chainingRule][op];
         return resultFunc.call(this, list, note, argObj_, initVal_);
         //
-    }; // $.chainedResult
+    }; // $.chainedResult_
 
     /**
      * Potential Hotspot/Nullipotent
@@ -4336,14 +4346,14 @@ function Game_SATBRules() {
      * @param {<T>?} initVal_ - The initial result to chain the notetag list
      * @returns {<T>} The chained result from the notetag results involved
      */
-    $.chainedValResult = function(list, note, argObj_, initVal_) {
+    $.chainedValResult_ = function(list, note, argObj_, initVal_) {
         var chainingRule = this._chainingRule(note);
         var valOp = _SATB._RESULT_CHAINING_OPERATION[note] + "Val";
         // Checks _SATB._RESULT_CHAINING_RULE_FUNC for details
         var resultFunc = _SATB._RESULT_CHAINING_RULES[chainingRule][valOp];
         return resultFunc.call(this, list, note, argObj_, initVal_);
         //
-    }; // $.chainedValResult
+    }; // $.chainedValResult_
 
     /**
      * Potential Hotspot/Nullipotent
@@ -4739,11 +4749,8 @@ function Game_SATBRules() {
      */
     $.closeSATBInputWins = function() {
         _SATB._deactivateHideSelectionWins.call(this);
-        // It's not worth making _cmdWins just to group these codes together
-        this._actorCommandWindow.deactivate();
-        this._actorCommandWindow.close();
-        this._partyCommandWindow.close();
-        //
+        _SATB._closeDeactivateActorCmdWin.call(this);
+        _SATB._closeDeactivatePartyCmdWin.call(this);
     }; // $.closeSATBInputWins
 
     /**
@@ -4813,7 +4820,9 @@ function Game_SATBRules() {
         var hasNoInputableActor = inputableIndices.length <= 0;
         if (this._partyCommandWindow.active) {
             // There's no need to setup a new inputable actor in this case
-            if (hasNoInputableActor) this._partyCommandWindow.close();
+            if (hasNoInputableActor) {
+                _SATB._closeDeactivatePartyCmdWin.call(this);
+            }
             return;
             //
         }
@@ -4830,14 +4839,32 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._onDeselectActor = function() {
-        _SATB._deselectOpenStatusWin.call(this);
         _SATB._deactivateHideSelectionWins.call(this);
-        // It's possible for the open actor command window to be inactive
-        this._actorCommandWindow.close();
-        if (!this._actorCommandWindow.active) return;
-        this._actorCommandWindow.deactivate();
-        //
+        _SATB._closeDeactivateActorCmdWin.call(this);
+        _SATB._deselectOpenStatusWin.call(this);
     }; // _SATB._onDeselectActor
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._deactivateHideSelectionWins = function() {
+        // Close all selection windows for selected actor becoming not inputable
+        _SATB._selectionWins.call(this).forEach(
+                _SATB._DEACTIVATE_HIDE_SELECTION_WIN);
+        //
+    }; // _SATB._deactivateHideSelectionWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Idempotent
+     * @since v0.00a @version v0.00a
+     */
+    _SATB._closeDeactivateActorCmdWin = function() {
+        this._actorCommandWindow.close();
+        this._actorCommandWindow.deactivate();
+    }; // _SATB._closeDeactivateActorCmdWin
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -4858,12 +4885,10 @@ function Game_SATBRules() {
      * Idempotent
      * @since v0.00a @version v0.00a
      */
-    _SATB._deactivateHideSelectionWins = function() {
-        // Close all selection windows for selected actor becoming not inputable
-        _SATB._selectionWins.call(this).forEach(
-                _SATB._DEACTIVATE_HIDE_SELECTION_WIN);
-        //
-    }; // _SATB._deactivateHideSelectionWins
+    _SATB._closeDeactivatePartyCmdWin = function() {
+        this._partyCommandWindow.close();
+        this._partyCommandWindow.deactivate();
+    }; // _SATB._closeDeactivatePartyCmdWin
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -4946,7 +4971,7 @@ function Game_SATBRules() {
         // The currently active window will be activated after it can be shown
         var win = this[winName], isActive = win.active;
         this._satb.wasWinActive[winName] = isActive;
-        if (isActive) win.deactivate();
+        win.deactivate();
         //
         win.hide();
     }; // _SATB._hideSelectionWin

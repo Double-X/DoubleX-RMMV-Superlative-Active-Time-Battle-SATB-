@@ -11,6 +11,8 @@ DoubleX_RMMV["Superlative ATB Unit Tests"] = "v0.00a";
  * the unit test to report that those values are invalid before even starting
  * a new game or loading a saved game, because those game switches/variables
  * don't have their values set yet at that moment
+ * You can open this unit test plugin js file to set how the failed tests are
+ * reported
  * DON'T ENABLE THIS TEST UNIT PLUGIN WITHOUT ENABLING THE SATB PLUGIN ITSELF
  * UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  */
@@ -37,7 +39,8 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
          */
         showFailMsg: function(val, param, cond) {
             // Effectively disables unit test when game switch with id 6 is on
-            if ($gameSwitches.value(6)) try { x; } catch (err) {
+            if (!$gameSwitches || !$gameSwitches.value(6)) return;
+            try { x; } catch (err) {
                 console.warn([
                     param + " in DoubleX RMMV Superlative ATB has value:",
                     val,
@@ -111,9 +114,14 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         noteTypes: { coreMax: "checkPositiveNum", coreActState: "checkBool" },
         //
         // Stores all the chained notetag type result unit tests
-        chainedNoteTypes: {
+        defaultNoteTypes: {
             coreMax: "checkPositiveNum",
-            coreActState: "checkBool"
+            coreActState: "checkInvalidVal"
+        },
+        chainedNoteTypes: { coreMax: "checkPositiveNum" },
+        noteChainingRules: {
+            coreMax: "checkChainNumRule",
+            coreActState: "checkChainBoolRule"
         },
         // Stores all the notetag type argument requirements
         noteArgObjs: {
@@ -277,10 +285,10 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
          * @since v0.00a @version v0.00a
          */
         checkCoreBaseFillUnit: function(val, param) {
-            if (val === "coreBaseFillATBFrame") return;
-            if (val === "coreBaseFillATBSec") return;
-            SATBUT.showFailMsg(val, param, "It should be either " +
-                    "coreBaseFillATBFrame or coreBaseFillATBSec!");
+            SATBUT.checkFuncs.checkVal(val, param, [
+                "coreBaseFillATBFrame",
+                "coreBaseFillATBSec"
+            ]);
         }, // checkCoreBaseFillUnit
 
         /**
@@ -290,19 +298,19 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
          * @since v0.00a @version v0.00a
          */
         checkCoreTurnUnit: function(val, param) {
-            if (val === "coreTurnATBTime") return;
-            if (val !== "coreTurnATBAct") SATBUT.showFailMsg(val, param,
-                    "It should be either coreTurnATBTime or coreTurnATBAct!");
+            SATBUT.checkFuncs.checkVal(val, param, [
+                "coreTurnATBTime",
+                "coreTurnATBAct"
+            ]);
         }, // checkCoreTurnUnit
 
         /**
          * Hotspot/No-op
          * @param {*} val - The actual parameter value
          * @param {String} param - The parameter being tested
-         * @param {String} dataType - The type of the data of the actual value
          * @since v0.00a @version v0.00a
          */
-        checkData: function(val, param, dataType) {
+        checkData: function(val, param) {
             var meta = val.meta;
             if (meta && meta.satb && meta.satb.datumType) return;
             SATBUT.showFailMsg(
@@ -375,15 +383,37 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
 
         /**
          * Hotspot/No-op
-         * @param {*} func - The parameter function
+         * @param {*} val - The parameter function
          * @enum @param {Param} param - The parameter being tested
          * @since v0.00a @version v0.00a
          */
-        checkFunc: function(func, param) {
-            if (typeof func === "function") return true;
+        checkFunc: function(val, param) {
+            if (typeof val === "function") return true;
             return SATBUT.showFailMsg(
-                    func, param, "func should be a function!");
+                    val, param, "func should be a function!");
         }, // checkFunc
+
+        /**
+         * Hotspot/No-op
+         * @param {*} val - The actual parameter value
+         * @param {String} param - The parameter being tested
+         * @since v0.00a @version v0.00a
+         */
+        checkInvalidVal: function(val, param) {
+            SATBUT.checkFuncs.checkVal(val, param, [null, undefined]);
+        }, // checkInvalidVal
+
+        /**
+         * Hotspot/No-op
+         * @param {*} val - The actual parameter value
+         * @param {String} param - The parameter being tested
+         * @since v0.00a @version v0.00a
+         */
+        checkNonnegativeInt: function(val, param) {
+            if (val >= 0 && Number.isInteger(val)) return;
+            SATBUT.showFailMsg(
+                    val, param, "It should be a nonnegative integer!");
+        }, // checkNonnegativeInt
 
         /**
          * Hotspot/No-op
@@ -1059,8 +1089,10 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     _UT.addSATBActBattler = BattleManager.addSATBActBattler = function(battler) {
     // v0.00a - v0.00a; Extended
         _BM.addSATBActBattler.apply(this, arguments);
-        // Added to check whether the supposed invariants indeed hold
-        _UT._checkAddSATBActBattler.call(this, battler);
+        // Added to check the argument of this public api
+        SATBUT.checkFuncs.checkObjType(battler,
+                "_BM.addSATBActBattler battler " + battler.name(),
+                Game_Battler);
         //
     }; // BattleManager.addSATBActBattler
 
@@ -1112,23 +1144,6 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         _UT._checkSortActBattlers.call(this);
         //
     }; // _SATB._sortActBattlers
-
-    /**
-     * The this pointer is BattleManager
-     * No-op
-     * @since v0.00a @version v0.00a
-     * @param {Game_Battler} battler - The battler to become able to exec acts
-     */
-    _UT._checkAddSATBActBattler = function(battler) {
-        SATBUT.checkFuncs.checkObjType(battler,
-                "BM.new._checkAddSATBActBattler battler " + battler.name(),
-                Game_Battler);
-        // Only this invariant's checked as the rest are brittle or tautological
-        if (this._satb.inputableActors.contains(battler)) SATBUT.showFailMsg(
-                battler.name(), "BM.new._checkAddSATBActBattler battler",
-                "A battler that can execute actions shouldn't be inputable!");
-        // This isn't tautological as the codes aren't even close to identical
-    }; // _UT._checkAddSATBActBattler
 
     /**
      * No-op
@@ -1343,6 +1358,34 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         //
     }; // $.updateSATBStateTurns
 
+    _GBB.onToggleAutoInputSATBActs = $.onToggleAutoInputSATBActs;
+    _UT.onToggleAutoInputSATBActs = $.onToggleAutoInputSATBActs = function() {
+    // v0.00a - v0.00a; Extended
+        _GBB.onToggleAutoInputSATBActs.apply(this, arguments);
+        // Added to ensure this battler won't be inputable nor able to exec act
+        _UT._checkOnToggleAutoInputSATBActs.call(this);
+        // This must be placed here or the check will be all wrong
+    }; // _UT.onToggleAutoInputSATBActs
+
+    /**
+     * The this pointer is Game_BattlerBase.prototype
+     * No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkOnToggleAutoInputSATBActs = function() {
+        if (BattleManager._satb.inputableActors.contains(this)) {
+            SATBUT.showFailMsg(this.name(),
+                    "GBB.new._checkOnToggleAutoInputSATBActs",
+                    "A battler right after toggling auto input actions " +
+                    "shouldn't be inputable!");
+        }
+        if (!BattleManager._actionBattlers.contains(this)) return;
+        SATBUT.showFailMsg(this.name(),
+                "GBB.new._checkOnToggleAutoInputSATBActs",
+                "A battler right after toggling auto input actions shouldn't" +
+                " be able to execute actions!");
+    }; // _UT._checkOnToggleAutoInputSATBActs
+
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_BattlerBase
 
 /*----------------------------------------------------------------------------
@@ -1494,6 +1537,27 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         return current;
     }; // $.coreATB
 
+    _GSATBPT._onCoreATBBecomeFull = $._onCoreATBBecomeFull;
+    _UT._onCoreATBBecomeFull = $._onCoreATBBecomeFull = function(coreMax) {
+    // v0.00a - v0.00a; Extended
+        // Added to test the inputability/actability invariants of this battler
+        _UT._checkWillCoreATBBecomeFull.call(this);
+        //
+        _GSATBPT._onCoreATBBecomeFull.apply(this, arguments);
+        // Added to test the inputability/actability invariants of this battler
+        _UT._checkDidCoreATBBecomeFull.call(this);
+        //
+    }; // $._onCoreATBBecomeFull
+
+    _GSATBPT._onCoreATBBecomeNotFull = $._onCoreATBBecomeNotFull;
+    _UT._onCoreATBBecomeNotFull = $._onCoreATBBecomeNotFull = function() {
+    // v0.00a - v0.00a; Extended
+        _GSATBPT._onCoreATBBecomeNotFull.apply(this, arguments);
+        // Added to test the inputability/actability invariants of this battler
+        _UT._checkDidCoreATBBecomeNotFull.call(this);
+        // There's nothing to check right before this listener callback triggers
+    }; // $._onCoreATBBecomeNotFull
+
     /**
      * The this pointer is Game_SATBPhaseTypes.prototype
      * @since v0.00a @version v0.00a
@@ -1520,6 +1584,58 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         //
     }; // _UT._checkAddSmallestCoreSATBDecrement
 
+    /**
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkWillCoreATBBecomeFull = function() {
+        if (BattleManager._satb.inputableActors.contains(this._battler)) {
+            SATBUT.showFailMsg(this._battler.name(),
+                    "GSATBPT.new._checkWillCoreATBBecomeFull",
+                    "A battler right before having full ATB value shouldn't " +
+                    "be inputable!");
+        }
+        if (!BattleManager._actionBattlers.contains(this._battler)) return;
+        SATBUT.showFailMsg(this._battler.name(),
+                "GSATBPT.new._checkWillCoreATBBecomeFull",
+                "A battler right before having full ATB value shouldn't be " +
+                "able to execute actions!");
+    }; // _UT._checkWillCoreATBBecomeFull
+
+    /**
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkDidCoreATBBecomeFull = function() {
+        if (!this._battler.canMove()) return;
+        var isInputable =
+                BattleManager._satb.inputableActors.contains(this._battler);
+        var isActable = BattleManager._actionBattlers.contains(this._battler);
+        if (isInputable || isActable) return;
+        SATBUT.showFailMsg(this._battler.name(),
+                "GSATBPT.new._checkDidCoreATBBecomeFull",
+                "A battler right after having full ATB value should be " +
+                "either inputable or able to execute actions!");
+    }; // _UT._checkDidCoreATBBecomeFull
+
+    /**
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkDidCoreATBBecomeNotFull = function() {
+        if (BattleManager._satb.inputableActors.contains(this._battler)) {
+            SATBUT.showFailMsg(this._battler.name(),
+                    "GSATBPT.new._checkDidCoreATBBecomeNotFull",
+                    "A battler right after not having full ATB value " +
+                    "shouldn't be inputable!");
+        }
+        if (!BattleManager._actionBattlers.contains(this._battler)) return;
+        SATBUT.showFailMsg(this._battler.name(),
+                "GSATBPT.new._checkDidCoreATBBecomeNotFull",
+                "A battler right after not having full ATB value shouldn't " +
+                "be able to execute actions!");
+    }; // _UT._checkDidCoreATBBecomeNotFull
+
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_SATBPhaseTypes
 
 /*----------------------------------------------------------------------------
@@ -1544,15 +1660,15 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     }; // $.initialize
 
     // Only interfaces will have their argument invariants checked
-    _GSATBN.result = $.result;
-    _UT.result = $.result = function(note, argObj_) {
+    _GSATBN.result_ = $.result_;
+    _UT.result_ = $.result_ = function(note, argObj_) {
     // v0.00a - v0.00a; Extended
-        var result = _GSATBN.result.apply(this, arguments);
+        var result_ = _GSATBN.result_.apply(this, arguments);
         // Added to check whether the interface function arguments are valid
         _UT._checkRunResult.call(this, note, argObj_);
         // Checking the cached result as well will be unnecessarily wasting time
-        return result;
-    }; // $.result
+        return result_;
+    }; // $.result_
     //
 
     _GSATBN.run = $.run;
@@ -1565,16 +1681,15 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     }; // $.run
     //
 
-    _GSATBN._uncachedResult = $._uncachedResult;
-    _UT._uncachedResult = $._uncachedResult = function(note, argObj_, funcNameSuffix) {
+    _GSATBN._uncachedResult_ = $._uncachedResult_;
+    _UT._uncachedResult_ = $._uncachedResult_ = function(note, argObj_, funcNameSuffix) {
     // v0.00a - v0.00a; Extended
-        var result = _GSATBN._uncachedResult.apply(this, arguments);
+        var result_ = _GSATBN._uncachedResult_.apply(this, arguments);
         // Added to check whether the uncached chained end result's valid
-        SATBUT.checkFuncs[SATBUT.unitTests.chainedNoteTypes[note]](
-                result, "_GSATBN._uncachedResult result " + note);
+        _UT._checkUncachedResult_.call(this, note, result_);
         // Checking the cached result as well will be unnecessarily wasting time
-        return result;
-    }; // $._uncachedResult
+        return result_;
+    }; // $._uncachedResult_
 
     _GSATBN._partResultWithoutCache_ = $._partResultWithoutCache_;
     _UT._partResultWithoutCache_ = $._partResultWithoutCache_ = function(note, argObj_, part) {
@@ -1599,31 +1714,31 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     _GSATBN._pairFuncListWithoutCache = $._pairFuncListWithoutCache;
     _UT._pairFuncListWithoutCache = $._pairFuncListWithoutCache = function(note, argObj_) {
     // v0.00a - v0.00a; Extended
-        var result = _GSATBN._pairFuncListWithoutCache.apply(this, arguments);
+        var list = _GSATBN._pairFuncListWithoutCache.apply(this, arguments);
         // Added to check whether the cache's really supposed to be enabled
         _UT._checkIsCached.call(this, false);
         // It's not tautological as it's not instantly obvious if it's the case
-        return result;
+        return list;
     }; // $._pairFuncListWithoutCache
 
     _GSATBN._pairFuncListWithCache = $._pairFuncListWithCache;
     _UT._pairFuncListWithCache = $._pairFuncListWithCache = function(note, argObj_) {
     // v0.00a - v0.00a; Extended
-        var result = _GSATBN._pairFuncListWithCache.apply(this, arguments);
+        var list = _GSATBN._pairFuncListWithCache.apply(this, arguments);
         // Added to check whether the cache's really supposed to be enabled
         _UT._checkIsCached.call(this, true);
         // It's not tautological as it's not instantly obvious if it's the case
-        return result;
+        return list;
     }; // $._pairFuncListWithCache
 
     _GSATBN._pairFuncListPartWithCache = $._pairFuncListPartWithCache;
     _UT._pairFuncListPartWithCache = $._pairFuncListPartWithCache = function(note, argObj_) {
     // v0.00a - v0.00a; Extended
-        var result = _GSATBN._pairFuncListPartWithCache.apply(this, arguments);
+        var list = _GSATBN._pairFuncListPartWithCache.apply(this, arguments);
         // Added to check whether the cache's really supposed to be enabled
         _UT._checkIsCached.call(this, true);
         // It's not tautological as it's not instantly obvious if it's the case
-        return result;
+        return list;
     }; // $._pairFuncListPartWithCache
 
     /**
@@ -1656,9 +1771,22 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         SATBUT.checkFuncs.checkVal(note, "GSATBN.new._checkRunResult note",
                 SATB.Game_SATBCache._NOTES);
         SATBUT.checkFuncs.checkObjVals(argObj_,
-                "GSATBN.new._checkRunResult note " + note + " argObj_",
+                "GSATBN.new._checkRunResult " + note + " argObj_",
                 SATBUT.unitTests.noteArgObjs[note]);
     }; // _UT._checkRunResult
+
+    /**
+     * The this pointer is Game_SATBNotes.prototype
+     * Potential Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {*?} result - Chained result from all effective notetags involved
+     */
+    _UT._checkUncachedResult_ = function(note, result_) {
+        var chainedFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (chainedFunc) SATBUT.checkFuncs[chainedFunc](
+                result_, "GSATBN.new._checkUncachedResult_ result_ " + note);
+    }; // _UT._checkUncachedResult_
 
     /**
      * The this pointer is Game_SATBNotes.prototype
@@ -1754,11 +1882,11 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     }; // $.partResult_
 
     _GSATBC.updatePartResult = $.updatePartResult;
-    _UT.updatePartResult = $.updatePartResult = function(note, argObj_, part, result) {
+    _UT.updatePartResult = $.updatePartResult = function(note, argObj_, part, result_) {
     // v0.00a - v0.00a; Extended
         _GSATBC.updatePartResult.apply(this, arguments);
         // Added to test the arguments of this public api
-        _UT._checkNoteArgObjPartResult.call(this, note, argObj_, part, result);
+        _UT._checkNoteArgObjPartResult.call(this, note, argObj_, part, result_);
         //
     }; // $.updatePartResult
 
@@ -1870,12 +1998,13 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @param {NoteType} note - The note to have its cached result
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
      * @param {DatumType} part - The note part to have its part result
-     * @param {*} result - The effective notetag list part result to be cached
+     * @param {*?} result_ - The effective notetag list part result to be cached
      */
-    _UT._checkNoteArgObjPartResult = function(note, argObj_, part, result) {
+    _UT._checkNoteArgObjPartResult = function(note, argObj_, part, result_) {
         _UT._checkNoteArgObjPart.call(this, note, argObj_, part);
-        SATBUT.checkFuncs[SATBUT.unitTests.chainedNoteTypes[note]](
-                result, "GSATBC.new._checkNoteArgObjPartResult result " + note);
+        var chainFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (result_ && chainFunc) SATBUT.checkFuncs[chainFunc](result_,
+                "GSATBC.new._checkNoteArgObjPartResult result " + note);
     }; // _UT._checkNoteArgObjPartResult
 
     /**
@@ -1900,7 +2029,8 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      */
     _UT._checkNoteArgObjResult = function(note, argObj_, result) {
         _UT._checkNoteArgObj.call(this, note, argObj_);
-        SATBUT.checkFuncs[SATBUT.unitTests.chainedNoteTypes[note]](
+        var chainFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (chainFunc) SATBUT.checkFuncs[chainFunc](
                 result, "GSATBC.new._checkNoteArgObjResult result " + note);
     }; // _UT._checkNoteArgObjResult
 
@@ -1914,7 +2044,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         SATBUT.checkFuncs.checkNoteType(
                 note, "GSATBC.new._checkNoteArgObj note");
         SATBUT.checkFuncs.checkObjVals(argObj_,
-                "GSATBC.new._checkNoteArgObj note " + note + " argObj_",
+                "GSATBC.new._checkNoteArgObj " + note + " argObj_",
                 SATBUT.unitTests.noteArgObjs[note]);
     }; // _UT._checkNoteArgObj
 
@@ -1991,13 +2121,171 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     var GSATBP = SATB.Game_SATBPairs.unitTests = { orig: {}, new: {} };
     var $ = Game_SATBPairs.prototype, _GSATBP = GSATBP.orig, _UT = GSATBP.new;
 
+    function testPairFuncs() {
+        // It's too painful to mock a battler and pairFuncs doesn't need it
+        var pairs = new Game_SATBPairs(), datum = {
+            meta: {
+                satb: {
+                    // Only val and eval suffixes can be tested as pure functions
+                    coreMax: [
+                        { suffix1: "val", entry1: "1" },
+                        { suffix1: "eval", entry1: "return latestMax * 0.5;" }
+                    ],
+                    coreActState: [
+                        { suffix1: "val", entry1: "true" },
+                        {
+                            suffix1: "eval",
+                            entry1: "return datumType !== 'states';"
+                        }
+                    ],
+                    // eval entry contents should also be pure functions
+                    datumType: "states"
+                }
+            }
+        };
+        //
+        var coreMaxDatum = JSON.stringify({ datum: datum, note: "coreMax" });
+        var coreActStateDatum = JSON.stringify({
+            datum: datum,
+            note: "coreActStateDatum"
+        });
+        var coreMaxPairFuncs = pairs.pairFuncs("coreMax", datum);
+        var coreMaxPairFunc0 = coreMaxPairFuncs[0];
+        var coreMaxPairFunc1 = coreMaxPairFuncs[1];
+        if (!coreMaxPairFunc0) {
+            SATBUT.showFailMsg(coreMaxDatum,
+                    "Game_SATBPairs.prototype.pairFuncs",
+                    "The coreMax PairFunc list should have 2 PairFunc!");
+        } else {
+            if (coreMaxPairFunc0.canBind) SATBUT.showFailMsg(coreMaxPairFunc0,
+                    "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                    "The canBind field of the 1st coreMax PairFunc should be" +
+                    " false!");
+            if (coreMaxPairFunc0.datum !== datum) {
+                SATBUT.showFailMsg(coreMaxPairFunc0,
+                        "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                        "The datum field of the 1st coreMax PairFunc should " +
+                        "be the original datum having the coreMax notetag!");
+            }
+            var unboundFunc = coreMaxPairFunc0.unboundFunc;
+            if (SATBUT.checkFuncs.checkFunc(unboundFunc,
+                    "Game_SATBPairs.prototype.pairFuncs 1st unboundFunc")) {
+                var result = unboundFunc(datum, datum.meta.satb.datumType, 4);
+                if (result !== 1) SATBUT.showFailMsg(result,
+                        "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                        "The result of the 1st coreMax PairFunc should be 1!");
+            }
+        }
+        if (!coreMaxPairFunc1) {
+            SATBUT.showFailMsg(coreMaxDatum,
+                    "Game_SATBPairs.prototype.pairFuncs",
+                    "The coreMax PairFunc list should have 2 PairFunc!");
+        } else {
+            if (!coreMaxPairFunc1.canBind) SATBUT.showFailMsg(coreMaxPairFunc1,
+                    "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                    "The canBind field of the 2nd coreMax PairFunc should be" +
+                    " true!");
+            if (coreMaxPairFunc1.datum !== datum) {
+                SATBUT.showFailMsg(coreMaxPairFunc1,
+                        "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                        "The datum field of the 2nd coreMax PairFunc should " +
+                        "be the original datum having the coreMax notetag!");
+            }
+            var unboundFunc = coreMaxPairFunc1.unboundFunc;
+            if (SATBUT.checkFuncs.checkFunc(unboundFunc,
+                    "Game_SATBPairs.prototype.pairFuncs 2nd unboundFunc")) {
+                var result = unboundFunc(datum, datum.meta.satb.datumType, 4);
+                if (result !== 2) SATBUT.showFailMsg(result,
+                        "Game_SATBPairs.prototype.pairFuncs " + coreMaxDatum,
+                        "The result of the 2nd coreMax PairFunc should be 2!");
+            }
+        }
+        if (coreMaxPairFuncs.length > 2) SATBUT.showFailMsg(coreMaxDatum,
+                "Game_SATBPairs.prototype.pairFuncs",
+                "The coreMax PairFunc list shouldn't have more than 2 " +
+                "PairFunc!");
+        var coreActStatePairFuncs = pairs.pairFuncs("coreActState", datum);
+        var coreActStatePairFunc0 = coreActStatePairFuncs[0];
+        var coreActStatePairFunc1 = coreActStatePairFuncs[1];
+        if (!coreActStatePairFunc0) {
+            SATBUT.showFailMsg(coreActStateDatum,
+                    "Game_SATBPairs.prototype.pairFuncs",
+                    "The coreActState PairFunc list should have 2 PairFunc!");
+        } else {
+            if (coreActStatePairFunc0.canBind) {
+                SATBUT.showFailMsg(coreActStatePairFunc0,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The canBind field of the 1st coreMax PairFunc " +
+                        "should be false!");
+            }
+            if (coreActStatePairFunc0.datum !== datum) {
+                SATBUT.showFailMsg(coreActStatePairFunc0,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The datum field of the 1st coreMax PairFunc should be" +
+                        " the original datum having the coreMax notetag!");
+            }
+            var unboundFunc = coreActStatePairFunc0.unboundFunc;
+            if (SATBUT.checkFuncs.checkFunc(unboundFunc,
+                    "Game_SATBPairs.prototype.pairFuncs 1st unboundFunc")) {
+                var result = unboundFunc(datum, datum.meta.satb.datumType, 4);
+                if (result !== true) SATBUT.showFailMsg(result,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The result of the 1st coreActState PairFunc should " +
+                        "be true!");
+            }
+        }
+        if (!coreActStatePairFunc1) {
+            SATBUT.showFailMsg(coreActStateDatum,
+                    "Game_SATBPairs.prototype.pairFuncs",
+                    "The coreActState PairFunc list should have 2 PairFunc!");
+        } else {
+            if (!coreActStatePairFunc1.canBind) {
+                SATBUT.showFailMsg(coreActStatePairFunc1,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The canBind field of the 2nd coreMax PairFunc " +
+                        "should be true!");
+            }
+            if (coreActStatePairFunc1.datum !== datum) {
+                SATBUT.showFailMsg(coreActStatePairFunc1,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The datum field of the 2nd coreMax PairFunc should " +
+                        "be the original datum having the coreMax notetag!");
+            }
+            var unboundFunc = coreActStatePairFunc1.unboundFunc;
+            if (SATBUT.checkFuncs.checkFunc(unboundFunc,
+                    "Game_SATBPairs.prototype.pairFuncs 2nd unboundFunc")) {
+                var result = unboundFunc(datum, datum.meta.satb.datumType, 4);
+                if (result !== false) SATBUT.showFailMsg(result,
+                        "Game_SATBPairs.prototype.pairFuncs " +
+                        coreActStateDatum,
+                        "The result of the 2nd coreActState PairFunc should " +
+                        "be false!");
+            }
+        }
+        if (coreActStatePairFuncs.length > 2) {
+            SATBUT.showFailMsg(coreActStateDatum,
+                    "Game_SATBPairs.prototype.pairFuncs",
+                    "The coreActState PairFunc list shouldn't have more than" +
+                    " 2 PairFunc!");
+        }
+    }
+
+    // This must be run here or the unit test would report an invalid battler
+    testPairFuncs();
+    //
+
     _GSATBP.initialize = $.initialize;
     _UT.initialize = $.initialize = function(battler) {
     // v0.00a - v0.00a; Extended
         _GSATBP.initialize.apply(this, arguments);
         // Added to test the argument of this constructor
         SATBUT.checkFuncs.checkObjType(
-                battler, "GSATBN.new._checkInit battler", Game_Battler);
+                battler, "_GSATBP.initialize battler", Game_Battler);
         //
     }; // $.initialize
 
@@ -2040,11 +2328,8 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @param {*} defaultVal - The default result of the note
      */
     _UT._checkDefault = function(note, argObj_, defaultVal) {
-        SATBUT.checkFuncs.checkNoteType(note, "GSATBP.new._checkDefault note");
-        SATBUT.checkFuncs.checkObjVals(argObj_,
-                "GSATBP.new._checkDefault note " + note + " argObj_",
-                SATBUT.unitTests.noteArgObjs[note]);
-        SATBUT.checkFuncs[SATBUT.unitTests.chainedNoteTypes[note]](
+        _UT._checkArgObjNote.call(this, argObj_, note);
+        SATBUT.checkFuncs[SATBUT.unitTests.defaultNoteTypes[note]](
                 defaultVal, "_GSATBP._checkDefault default " + note);
     }; // _UT._checkDefault
 
@@ -2058,7 +2343,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     _UT._checkPairFuncs = function(note, datum_, pairFuncs) {
         SATBUT.checkFuncs.checkNoteType(
                 note, "GSATBP.new._checkPairFuncs note");
-        if (datum_) SATBUT.checkFuncs.checkDataMeta(
+        if (datum_) SATBUT.checkFuncs.checkData(
                 datum_, "GSATBP.new._checkPairFuncs datum_");
         SATBUT.checkFuncs.checkPairFuncList(
                 pairFuncs, "GSATBP.new._checkPairFuncs pairFuncs");
@@ -2074,25 +2359,399 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @param {*?} result_ - The result of the notetag function involved
      */
     _UT._checkRun_ = function(argObj_, note, pairFunc, latestChainedResult_, result_) {
-        SATBUT.checkFuncs.checkObjVals(argObj_,
-                "GSATBP.new._checkRun_ note " + note + " argObj_",
-                SATBUT.unitTests.noteArgObjs[note]);
-        SATBUT.checkFuncs.checkNoteType(note, "GSATBP.new._checkRun_ note");
+        _UT._checkArgObjNote.call(this, argObj_, note);
         SATBUT.checkFuncs.checkPairFunc(
                 pairFunc, "GSATBP.new._checkRun_ pairFunc");
-        var checkChainedFunc = SATBUT.unitTests.chainedNoteTypes[note];
-        if (checkChainedFunc) {
-            SATBUT.checkFuncs[checkChainedFunc](latestChainedResult_,
-                    "_GSATBP.run_ latestChainedResult_ " + note);
+        var chainedFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (latestChainedResult_ && chainedFunc) {
+            SATBUT.checkFuncs[chainedFunc](latestChainedResult_,
+                    "GSATBP.new._checkRun_ latestChainedResult_ " + note);
         }
         var checkFunc = SATBUT.unitTests.noteTypes[note];
-        if (!checkFunc) return; // Some notes don't return any result
+        // Some notes don't return any result
+        if (!checkFunc || !result_) return;
+        //
         // Checking the cached result as well will be unnecessarily wasting time
-        SATBUT.checkFuncs[checkFunc](result_, "_GSATBP.run_ note " + note);
+        SATBUT.checkFuncs[checkFunc](result_, "GSATBP.new._checkRun_ " + note);
         //
     }; // _UT._checkRun_
 
+    /**
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {NoteType} note - The note to have its contents run
+     */
+    _UT._checkArgObjNote = function(argObj_, note) {
+        SATBUT.checkFuncs.checkObjVals(argObj_,
+                "GSATBP.new._checkArgObjNote " + note + " argObj_",
+                SATBUT.unitTests.noteArgObjs[note]);
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBP.new._checkArgObjNote note");
+    }; // _UT._checkArgObjNote
+
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_SATBPairs
+
+/*----------------------------------------------------------------------------
+ *    # Edit class: Game_SATBRules
+ *      - Unit tests all data notetags to pinpoint the data with faulty notes
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var GSATBR = SATB.Game_SATBPairs.unitTests = { orig: {}, new: {} };
+    var $ = Game_SATBRules.prototype, _GSATBR = GSATBR.orig, _UT = GSATBR.new;
+
+    _GSATBR.initialize = $.initialize;
+    _UT.initialize = $.initialize = function(pairs) {
+    // v0.00a - v0.00a; Extended
+        _GSATBR.initialize.apply(this, arguments);
+        // Added to test the argument of this constructor
+        SATBUT.checkFuncs.checkObjType(
+                pairs, "_GSATBR.initialize pairs", Game_SATBPairs);
+        //
+    }; // $.initialize
+
+    _GSATBR.isAssociative = $.isAssociative;
+    _UT.isAssociative = $.isAssociative = function(note) {
+    // v0.00a - v0.00a; Extended
+        var isAssociative = _GSATBR.isAssociative.apply(this, arguments);
+        // Added to test whether the result's valid
+        _UT._checkIsAssociative.call(this, note, isAssociative);
+        //
+        return isAssociative;
+    }; // $.isAssociative
+
+    _GSATBR.chainedResult = $.chainedResult;
+    _UT.chainedResult = $.chainedResult = function(list, note, argObj_, initVal_) {
+    // v0.00a - v0.00a; Extended
+        var chainedResult = _GSATBR.chainedResult.apply(this, arguments);
+        // Added to test whether the result's valid
+        _UT._checkChainedResult.call(
+                this, list, note, argObj_, initVal_, chainedResult);
+        //
+        return chainedResult;
+    }; // $.chainedResult
+
+    _GSATBR.chainedValResult = $.chainedValResult;
+    _UT.chainedValResult = $.chainedValResult = function(list, note, argObj_, initVal_) {
+    // v0.00a - v0.00a; Extended
+        var chainedResult = _GSATBR.chainedValResult.apply(this, arguments);
+        // Added to test whether the result's valid
+        _UT._checkChainedValResult.call(
+                this, list, note, argObj_, initVal_, chainedResult);
+        //
+        return chainedResult;
+    }; // $.chainedValResult
+
+    _GSATBR.chainedRunList = $.chainedRunList;
+    _UT.chainedRunList = $.chainedRunList = function(list, note) {
+    // v0.00a - v0.00a; Extended
+        var chainFunc = _GSATBR.chainedRunList.apply(this, arguments);
+        // Added to test whether the returned function's valid
+        _UT._checkChainedRunList.call(this, list, note, chainFunc);
+        //
+        return chainFunc;
+    }; // $.chainedRunList
+
+    _GSATBR.priorities = $.priorities;
+    _UT.priorities = $.priorities = function(note) {
+    // v0.00a - v0.00a; Extended
+        var priorities = _GSATBR.priorities.apply(this, arguments);
+        // Added to test whether the returned priorities' valid
+        _UT._checkPriorities.call(this, note, priorities);
+        //
+        return priorities;
+    }; // $.priorities
+
+    _GSATBR._chainingRule = $._chainingRule;
+    _UT._chainingRule = $._chainingRule = function(note) {
+    // v0.00a - v0.00a; Extended
+        var _chainingRule = _GSATBR._chainingRule.apply(this, arguments);
+        // Added to test whether the returned chaining rule' valid
+        _UT._checkChainingRule.call(this, note, _chainingRule);
+        // It's a very useful check even if it's a private method
+        return _chainingRule;
+    }; // $._chainingRule
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {NoteType} note - The note to have its effective results chained
+     * @param {Boolean} isAssociative - The check result
+     */
+    _UT._checkIsAssociative = function(note, isAssociative) {
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBR.new._checkIsAssociative note");
+        SATBUT.checkFuncs.checkBool(
+                isAssociative, "GSATBR.new._checkIsAssociative isAssociative");
+    }; // _UT._checkIsAssociative
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {[PairFunc]} list - The effective notetag list to be chained
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {*?} initVal_ - The initial result to chain the notetag list
+     * @param {*} chainedResult - Chained result from note list of note involved
+     */
+    _UT._checkChainedResult = function(list, note, argObj_, initVal_, chainedResult) {
+        SATBUT.checkFuncs.checkPairFuncList(
+                list, "GSATBR.new._checkChainedResult list");
+        _UT._checkNoteArgObjInitValChainedResult.call(
+                this, note, argObj_, initVal_, chainedResult);
+    }; // _UT._checkChainedResult
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {[<T>]} list - The effective notetag results to be chained
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {<T>?} initVal_ - The initial result to chain the notetag list
+     * @param {<T>} chainedResult - Chained result from the note list involved
+     */
+    _UT._checkChainedValResult = function(list, note, argObj_, initVal_, chainedResult) {
+        var chainedFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (chainedFunc) list.forEach(function(val, i) {
+            SATBUT.checkFuncs[chainedFunc](val,
+                    "GSATBR.new._checkChainedResult chainedResult ith " +
+                    note + " value");
+        });
+        _UT._checkNoteArgObjInitValChainedResult.call(
+                this, note, argObj_, initVal_, chainedResult);
+    }; // _UT._checkChainedValResult
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @param {*?} initVal_ - The initial result to chain the notetag list
+     * @param {*} chainedResult - Chained result from note list of note involved
+     */
+    _UT._checkNoteArgObjInitValChainedResult = function(note, argObj_, initVal_, chainedResult) {
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBR.new._checkNoteArgObjInitValChainedResult note");
+        SATBUT.checkFuncs.checkObjVals(argObj_,
+                "GSATBR.new._checkNoteArgObjInitValChainedResult " + note +
+                " argObj_", SATBUT.unitTests.noteArgObjs[note]);
+        var chainedFunc = SATBUT.unitTests.chainedNoteTypes[note];
+        if (!chainedFunc) return;
+        if (initVal_) SATBUT.checkFuncs[chainedFunc](initVal_,
+                "GSATBR.new._checkNoteArgObjInitValChainedResult initVal_ " +
+                note);
+        SATBUT.checkFuncs[chainedFunc](chainedResult,
+                "GSATBR.new._checkNoteArgObjInitValChainedResult " +
+                "chainedResult " + note);
+    }; // _UT._checkNoteArgObjInitValChainedResult
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {[PairFunc]} list - The effective notetag list to be chained
+     * @param {NoteType} note - The note to have its effective results chained
+     * @param {([PairFunc]) -> [PairFunc]} chainFunc - The function chaining the
+     *                                                 note list
+     */
+    _UT._checkChainedRunList = function(list, note, chainFunc) {
+        SATBUT.checkFuncs.checkPairFuncList(
+                list, "GSATBR.new._checkChainedRunList list");
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBR.new._checkChainedRunList note");
+        SATBUT.checkFuncs.checkFunc(
+                chainFunc, "GSATBR.new._checkChainedRunList chainFunc");
+    }; // _UT._checkChainedRunList
+
+    /**
+     * Potential Hotspot/No-op
+     * @interface @since v0.00a @version v0.00a
+     * @param {String} note - The note to have its effective list returned
+     * @param {[String]} priorities - Data type priority queue parameter value
+     */
+    _UT._checkPriorities = function(note, priorities) {
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBR.new._checkPriorities note");
+        SATBUT.checkFuncs.checkArrayDataType(
+                priorities, "GSATBR.new._checkPriorities priorities");
+    }; // _UT._checkPriorities
+
+    /**
+     * Potential Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {NoteType} note - The note to have its effective list returned
+     * @param {ChainRule} chainingRule - The effective notetag chaining rule
+     *                                   parameter value
+     */
+    _UT._checkChainingRule = function(note, chainingRule) {
+        SATBUT.checkFuncs.checkNoteType(
+                note, "GSATBR.new._checkChainingRule note");
+        SATBUT.checkFuncs[SATBUT.unitTests.noteChainingRules[note]](
+                chainingRule, "GSATBR.new._checkChainingRule chainingRule");
+    }; // _UT._checkChainingRule
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_SATBRules
+
+/*----------------------------------------------------------------------------
+ *    # Edit class: Game_Interpreter
+ *      - Unit tests all plugin commands to validate the inputted parameters
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var GI = SATB.Game_Interpreter.unitTests = { orig: {}, new: {} };
+    var _SATB = SATB.Game_Interpreter.new, _GI = GI.orig, _UT = GI.new;
+
+    _GI._FILTERED_TARGETS = _SATB._FILTERED_TARGETS;
+    _UT._FILTERED_TARGETS = _SATB._FILTERED_TARGETS = function(targetType, targets, targetGroup) {
+    // v0.00a - v0.00a; Extended
+        var filteredTargets = _GI._FILTERED_TARGETS.apply(_SATB, arguments);
+        // Added to check the parameters of this private pure function
+        _UT._CHECK_FILTERED_TARGETS(
+                targetType, targets, targetGroup, filteredTargets);
+        // It's very useful to check the user inputs even if it's a private func
+        return filteredTargets;
+    }; // _SATB._FILTERED_TARGETS
+
+    _UT._CHECK_FILTERED_TARGETS = function(targetType, targets, targetGroup, filteredTargets) {
+        SATBUT.checkFuncs.checkVal(targetType,
+                "GI.new._CHECK_FILTERED_TARGETS targetType",
+                Object.keys(_SATB._TARGET_GROUPS));
+        targets.forEach(function(target, i) {
+            SATBUT.checkFuncs.checkString(
+                    target, "GI.new._CHECK_FILTERED_TARGETS target " + i);
+            if (!isNaN(target)) SATBUT.checkFuncs.checkNonnegativeInt(
+                    +target, "GI.new._CHECK_FILTERED_TARGETS target " + i);
+        });
+        targetGroup.forEach(function(target, i) {
+            SATBUT.checkFuncs.checkObjType(target,
+                    "GI.new._CHECK_FILTERED_TARGETS target " + i, Game_Battler);
+        });
+        filteredTargets.forEach(function(target, i) {
+            SATBUT.checkFuncs.checkObjType(target,
+                    "GI.new._CHECK_FILTERED_TARGETS target " + i, Game_Battler);
+        });
+    }; // _UT._CHECK_FILTERED_TARGETS
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_Interpreter
+
+/*----------------------------------------------------------------------------
+ *    # Edit class: Scene_Battle
+ *      - Tests all Scene_Battle preconditions, postconditions and invariants
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var SB = SATB.Scene_Battle.unitTests = { orig: {}, new: {} };
+    var _SATB = SATB.Scene_Battle.new, _SB = SB.orig, _UT = SB.new;
+
+    _SB._updateBattleProc = _SATB._updateBattleProc;
+    _UT._updateBattleProc = _SATB._updateBattleProc = function() {
+    // v0.00a - v0.00a; Extended
+        _SB._updateBattleProc.apply(this, arguments);
+        // Added to check if combinations of different window states are valid
+        _UT._checkInputWinStates.call(this);
+        // It's a very useful check that must be run per frame
+    }; // _SATB._updateBattleProc
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkInputWinStates = function() {
+        // These obvious invariants are actually very easy to become all wrong
+        var cmdWins = {
+            partyCmdWin: this._partyCommandWindow,
+            actorCmdWin: this._actorCommandWindow
+        };
+        var selectWins = {
+            skillWin: this._skillWindow,
+            itemWin: this._itemWindow,
+            actorWin: this._actorWindow,
+            enemyWin: this._enemyWindow
+        };
+        var activeCmdWins = Object.keys(cmdWins).filter(function(win) {
+            return cmdWins[win].active;
+        });
+        var activeSelectWins = Object.keys(selectWins).filter(function(win) {
+            return selectWins[win].active;
+        });
+        if (activeCmdWins.length > 1) SATBUT.showFailMsg(activeCmdWins,
+                "SB.new._checkInputWinStates activeCmdWins",
+                "At most 1 command window can be active at a time!");
+        if (activeSelectWins.length > 1) SATBUT.showFailMsg(activeSelectWins,
+                "SB.new._checkInputWinStates activeSelectWins",
+                "At most 1 selection window can be active at a time!");
+        if (_SATB._canDisplayWins.call(this)) {
+            activeCmdWins.forEach(function(win) {
+                if (cmdWins[win].visible) return;
+                SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
+                        "An active command window must be visible!");
+            });
+            activeSelectWins.forEach(function(win) {
+                if (selectWins[win].visible) return;
+                SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
+                        "An active selection window must be visible!");
+            });
+        }
+        var openCmdWins = Object.keys(cmdWins).filter(function(win) {
+            return cmdWins[win].isOpen();
+        });
+        var visibleSelectWins = Object.keys(selectWins).filter(function(win) {
+            return selectWins[win].visible;
+        });
+        if (openCmdWins.length > 1) SATBUT.showFailMsg(openCmdWins,
+                "SB.new._checkInputWinStates openCmdWins",
+                "At most 1 command window can be open at a time!");
+        if (visibleSelectWins.length > 1) SATBUT.showFailMsg(visibleSelectWins,
+                "SB.new._checkInputWinStates visibleSelectWins",
+                "At most 1 selection window can be visible at a time!");
+        visibleSelectWins.forEach(function(win) {
+            if (selectWins[win].active) return;
+            SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
+                    "A visible selection window must be active!");
+        });
+        if (this._partyCommandWindow.active) {
+            if (activeSelectWins.length > 0) {
+                SATBUT.showFailMsg(activeSelectWins,
+                        "SB.new._checkInputWinStates activeSelectWins",
+                        "No selection window can be active when the party " +
+                        "command window's active!");
+            }
+            if (visibleSelectWins.length > 0) {
+                SATBUT.showFailMsg(visibleSelectWins,
+                        "SB.new._checkInputWinStates visibleSelectWins",
+                        "No selection window can be visible when the party " +
+                        "command window's active!");
+            }
+        }
+        var actor = BattleManager.actor();
+        if (actor) {
+            // There's nothing to check for the else case as it's 1 frame delay
+            var actorIndex = actor.index();
+            var statusWindowIndex = this._statusWindow._index;
+            if (actorIndex !== statusWindowIndex) {
+              SATBUT.showFailMsg(JSON.stringify({
+                  actorIndex: actorIndex,
+                  statusWindowIndex: statusWindowIndex
+              }), "SB.new._checkInputWinStates indices",
+                      "The status window index must be the same as that of " +
+                      "the inputting actor!");
+            }
+            //
+        }
+        // It's pointless to check the visibility of any command window
+    }; // _UT._checkInputWinStates
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Scene_Battle
 
 /*----------------------------------------------------------------------------*/
 

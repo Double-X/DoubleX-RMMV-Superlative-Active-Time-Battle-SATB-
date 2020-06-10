@@ -122,7 +122,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @value last
  * @desc Sets how to use multiple coreMax notetags
  * You can use script calls to change this choice later in game
- * @default *
+ * @default /
  *
  * @param _coreMaxATBValNotePriorities
  * @parent IsCoreEnabled
