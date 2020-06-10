@@ -17,7 +17,7 @@ Installation Instructions:
 3. Unzip the zipped file into that new RMMV project(After clicking into the "DoubleX-RMMV-Superlative-Active-Time-Battle-SATB--master" folder)
 
 Plugins Ordering:
-1. DoubleX RMMV Superlative ATB Parameters(Optional but highly recommended to make this plugin easier to use)
+1. DoubleX RMMV Superlative ATB Parameters(Mandatory as not all parameters have the configuration counterparts)
 2. DoubleX RMMV Superlative ATB Configurations(Mandatory even if you never access the configurations yourselves)
 3. DoubleX RMMV Superlative ATB Implementations(Mandatory)
 4. DoubleX RMMV Superlative ATB Unit Test(Optional but useful when debugging by validating parameters/configuration/notetag values and script call/plugin command arguments)
