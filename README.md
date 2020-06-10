@@ -1,3 +1,6 @@
+PLEASE NOTE THAT THIS PROJECT'S STILL UNDER DEVELOPMENT. Currently the following modules are completed:
+1. Core Module
+
 Videos:
 1. Core Module Only
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
