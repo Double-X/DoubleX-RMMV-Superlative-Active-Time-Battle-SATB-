@@ -1,5 +1,6 @@
 Videos:
-1. Core Module Only -
+1. Core Module Only
+- https://www.youtube.com/watch?v=ZmW8ZGVwfy0
 
 Posts:
 1. 
