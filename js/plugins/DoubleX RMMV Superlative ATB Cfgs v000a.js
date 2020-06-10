@@ -9,7 +9,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
  * @help
  *
  * Plugins Ordering:
- * DoubleX RMMV Superlative ATB Parameters(Optional but highly recommended to make this plugin easier to use)
+ * DoubleX RMMV Superlative ATB Parameters(Mandatory as not all parameters have the configuration counterparts)
  * DoubleX RMMV Superlative ATB Configurations(Mandatory even if you never access the configurations yourselves)
  * DoubleX RMMV Superlative ATB Implementations(Mandatory)
  * DoubleX RMMV Superlative ATB Unit Test(Optional but useful when debugging by validating parameters/configuration/notetag values and script call/plugin command arguments)
