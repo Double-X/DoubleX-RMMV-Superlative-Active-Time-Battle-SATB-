@@ -27,7 +27,7 @@ DoubleX_RMMV["Superlative ATB Implementations"] = "v0.00a";
  *----------------------------------------------------------------------------
  */
 
-if (DoubleX_RMMV.SATB) {
+if (DoubleX_RMMV.Superlative_ATB_Parameters_File && DoubleX_RMMV.SATB) {
 
 /*----------------------------------------------------------------------------*/
 
@@ -5058,8 +5058,14 @@ function Game_SATBRules() {
 /*----------------------------------------------------------------------------*/
 
 } else {
-    alert("DoubleX RMMV Superlative ATB Configurations should be above " +
-            "DoubleX RMMV Superlative ATB Implementations");
+    if (!DoubleX_RMMV.Superlative_ATB_Parameters_File) {
+        alert("DoubleX RMMV Superlative ATB Parameters should be above " +
+                "DoubleX RMMV Superlative ATB Implementations");
+    }
+    if (!DoubleX_RMMV.SATB) {
+        alert("DoubleX RMMV Superlative ATB Configurations should be above " +
+                "DoubleX RMMV Superlative ATB Implementations");
+    }
 } // if (DoubleX_RMMV.SATB)
 
 /*============================================================================*/
