@@ -1,6 +1,9 @@
 PLEASE NOTE THAT THIS PROJECT'S STILL UNDER DEVELOPMENT. Currently the following modules are completed:
 1. Core Module
 
+Also, please note that the following plugins are made by the others(They're included here to demonstrate that SATB are indeed compatible to them all):
+1. 
+
 Videos:
 1. Core Module Only
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
