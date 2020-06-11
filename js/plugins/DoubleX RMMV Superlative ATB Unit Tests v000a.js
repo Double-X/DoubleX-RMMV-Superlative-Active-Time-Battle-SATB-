@@ -13,9 +13,10 @@ DoubleX_RMMV["Superlative ATB Unit Tests"] = "v0.00a";
  * don't have their values set yet at that moment
  * You can open this unit test plugin js file to set how the failed tests are
  * reported
- * DON'T ENABLE THIS TEST UNIT PLUGIN WITHOUT ENABLING THE SATB PLUGIN ITSELF
+ * DON'T ENABLE THIS UNIT TEST PLUGIN WITHOUT ENABLING THE SATB PLUGIN ITSELF
  * UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  */
+
 if (DoubleX_RMMV["Superlative ATB Implementations"]) {
 
 /*============================================================================
@@ -726,7 +727,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         var satb = { datumType: "states" }, lines = [
             "<doublex rmmv coremax>",
             "<doublex rmmv satb coreMax cfg: CMATB_MAX>",
-            "<satb coreMax val: 100>",
+            "<satb coreMax val: 102.4>",
             // eval suffix has no side effects if is content's no switch/vars
             "<doublex rmmv satb coreMax>",
             "return 999.0 / this.agi;",
@@ -765,7 +766,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
                 SATBUT.showFailMsg(satbLines, "SATB.DataManager.new._readNote",
                         "The suffix of the 2nd coreMax notetag should be val!");
             }
-            if (secondCoreMax.entry1 !== "100") {
+            if (secondCoreMax.entry1 !== "102.4") {
                 SATBUT.showFailMsg(satbLines, "SATB.DataManager.new._readNote",
                         "The entry of the 2nd coreMax notetag should be 100!");
             }
@@ -1589,6 +1590,13 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.00a @version v0.00a
      */
     _UT._checkWillCoreATBBecomeFull = function() {
+        if (!$gameParty.inBattle()) return;
+        if (BattleManager._subject === this._battler) {
+            SATBUT.showFailMsg(this._battler.name(),
+                    "GSATBPT.new._checkWillCoreATBBecomeFull",
+                    "A battler right before having full ATB value shouldn't " +
+                    "be the action execution subject!");
+        }
         if (BattleManager._satb.inputableActors.contains(this._battler)) {
             SATBUT.showFailMsg(this._battler.name(),
                     "GSATBPT.new._checkWillCoreATBBecomeFull",
@@ -1607,7 +1615,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.00a @version v0.00a
      */
     _UT._checkDidCoreATBBecomeFull = function() {
-        if (!this._battler.canMove()) return;
+        if (!$gameParty.inBattle() || !this._battler.canMove()) return;
         var isInputable =
                 BattleManager._satb.inputableActors.contains(this._battler);
         var isActable = BattleManager._actionBattlers.contains(this._battler);
@@ -1623,6 +1631,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.00a @version v0.00a
      */
     _UT._checkDidCoreATBBecomeNotFull = function() {
+        if (!$gameParty.inBattle()) return;
         if (BattleManager._satb.inputableActors.contains(this._battler)) {
             SATBUT.showFailMsg(this._battler.name(),
                     "GSATBPT.new._checkDidCoreATBBecomeNotFull",
@@ -2684,23 +2693,13 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         var activeSelectWins = Object.keys(selectWins).filter(function(win) {
             return selectWins[win].active;
         });
-        if (activeCmdWins.length > 1) SATBUT.showFailMsg(activeCmdWins,
-                "SB.new._checkInputWinStates activeCmdWins",
-                "At most 1 command window can be active at a time!");
-        if (activeSelectWins.length > 1) SATBUT.showFailMsg(activeSelectWins,
-                "SB.new._checkInputWinStates activeSelectWins",
-                "At most 1 selection window can be active at a time!");
+        _UT._checkActiveCmdWinNum.call(this, activeCmdWins);
+        _UT._checkActiveSelectWinNum.call(this, activeSelectWins);
         if (_SATB._canDisplayWins.call(this)) {
-            activeCmdWins.forEach(function(win) {
-                if (cmdWins[win].visible) return;
-                SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
-                        "An active command window must be visible!");
-            });
-            activeSelectWins.forEach(function(win) {
-                if (selectWins[win].visible) return;
-                SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
-                        "An active selection window must be visible!");
-            });
+            _UT._checkDisplayableActiveVisibleCmdWins.call(
+                    this, cmdWins, activeCmdWins);
+            _UT._checkDisplayableActiveVisibleSelectWins.call(
+                    this, selectWins, activeSelectWins);
         }
         var openCmdWins = Object.keys(cmdWins).filter(function(win) {
             return cmdWins[win].isOpen();
@@ -2708,48 +2707,158 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         var visibleSelectWins = Object.keys(selectWins).filter(function(win) {
             return selectWins[win].visible;
         });
-        if (openCmdWins.length > 1) SATBUT.showFailMsg(openCmdWins,
-                "SB.new._checkInputWinStates openCmdWins",
-                "At most 1 command window can be open at a time!");
-        if (visibleSelectWins.length > 1) SATBUT.showFailMsg(visibleSelectWins,
-                "SB.new._checkInputWinStates visibleSelectWins",
-                "At most 1 selection window can be visible at a time!");
-        visibleSelectWins.forEach(function(win) {
-            if (selectWins[win].active) return;
-            SATBUT.showFailMsg(win, "SB.new._checkInputWinStates win",
-                    "A visible selection window must be active!");
-        });
+        _UT._checkOpenCmdWinNum.call(this, openCmdWins);
+        _UT._checkVisibleSelectWinNum.call(this, visibleSelectWins);
+        _UT._checkVisibleActiveSelectWins.call(
+                this, selectWins, visibleSelectWins);
         if (this._partyCommandWindow.active) {
-            if (activeSelectWins.length > 0) {
-                SATBUT.showFailMsg(activeSelectWins,
-                        "SB.new._checkInputWinStates activeSelectWins",
-                        "No selection window can be active when the party " +
-                        "command window's active!");
-            }
-            if (visibleSelectWins.length > 0) {
-                SATBUT.showFailMsg(visibleSelectWins,
-                        "SB.new._checkInputWinStates visibleSelectWins",
-                        "No selection window can be visible when the party " +
-                        "command window's active!");
-            }
+            _UT._checkActivePartyCmdActiveSelectWins.call(
+                    this, activeSelectWins);
+            _UT._checkActivePartyCmdVisibleSelectWins.call(
+                    this, visibleSelectWins);
         }
         var actor = BattleManager.actor();
-        if (actor) {
-            // There's nothing to check for the else case as it's 1 frame delay
-            var actorIndex = actor.index();
-            var statusWindowIndex = this._statusWindow._index;
-            if (actorIndex !== statusWindowIndex) {
-              SATBUT.showFailMsg(JSON.stringify({
-                  actorIndex: actorIndex,
-                  statusWindowIndex: statusWindowIndex
-              }), "SB.new._checkInputWinStates indices",
-                      "The status window index must be the same as that of " +
-                      "the inputting actor!");
-            }
-            //
-        }
+        // There's nothing to check for the else case as it's 1 frame delay
+        if (actor) _UT._checkInputtingActorStatusWinI.call(this, actor.index());
         // It's pointless to check the visibility of any command window
     }; // _UT._checkInputWinStates
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Command]} activeCmdWins - The list of active cmd windows
+     */
+    _UT._checkActiveCmdWinNum = function(activeCmdWins) {
+        if (activeCmdWins.length > 1) SATBUT.showFailMsg(activeCmdWins,
+                "SB.new._checkActiveCmdWinNum activeCmdWins",
+                "At most 1 command window can be active at a time!");
+    }; // _UT._checkActiveCmdWinNum
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} activeSelectWins - List of active select win
+     */
+    _UT._checkActiveSelectWinNum = function(activeSelectWins) {
+        if (activeSelectWins.length > 1) SATBUT.showFailMsg(activeSelectWins,
+                "SB.new._checkActiveSelectWinNum activeSelectWins",
+                "At most 1 selection window can be active at a time!");
+    }; // _UT._checkActiveSelectWinNum
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Command]} cmdWins - The list of command windows
+     * @param {[Window_Command]} activeCmdWins - The list of active cmd windows
+     */
+    _UT._checkDisplayableActiveVisibleCmdWins = function(cmdWins, activeCmdWins) {
+        activeCmdWins.forEach(function(win) {
+            if (!cmdWins[win].visible) SATBUT.showFailMsg(win,
+                    "SB.new._checkDisplayableActiveVisibleCmdWins",
+                    "An active command window must be visible!");
+        });
+    }; // _UT._checkDisplayableActiveVisibleCmdWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} selectWins - The list of selection windows
+     * @param {[Window_Selectable]} activeSelectWins - List of active select win
+     */
+    _UT._checkDisplayableActiveVisibleSelectWins = function(selectWins, activeSelectWins) {
+        activeSelectWins.forEach(function(win) {
+            if (!selectWins[win].visible) SATBUT.showFailMsg(win,
+                    "SB.new._checkDisplayableActiveVisibleSelectWins",
+                    "An active selection window must be visible!");
+        });
+    }; // _UT._checkDisplayableActiveVisibleSelectWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Command]} openCmdWins - The list of open cmd windows
+     */
+    _UT._checkOpenCmdWinNum = function(openCmdWins) {
+        if (openCmdWins.length > 1) SATBUT.showFailMsg(openCmdWins,
+                "SB.new._checkOpenCmdWinNum openCmdWins",
+                "At most 1 command window can be open at a time!");
+    }; // _UT._checkOpenCmdWinNum
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} visibleSelectWins - Visible select win list
+     */
+    _UT._checkVisibleSelectWinNum = function(visibleSelectWins) {
+        if (visibleSelectWins.length > 1) SATBUT.showFailMsg(visibleSelectWins,
+                "SB.new._checkVisibleSelectWinNum visibleSelectWins",
+                "At most 1 selection window can be visible at a time!");
+    }; // _UT._checkVisibleSelectWinNum
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} selectWins - The list of selection windows
+     * @param {[Window_Selectable]} visibleSelectWins - Visible select win list
+     */
+    _UT._checkVisibleActiveSelectWins = function(selectWins, visibleSelectWins) {
+        visibleSelectWins.forEach(function(win) {
+            if (selectWins[win].active) return;
+            SATBUT.showFailMsg(win, "SB.new._checkVisibleActiveSelectWins",
+                    "A visible selection window must be active!");
+        });
+    }; // _UT._checkVisibleActiveSelectWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} activeSelectWins - List of active select win
+     */
+    _UT._checkActivePartyCmdActiveSelectWins = function(activeSelectWins) {
+        if (activeSelectWins.length > 0) SATBUT.showFailMsg(activeSelectWins,
+                "SB.new._checkActivePartyCmdActiveSelectWins activeSelectWins",
+                "No selection window can be active when the party " +
+                "command window's active!");
+    }; // _UT._checkActivePartyCmdActiveSelectWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {[Window_Selectable]} visibleSelectWins - Visible select win list
+     */
+    _UT._checkActivePartyCmdVisibleSelectWins = function(visibleSelectWins) {
+        if (visibleSelectWins.length > 0) SATBUT.showFailMsg(visibleSelectWins,
+                "SB.new._checkActivePartyCmdVisibleSelectWins " +
+                "visibleSelectWins",
+                "No selection window can be visible when the party " +
+                "command window's active!");
+    }; // _UT._checkActivePartyCmdVisibleSelectWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Hotspot/No-op
+     * @since v0.00a @version v0.00a
+     * @param {Index} actorIndex - The index of the inputting actor
+     */
+    _UT._checkInputtingActorStatusWinI = function(actorIndex) {
+        var statusWindowIndex = this._statusWindow._index;
+        if (actorIndex === statusWindowIndex) return;
+        SATBUT.showFailMsg(JSON.stringify({
+            actorIndex: actorIndex,
+            statusWindowIndex: statusWindowIndex
+        }), "SB.new._checkInputtingActorStatusWinI indices",
+                "The status window index must be the same as that of the " +
+                "inputting actor!");
+    }; // _UT._checkInputtingActorStatusWinI
 
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Scene_Battle
 
@@ -2757,7 +2866,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
 
 } else {
     alert("DoubleX RMMV Superlative ATB Implementations should be above " +
-            "DoubleX RMMV Superlative ATB Unit Test");
-} // if (DoubleX_RMMV["Superlative ATB Configurations"])
+            "DoubleX RMMV Superlative ATB Unit Tests");
+} // if (DoubleX_RMMV["Superlative ATB Implementations"])
 
 /*============================================================================*/

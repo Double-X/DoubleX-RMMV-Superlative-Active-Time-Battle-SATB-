@@ -12,8 +12,9 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
  * DoubleX RMMV Superlative ATB Parameters(Mandatory as not all parameters have the configuration counterparts)
  * DoubleX RMMV Superlative ATB Configurations(Mandatory even if you never access the configurations yourselves)
  * DoubleX RMMV Superlative ATB Implementations(Mandatory)
- * DoubleX RMMV Superlative ATB Unit Test(Optional but useful when debugging by validating parameters/configuration/notetag values and script call/plugin command arguments)
- * DoubleX RMMV Superlative ATB Compatibility(Optional but should be placed below all addressed plugins when needed)
+ * DoubleX RMMV Superlative ATB Unit Tests(Optional but useful when debugging by validating parameters/configuration/notetag values and script call/plugin command arguments)
+ * DoubleX RMMV Superlative ATB Compatibilities(Optional but should be placed below all addressed plugins when needed)
+ * DoubleX RMMV Superlative ATB Compatibility Tests(Optional but useful when the unit test plugin's also enabled)
  * DoubleX RMMV Superlative ATB Documentations(Optional but highly recommended to check plugin versions and make reading documentations easier)
  *
  * Getting Started:
@@ -31,6 +32,24 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
 (function(SATB) {
 
     "use strict";
+
+    /**
+     * Setups everything that has to be setup for this plugin in battle test
+     * It's very useful when some parameters/notetags use switches/variables
+     * @since v0.00a @version v0.00a
+     */
+    SATB.onSetupBattleTest = function() {
+        // These game switches and variables are used in the default SATB demo
+        $gameSwitches.setValue(1, true);
+        $gameSwitches.setValue(5, true);
+        $gameVariables.setValue(2, 2);
+        $gameVariables.setValue(3, "return 1.25;");
+        $gameVariables.setValue(4, "1.6");
+        //
+        // This game switch's used in the unit test plugin
+        setTimeout(function() { $gameSwitches.setValue(6, true); }, 500);
+        //
+    }; // SATB.onSetupBattleTest
 
     /*------------------------------------------------------------------------
      *    # Parameter counterparts

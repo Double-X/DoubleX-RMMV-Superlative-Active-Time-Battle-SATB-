@@ -19,7 +19,7 @@ DoubleX_RMMV["Superlative ATB Implementations"] = "v0.00a";
  *         - Thorough comprehension on the essence of the default RMMV battle
  *           system implementations
  *         - Advanced RMMV plugin development proficiency to fully comprehend
- *           this plugin
+ *           this implementation plugin
  *      2. All reference tags are to have clear references between the
  *         Plugin Info and Plugin Implementations by searching them
  *      3. All intentionally hidden script calls can be found by searching
@@ -459,8 +459,11 @@ function Game_SATBRules() {
     _SATB._REG_EXP_SUFFIXES =
             " +(\\w+(?:" + _SATB._REG_EXP_SUFFIX_SEPARATOR + "\\w+)*) *";
     _SATB._REG_EXP_ENTRY_SEPARATOR = " *, +";
-    _SATB._REG_EXP_ENTRIES =
-            " +(\\w+(?:" + _SATB._REG_EXP_ENTRY_SEPARATOR + "\\w+)*) *";
+    // So alphanumeric characters as well as numbers with decimals are captured
+    _SATB.REG_EXP_ENTRY_VAL = "[A-Za-z0-9_.]+";
+    //
+    _SATB._REG_EXP_ENTRIES = " *(" + _SATB.REG_EXP_ENTRY_VAL + "(?:" +
+            _SATB._REG_EXP_ENTRY_SEPARATOR + _SATB.REG_EXP_ENTRY_VAL + ")*) *";
 
     _SATB._REG_EXPS = {
         // It's too nasty to validate the notetags here so it's not done here
@@ -497,6 +500,15 @@ function Game_SATBRules() {
         return isLoaded && _SATB._isDatabaseLoaded.call(this);
         // _isDatabaseLoaded must be placed here or the data might not be ready
     }; // DataManager.isDatabaseLoaded
+
+    _DM.setupBattleTest = DataManager.setupBattleTest;
+    _SATB.setupBattleTest = DataManager.setupBattleTest = function() {
+    // v0.00a - v0.00a; Extended
+        _DM.setupBattleTest.apply(this, arguments);
+        // Added to setup everything that has to be setup upon battle test start
+        SATB.onSetupBattleTest();
+        //
+    }; // DataManager.setupBattleTest
 
     _DM.saveGame = DataManager.saveGame;
     _SATB.saveGame = DataManager.saveGame = function(contents) {
@@ -803,9 +815,9 @@ function Game_SATBRules() {
     SATB.BattleManager = { orig: {}, new: {} };
     var _BM = SATB.BattleManager.orig, _SATB = SATB.BattleManager.new;
 
-    _SATB._ACTOR_INDEX = function(actor) { return actor.index(); };
+    _SATB._ACTOR_INDEX = function(actor) { return actor.index(); }; // Hotspot
     // A new clean object must be returned or this clean state would be lost
-    _SATB._CORE_TURN_CLOCK = function() {
+    _SATB._CORE_TURN_CLOCK = function() { // Potential Hotspot
         return { act: 0, frame: 0, sec: 0.0 };
     }; // _SATB._CORE_TURN_CLOCK
     //
@@ -815,6 +827,7 @@ function Game_SATBRules() {
         return b.latestSATBItem.speed - a.latestSATBItem.speed;
     }; // _SATB._SORT_BATTLER_SPEEDS_DESCENDINGLY
 
+    // Potential Hotspots
     _BM._ACT_CORE_TURN_CLOCK_OVERFLOW_FUNC = function(clockMax) {
         _SATB._onCoreTurnClockOverflow.call(this, "act", clockMax, [{
             clockUnit: "frame",
@@ -852,6 +865,7 @@ function Game_SATBRules() {
             isInt: true
         }]);
     }; // _BM._SEC_CORE_TURN_CLOCK_OVERFLOW_FUNC
+    //
 
     _SATB.IS_VALID_RESULT = function(result) { // Hotspot
         // Using undefined is most memory efficient and using null's play safe
@@ -971,14 +985,14 @@ function Game_SATBRules() {
     });
 
     /**
-     * Hotspot/Nullipotent
+     * Script Call/Hotspot/Nullipotent
      * @interface @since v0.00a @version v0.00a
      * @returns {Boolean} The check result
      */
     BattleManager.isSATB = function() {
         // IT CAN'T BE CHANGED DURING THE SAME BATTLE SO NO CACHING'S NEEDED
         return $gameSystem.satbParamFunc("IsCoreEnabled")();
-        //
+        // It's useful to display ATB action costs outside battles
     }; // BattleManager.isSATB
 
     /**
@@ -1064,7 +1078,7 @@ function Game_SATBRules() {
         // Ensures party escape attempt won't trigger when the battle's busy
         if (!this.isSATB()) return true;
         if (!this._spriteset || !this._logWindow || this.isBusy()) return false;
-        return this.canUpdateSATB() && this._phase !== 'action';
+        return this.canUpdateSATB() && !_SATB._isActPhase.call(this);
         //
     }; // BattleManager.canSATBEsc
 
@@ -1075,9 +1089,8 @@ function Game_SATBRules() {
      */
     BattleManager.canUpdateSATB = function() {
         // Checks if cases always stopping global ATB frame update aren't met
-        if (this.isAborting() || this.isBattleEnd()) return false;
+        if (_SATB._isBattleStop.call(this)) return false;
         return $gameParty.inBattle() && this._phase !== 'init';
-        //
     }; // BattleManager.canUpdateSATB
 
     /**
@@ -1097,6 +1110,7 @@ function Game_SATBRules() {
     }; // BattleManager.addSATBInputableActor
 
     /**
+     * This method's sematically idempotent but not technically so
      * @interface @since v0.00a @version v0.00a
      * @param {Game_Battler} battler - The battler to become able to exec acts
      */
@@ -1120,8 +1134,8 @@ function Game_SATBRules() {
      */
     BattleManager.eraseSATBInputableActor = function(actor) {
         if (!$gameParty.inBattle()) return;
-        var index = this._satb.inputableActors.indexOf(actor);
-        if (index >= 0) this._satb.inputableActors.splice(index, 1);
+        var i = this._satb.inputableActors.indexOf(actor);
+        if (i >= 0) this._satb.inputableActors.splice(i, 1);
         if (this.actor() === actor) return this.clearActor();
         // Otherwise inputable actors not being selected will have wrong poses
         actor.setActionState('');
@@ -1136,8 +1150,8 @@ function Game_SATBRules() {
     BattleManager.eraseSATBActBattler = function(battler) {
         if (!$gameParty.inBattle() || !this.isSATB()) return;
         // _subject shouldn't be in _actionBattlers so it's safe to always erase
-        var index = this._actionBattlers.indexOf(battler);
-        if (index >= 0) this._actionBattlers.splice(index, 1);
+        var i = this._actionBattlers.indexOf(battler);
+        if (i >= 0) this._actionBattlers.splice(i, 1);
         //
     }; // BattleManager.eraseSATBActBattler
 
@@ -1199,7 +1213,7 @@ function Game_SATBRules() {
      */
     BattleManager.canUpdateSATBProc = function() {
         // Checks if the ATB frame update or action execution can be processed
-        if (this.isAborting() || this.isBattleEnd()) {
+        if (_SATB._isBattleStop.call(this)) {
             // There's no point in extracting these into a new method.function
             this.update();
             return false;
@@ -1240,7 +1254,7 @@ function Game_SATBRules() {
      */
     BattleManager.updateSATBAct = function() {
         // Updates current action when finished execution on the current target
-        if (this._phase === 'action' && !this.isBusy()) this.updateAction();
+        if (_SATB._canUpdateAct.call(this)) this.updateAction();
         //
     }; // BattleManager.updateSATBAct
 
@@ -1459,6 +1473,15 @@ function Game_SATBRules() {
     }; // _SATB._sortActBattlersBySpeed
 
     /**
+     * Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @returns {Boolean} The check result
+     */
+    _SATB._isBattleStop = function() {
+        return this.isAborting() || this.isBattleEnd();
+    }; // _SATB._isBattleStop
+
+    /**
      * The this pointer is BattleManager
      * Hotspot
      * @since v0.00a @version v0.00a
@@ -1478,7 +1501,8 @@ function Game_SATBRules() {
      * @since v0.00a @version v0.00a
      */
     _SATB._procTurn = function() {
-        if (this._phase === 'action') return;
+        if (_SATB._isActPhase.call(this)) return;
+        $gameParty.requestMotionRefresh();
         this._subject = this._subject || this.getNextSubject();
         if (this._subject) this.processTurn();
     }; // _SATB._procTurn
@@ -1551,6 +1575,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Potential Hotspot
      * @since v0.00a @version v0.00a
      * @param {Number} clockMax - The ATB turn clock maximum value
      * @param {(Number)} overflowFunc - Function to run when turn clock overflow
@@ -1568,7 +1593,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
-     * Hotspot/Nullipotent
+     * Potential Hotspot/Nullipotent
      * @since v0.00a @version v0.00a
      * @returns {Boolean} The check result
      */
@@ -1586,6 +1611,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Potential Hotspot
      * @since v0.00a @version v0.00a
      * @param {String} clockUnit - The ATB turn clock unit(act/frame/sec)
      * @param {Number} clockMax - The ATB turn clock maximum value
@@ -1604,6 +1630,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Potential Hotspot
      * @since v0.00a @version v0.00a
      * @param {Number} newTurnClockProportion - The proportion of the other unit
      * @param {{String, Number, Boolean}} otherClockUnitDatum - Other clock
@@ -1618,6 +1645,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Potential Hotspot
      * @since v0.00a @version v0.00a
      */
     _SATB._endTurn = function() {
@@ -1630,6 +1658,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is BattleManager
+     * Potential Hotspot
      * @since v0.00a @version v0.00a
      * @param {Game_Battler} mem - The member to have his/her/its turn ended
      */
@@ -1638,6 +1667,24 @@ function Game_SATBRules() {
         this._logWindow.displayAutoAffectedStatus(mem);
         this._logWindow.displayRegeneration(mem);
     }; // _SATB._endMemTurn
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @returns {Boolean} The check result
+     */
+    _SATB._canUpdateAct = function() {
+        // _SATB._isActPhase will be changed in the compatibility plugin
+        return this._phase === 'action' && !this.isBusy();
+        //
+    }; // _SATB._canUpdateAct
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.00a @version v0.00a
+     * @returns {Boolean} The check result
+     */
+    _SATB._isActPhase = function() { return this._phase === 'action'; };
 
 })(DoubleX_RMMV.SATB); // BattleManager
 
@@ -1726,11 +1773,11 @@ function Game_SATBRules() {
         }, // params
         notes: {
             // Refer to reference tag NOTE_TYPE
-            coreMax: function(content) {
+            coreMax: function(content) { // Potential Hotspot
                 var c = "'use strict';\n" + content;
                 return new Function("datum", "datumType", "latestMax", c);
             },
-            coreActState: function(content) {
+            coreActState: function(content) { // Potential Hotspot
                 var c = "'use strict';\n" + content;
                 return new Function("datum", "datumType", c);
             }
@@ -2268,7 +2315,9 @@ function Game_SATBRules() {
      */
     $.eraseCoreSATBActs = function() {
         this.clearCoreSATB();
+        // setSATBActTimes isn't called for performance boost
         this._satb.actTimes = 0;
+        //
     }; // $.eraseCoreSATBActs
 
     /**
@@ -2338,6 +2387,7 @@ function Game_SATBRules() {
 
     /**
      * The this pointer is Game_BattlerBase.prototype
+     * Nullipotent
      * @since v0.00a @version v0.00a
      * @enum @param {Boolean} wasAutoBattle - Whether battler was auto battle
      * @param {Boolean} wasRestricted - Whether the battler was restricted
@@ -2376,6 +2426,7 @@ function Game_SATBRules() {
         setCoreSATBProportion: "setCoreATBProportion",
         addCoreSATB: "addCoreATB",
         addCoreSATBProportion: "addCoreATBProportion",
+        multiplyCoreSATB: "multiplyCoreATB",
         clearCoreSATB: "clearCoreATB",
         coreSATB: "coreATB",
         coreMaxSATB: "coreMax"
@@ -2411,7 +2462,7 @@ function Game_SATBRules() {
     _SATB.addState = $.addState = function(stateId) {
     // v0.00a - v0.00a; Extended
         // Added to mark that state notetags might have changed
-        if (this.isStateAffected(stateId) && !this.isStateAffected(stateId)) {
+        if (this.isStateAddable(stateId) && !this.isStateAffected(stateId)) {
             this._satb.notes.markChangeFactors(["states"]);
         }
         // This must be placed here before calling refresh
@@ -2516,7 +2567,7 @@ function Game_SATBRules() {
     //
 
     /**
-     * Script Call/Idempotent
+     * Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {{[DatumType]}?} noteFactors_ - The notes and factors to be raised
      */
@@ -2591,7 +2642,7 @@ function Game_SATBRules() {
     }; // $.setStartSATB
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {Number} fillRate - The increment of current ATB value proportion
      */
@@ -2649,8 +2700,47 @@ function Game_SATBRules() {
      */
     $.initCoreSATBActs = function(atbVal) {
         this.setCoreSATB(atbVal);
+        // setSATBActTimes isn't called for performance boost
         this._satb.actTimes = 0;
+        //
     }; // $.initCoreSATBActs
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {Nonnegative Int} increment - The virtual action slot increment
+     */
+    $.addSATBActTimes = function(increment) {
+        this.setSATBActTimes(this._satb.actTimes + increment);
+    }; // $.addSATBActTimes
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {Nonnegative Int} multiplier - The virtual action slot multipler
+     */
+    $.multiplySATBActTimes = function(multiplier) {
+        this.setSATBActTimes(this._satb.actTimes * multiplier);
+    }; // $.multiplySATBActTimes
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.00a @version v0.00a
+     * @param {Nonnegative Int} actTimes - The new number of virtual action slot
+     */
+    $.setSATBActTimes = function(actTimes) {
+        var oldActTimes = this._satb.actTimes;
+        this._satb.actTimes = actTimes;
+        if (oldActTimes > 0 && actTimes <= 0) {
+            // It's to ensure that the ATB value will become not full
+            this._satb.phaseTypes.addSmallestCoreSATBDecrement();
+            //
+        } else if (oldActTimes <= 0 && actTimes >= 0) {
+            // It's to ensure that the ATB value will become full
+            this.setCoreSATB(this.coreMaxSATB());
+            //
+        }
+    }; // $.setSATBActTimes
 
     /**
      * The this pointer is Game_Battler.prototype
@@ -2683,7 +2773,7 @@ function Game_SATBRules() {
         // The number of action slots should always be 1 so the counter's needed
         if (this._satb.actTimes > 0) return;
         this._satb.actTimes = _GB.makeActionTimes.apply(this, arguments);
-        //
+        // It's not idempotent as makeActionTimes are random by default
     }; // _SATB._makeActs
 
     /**
@@ -2942,7 +3032,7 @@ function Game_SATBRules() {
     }; // $.clear
 
     /**
-     * Hotspot
+     * Hotspot/Hotspot
      * @interface @since v0.00a @version v0.00a
      * @param {Number} fillRate - The increment of current ATB value proportion
      */
@@ -2955,6 +3045,7 @@ function Game_SATBRules() {
 
     /**
      * @interface @since v0.00a @version v0.00a
+     * This method's practically idempotent but not theoretically so
      */
     $.addSmallestCoreSATBDecrement = function() {
         // Otherwise the increment would be too small for huge max ATB values
@@ -2982,6 +3073,15 @@ function Game_SATBRules() {
     }; // $.addCoreATB
 
     /**
+     * Script Call
+     * @interface @since v0.00a @version v0.00a
+     * @param {Number} multiplier - Multiplier of current ATB value of battler
+     */
+    $.multiplyCoreATB = function(multiplier) {
+        this.setCoreATB(this.coreATB() * multiplier);
+    }; // $.multiplyCoreATB
+
+    /**
      * Script Call/Idempotent
      * @interface @since v0.00a @version v0.00a
      */
@@ -2990,13 +3090,13 @@ function Game_SATBRules() {
     }; // clearCoreATB
 
     /**
-     * Script Call/Hotspot/Idempotent
+     * Script Call/Idempotent
      * @interface @since v0.00a @version v0.00a
      * @param {Number} proportion - New current ATB value proportion of battler
      */
     $.setCoreATBProportion = function(proportion) {
         this.setCoreATB(proportion * this.coreMax());
-    }; // $.setCoreATB
+    }; // $.setCoreATBProportion
 
     /**
      * Script Call/Hotspot/Idempotent
@@ -3014,7 +3114,7 @@ function Game_SATBRules() {
     }; // $.setCoreATB
 
     /**
-     * Script Call/Nullipotent
+     * Script Call/Hotspot/Nullipotent
      * @interface @since v0.00a @version v0.00a
      * @returns {Number} The current ATB value of the battler
      */
@@ -3888,14 +3988,14 @@ function Game_SATBRules() {
     var $ = Game_SATBPairs.prototype, _SATB = SATB.Game_SATBPairs = {};
     var GS = SATB.Game_System.new;
 
-    _SATB._IS_VALID_PAIR = function(note, pair_) {
+    _SATB._IS_VALID_PAIR = function(note, pair_) { // Potential Hotspot
         if (!pair_) return false;
         return pair_.entry1 && _SATB._IS_VALID_SUFFIX(note, pair_.suffix1);
     }; // _SATB._IS_VALID_PAIR
     _SATB._IS_VALID_SUFFIX = function(note, suffix) { // Potential Hotspot
         return _SATB._NOTE_TYPES[note].suffixes.contains(suffix);
     }; // _SATB._IS_VALID_SUFFIX
-    _SATB._PAIR_FUNC = function(note, datum, pair) {
+    _SATB._PAIR_FUNC = function(note, datum, pair) { // Potential Hotspot
         // Refers to reference tag THIS_GAME_BATTLER
         var suffix = pair.suffix1, noteFunc = _SATB._SUFFIX_FUNCS[suffix];
         var resultType = _SATB._NOTE_TYPES[note].result;
@@ -3906,14 +4006,11 @@ function Game_SATBRules() {
         };
         //
     }; // $._PAIR_FUNC
-    _SATB._STRING_TO_NUM = function(r) { return +r; };
+    _SATB._STRING_TO_NUM = function(r) { return +r; }; // Potential Hotspot
 
     // Refers to reference tag NOTE_DEFAULT_RESULTS
-    _SATB._DEFAULT_RESULTS = { // Hotspot
+    _SATB._DEFAULT_RESULTS = { // Potential Hotspot
         coreMax: function() { return this._battler.baseCoreMaxSATB(); },
-        // A notetag chaining boolean values can't have any valid default value
-        coreActState: function() { return undefined; }
-        //
     }; // _SATB._DEFAULT_RESULTS
     //
     // The last argument must be the latest chained notetag value result
@@ -4011,7 +4108,10 @@ function Game_SATBRules() {
      * @returns {*} The default result of the note
      */
     $.default_ = function(note, argObj_) {
-        return _SATB._DEFAULT_RESULTS[note].call(this, argObj_);
+        var func = _SATB._DEFAULT_RESULTS[note];
+        // Not all notetags have default values
+        return func ? func.call(this, argObj_) : undefined;
+        //
     }; // $.default_
 
     /**
@@ -4529,8 +4629,11 @@ function Game_SATBRules() {
     }; // _SATB._TARGET_TYPES
 
     // Functions returning results aren't commands but they're not listed anyway
-    _SATB._CMDS = Object.keys(GB.NOTE_FORWARDED_FUNCS).concat(
-            GB.PHASE_TYPE_FORWARDED_FUNCS);
+    _SATB._CMDS = Object.keys(GB.NOTE_FORWARDED_FUNCS).concat([
+        "setSATBActTimes",
+        "addSATBActTimes",
+        "multiplySATBActTimes"
+    ]).concat(GB.PHASE_TYPE_FORWARDED_FUNCS);
     //
     _SATB._TARGET_ID = "id", _SATB._TARGET_INDEX = "index";
 
@@ -4631,7 +4734,7 @@ function Game_SATBRules() {
         if (win.visible) win.hide();
         // These selection windows can't be inactive but visible
     }; // _SATB._DEACTIVATE_HIDE_SELECTION_WIN
-    _SATB._IS_VISIBLE = function(window) { return window.visible; };
+    _SATB._IS_VISIBLE = function(win) { return win.visible; };
 
      /*------------------------------------------------------------------------
       *    New private instance variables
@@ -4714,6 +4817,24 @@ function Game_SATBRules() {
         _SB.selectNextCommand.apply(this, arguments);
     }; // $.selectNextCommand
 
+    [
+        "commandAttack",
+        "commandSkill",
+        "commandGuard",
+        "onActorOk",
+        "onEnemyOk",
+        "onSkillOk",
+        "onItemOk",
+        "onSelectAction"
+    ].forEach(function(func) {
+        _SB[func] = $[func];
+        _SATB[func] = $[func] = function() { // v0.00a - v0.00a; Extended
+            // Edited to prevent an extremely rare crash from happening
+            if (BattleManager.actor()) _SB[func].apply(this, arguments);
+            // It's ok to just change to No-op as the windows will be cleaned up
+        }; // $[func]
+    });
+
     /**
      * Idempotent
      * @interface @since v0.00a @version v0.00a
@@ -4722,13 +4843,10 @@ function Game_SATBRules() {
     $.refreshSATBInputWins = function() {
         if (!BattleManager.isSATB()) return;
         // It's possible for the target list/availability to be changed
-        if (this._actorWindow.visible) {
-            this._actorWindow.refresh();
-            return this._enemyWindow.deselect();
-        } else if (this._enemyWindow.visible) {
-            this._enemyWindow.refresh();
-            return this._actorWindow.deselect();
-        }
+        if (this._actorWindow.visible) return _SATB._refreshDeselectTargetWin(
+                this._actorWindow, this._enemyWindow);
+        if (this._enemyWindow.visible) return _SATB._refreshDeselectTargetWin(
+                this._enemyWindow, this._actorWindow);
         // Invisible selection wins are active only when they can't be shown
         // It's to ensure that the stale targets aren't displayed as selected
         this._actorWindow.deselect();
@@ -4817,14 +4935,12 @@ function Game_SATBRules() {
         //
         // Deactivates the active input windows that should be no longer active
         if (selectedIndex >= 0) return _SATB._onDeselectActor.call(this);
+        //
         var hasNoInputableActor = inputableIndices.length <= 0;
+        // There's no need to setup a new inputable actor in this case
         if (this._partyCommandWindow.active) {
-            // There's no need to setup a new inputable actor in this case
-            if (hasNoInputableActor) {
-                _SATB._closeDeactivatePartyCmdWin.call(this);
-            }
-            return;
-            //
+            return _SATB._updateActivePartyCmdWin.call(
+                    this, hasNoInputableActor);
         }
         //
         // Setups new inputable actors to input actions if there's such actors
@@ -4879,6 +4995,18 @@ function Game_SATBRules() {
         //
         this._statusWindow.deselect();
     }; // _SATB._deselectOpenStatusWin
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Nullipotent
+     * @since v0.00a @version v0.00a
+     * @param {Boolean} hasNoInputableActor - Whether there's no inputable actor
+     */
+    _SATB._updateActivePartyCmdWin = function(hasNoInputableActor) {
+        // Deactivates the active input windows that should be no longer active
+        if (hasNoInputableActor) _SATB._closeDeactivatePartyCmdWin.call(this);
+        //
+    }; // _SATB._updateActivePartyCmdWin
 
     /**
      * The this pointer is Scene_Battle.prototype
@@ -5032,10 +5160,10 @@ function Game_SATBRules() {
      * The this pointer is Scene_Battle.prototype
      * Idempotent
      * @since v0.00a @version v0.00a
-     * @param {Index} index - The index of the inputable actor in the party
+     * @param {Index} i - The index of the inputable actor in the party
      */
-    _SATB._onSelectActor = function(index) {
-        BattleManager.changeActor(index, 'waiting');
+    _SATB._onSelectActor = function(i) {
+        BattleManager.changeActor(i, 'waiting');
         this.startActorCommandSelection();
     }; // _SATB._onSelectActor
 
@@ -5043,15 +5171,26 @@ function Game_SATBRules() {
      * The this pointer is Scene_Battle.prototype
      * @since v0.00a @version v0.00a
      */
-    _SATB._selectNextCmd = function(index) {
+    _SATB._selectNextCmd = function() {
         BattleManager.selectNextCommand();
         // So actor cmd win will be immediately setup for next inputable actor
         if (BattleManager.isInputting() && BattleManager.actor()) {
             return this.startActorCommandSelection();
         }
-        //
+        // Using BattleManager.isInputting() as well is just to play safe
         this.endCommandSelection();
     }; // _SATB._selectNextCmd
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * @since v0.00a @version v0.00a
+     * @param {Window_Selectable} refreshWin - Target select window to refresh
+     * @param {Window_Selectable} deselectWin - Target select window to deselect
+     */
+    _SATB._refreshDeselectTargetWin = function(refreshWin, deselectWin) {
+        refreshWin.refresh();
+        deselectWin.deselect();
+    }; // _SATB._refreshDeselectTargetWin
 
 })(DoubleX_RMMV.SATB); // Scene_Battle.prototype
 

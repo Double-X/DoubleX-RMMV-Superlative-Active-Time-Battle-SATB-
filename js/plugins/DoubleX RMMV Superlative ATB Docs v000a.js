@@ -154,10 +154,17 @@
  *         uses
  *      6. If you want to keep things easy, simple and small, you may want to
  *         use DoubleX RMMV Popularized ATB instead
- *      7. (Advanced)You might have to read some new variables/functions to
+ *      7. If you want to run battle tests, you use open the configuration
+ *         plugin js file directly to setup everything that has to be setup
+ *         upon battle test start by changing the contents of the function
+ *         SATB.onSetupBattleTest
+ *         (It's especially useful when some parameters/notetags use some
+ *         game switches/variables which must all have their corresponding
+ *         values manually assigned first)
+ *      8. (Advanced)You might have to read some new variables/functions to
  *         have a basic knowledge on what they do in order to realize some
  *         intended cases
- *      8. (Advanced)You might have to dig into the mechanisms of some new
+ *      9. (Advanced)You might have to dig into the mechanisms of some new
  *         variables/functions to have a solid underatanding on how they work
  *         alone in order to realize some unintended usages
  *----------------------------------------------------------------------------
@@ -590,6 +597,10 @@
  *           already doing so for some other totally different reasons, in
  *           this case you're likely already good enough to use this primirive
  *           script call while still really knowing what you're truly doing)
+ *    # Battle manipulations
+ *      1. BattleManager.isSATB()
+ *         - Returns whether this plugin's enabled
+ *         - (Advanced)It's supposed to be Nullipotent
  *    # Battler manipulations
  *      1. setCoreSATB(val)
  *         - Sets the new current ATB value of the battler involved as val
@@ -605,7 +616,7 @@
  *           proportion
  *      3. addCoreSATB(increment)
  *         - Adds the current ATB value of the battler involved by increment
- *         - (Advanced)val is supposed to be a Number
+ *         - (Advanced)increment is supposed to be a Number
  *         - E.g.:
  *           $gameTroop.members()[0].addCoreSATB(-100) will subtract the
  *           current ATB value of the 1st troop member by 100
@@ -614,37 +625,68 @@
  *           this one adds the current ATB value of the battler involved by
  *           the amount in which its proportion relative to the maximum
  *           counterpart is proportion
- *      5. clearCoreSATB()
+ *      5. multiplyCoreSATB(multiplier)
+ *         - The same as the script call addCoreSATB(increment) except that
+ *           this one multiplies the current ATB value of the battler involved
+ *           by multiplier
+ *      6. clearCoreSATB()
  *         - Sets the new current ATB value of the battler involved as 0 if
  *           it was positive(otherwise it'll remain unchanged)
- *         - (Advanced)val is supposed to be a Number
  *         - E.g.:
  *           $gameTroop.deadMembers()[1].clearCoreSATB() won't have any effect
  *           if the current ATB value of the 2nd dead troop member is negative
  *         - (Advanced)It's supposed to be Idempotent
- *      6. coreSATB()
- *         - Returns the current ATB value of the battler involved
- *         - (Advanced)It's supposed to return a Number
+ *      7. setSATBActTimes(actTimes)
+ *         - Sets the number of virtual action slots of the battler involved
+ *           as actTimes
+ *         - If the number of virtual action slots becomes greater than 0,
+ *           then the ATB value of that battler will immediately become full
+ *         - If the number of virtual action slots becomes not greater than 0,
+ *           then the ATB value of that battler will be minused by an
+ *           extremely small decrement to ensure that it won't be full
+ *         - Bear in mind that the number of virtual action slots will be
+ *           reduced by 1(without changes from the Action Module) when a
+ *           battler just finished executing an action
+ *         - (Advanced)actTimes is supposed to be a Nonnegative Integer
  *         - E.g.:
- *           $gameActors.actor(0).coreSATB() will return the current value of
- *           the 1st actor
- *         - (Advanced)It's supposed to be Nullipotent
- *      7. coreMaxSATB()
- *         - Returns the maximum ATB value of the battler involved
- *         - (Advanced)It's supposed to return a positive Number
- *         - E.g.:
- *           $gameParty.aliveMembers()[0].coreMaxSATB() will return the
- *           maximum value of the 1st alive party member
- *         - (Advanced)Using this script call might recache the return value
- *         - (Advanced)It's supposed to be Nullipotent other than possibly
- *           recaching the return value
- *      10. (Advanced)raiseAllSATBNoteChangeFactors()
+ *           $gameActors.actor(1).setSATBActTimes(2) will set the number of
+ *           virtual action slot of the game actor with id 1 as 2
+ *           The ATB value of that actor will immediately become full
+ *         - (Advanced)It's supposed to be Idempotent
+ *      8. addSATBActTimes(increment)
+ *         - Adds the number of virtual action slots of the battler involved
+ *           by increment
+ *         - Otherwise it's the same as the script call
+ *           setSATBActTimes(actTimes)
+ *         - (Advanced)increment is supposed to be an Integer
+ *         - (Advanced)This script call isn't supposed to be idempotent
+ *      9. multiplySATBActTimes(multiplier)
+ *         - The same as the script call addSATBActTimes(increment) except
+ *           that this one multiplies the number of virtual action slots of
+ *           the battler involved by multiplier
+ *      10. coreSATB()
+ *          - Returns the current ATB value of the battler involved
+ *          - (Advanced)It's supposed to return a Number
+ *          - E.g.:
+ *            $gameActors.actor(0).coreSATB() will return the current value
+ *            of the 1st actor
+ *          - (Advanced)It's supposed to be Nullipotent
+ *      11. coreMaxSATB()
+ *          - Returns the maximum ATB value of the battler involved
+ *          - (Advanced)It's supposed to return a positive Number
+ *          - E.g.:
+ *            $gameParty.aliveMembers()[0].coreMaxSATB() will return the
+ *            maximum value of the 1st alive party member
+ *          - (Advanced)Using this script call might recache the return value
+ *          - (Advanced)It's supposed to be Nullipotent other than possibly
+ *            recaching the return value
+ *      12. (Advanced)raiseAllSATBNoteChangeFactors()
  *          - Applies the script call
  *            raiseSATBNoteChangeFactors(note, factors) to all notes
- *          - You should probably use refresh() instead of this script call
- *            As refresh() will have all the effects this script call has, and
+ *          - You should probably use refresh() instead of this script call as
+ *            refresh() will have all the effects this script call has, and
  *            also immediately recache values that are no longer valid
- *      11. (Advanced)raiseSATBNoteChangeFactors(note, factors)
+ *      13. (Advanced)raiseSATBNoteChangeFactors(note, factors)
  *         - Notifies that the notetag note might need to be recached due to
  *           potential changes in factors factors
  *         - note is either of the following:
@@ -667,7 +709,7 @@
  *           will notify the 1st alive party member that the coreMax notetags
  *           might need to be recached due to potential changes in the states
  *           and skills or their coreMax notetags
- *      12. (Advanced)invalidateSATBNoteResult(note, part)
+ *      14. (Advanced)invalidateSATBNoteResult(note, part)
  *         - Invalidates the cached intermediate result of part part in note
  *           note for the actor involved
  *         - note is either of the following:
@@ -686,7 +728,7 @@
  *           $gameParty.aliveMembers()[0].invalidateSATBNoteResult("coreMax", "states")
  *           will invalidate the cached intermediate result of all effective
  *           coreMax notetags in states for the 1t alive party member
- *      13. (Advanced)invalidateSATBNoteList(note, part)
+ *      15. (Advanced)invalidateSATBNoteList(note, part)
  *         - Invalidates the cached notetag list of part part in note note for
  *           the actor involved
  *         - note is either of the following:
@@ -770,10 +812,26 @@
  *          - The same as the script call addCoreSATBProportion(increment) in
  *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      5. clearCoreSATB targetType targets
+ *      5. multiplyCoreSATB targetType targets multiplier
+ *          - The same as the script call multiplyCoreSATB(multiplier) in
+ *            Battler manipulations with the designated targets in the
+ *            designated targetType
+ *      6. clearCoreSATB targetType targets
  *          - The same as the script call clearCoreSATB() in Battler
  *            manipulations with the designated targets in the designated
  *            targetType
+ *      7. setSATBActTimes targetType targets actTimes
+ *          - The same as the script call setSATBActTimes(actTimes) in Battler
+ *            manipulations with the designated targets in the designated
+ *            targetType
+ *      8. addSATBActTimes targetType targets increment
+ *          - The same as the script call addSATBActTimes(increment) in
+ *            Battler manipulations with the designated targets in the
+ *            designated targetType
+ *      9. multiplySATBActTimes targetType targets multiplier
+ *          - The same as the script call multiplySATBActTimes(multiplier) in
+ *            Battler manipulations with the designated targets in the
+ *            designated targetType
  *      10. raiseAllSATBNoteChangeFactors targetType targets
  *          - The same as the script call raiseAllSATBNoteChangeFactors() in
  *            Battler manipulations with the designated targets in the
@@ -804,7 +862,8 @@ DoubleX_RMMV.SATB_VERS = {
     Configurations: "0.00a",
     Implementations: "0.00a",
     "Unit Tests": "0.00a",
-    Compatibilities: "0.00a"
+    Compatibilities: "0.00a",
+    "Compatibility Tests": "0.00a"
 }; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {
     "use strict";
