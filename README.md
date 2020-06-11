@@ -4,6 +4,8 @@ PLEASE NOTE THAT THIS PROJECT'S STILL UNDER DEVELOPMENT. Currently the following
 Also, please note that the following plugins are made by the others(They're included here to demonstrate that SATB are indeed compatible to them all):
 1. 
 
+IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH PLUGINS HAVING STRICTLY STRICTER TERMS OF USE THAN THIS PROJECT(THIS ESPECIALLY APPLIIES TO COMMERCIAL PLUGINS) TO AVOID VIOLATING THEIR TERMS OF USE
+
 Videos:
 1. Core Module Only
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
