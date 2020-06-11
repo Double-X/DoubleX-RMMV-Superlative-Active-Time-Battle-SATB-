@@ -8,9 +8,11 @@ The following foreign plugins are addressed by the compatibility plugin:
    - https://atelierrgss.wordpress.com/rmv-battle-hud/
 2. Yanfly Engine Plugins - Battle Engine Core
    - http://www.yanfly.moe/wiki/Battle_Engine_Core_(YEP)
+
 The following foreign plugins are helpful when using this project:
 1. QInput
    - https://quxios.github.io/plugins/QInput
+
 Please note that I'll only place plugins that are made by myself in this repository.
 
 Videos:
