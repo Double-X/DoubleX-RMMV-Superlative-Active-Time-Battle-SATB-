@@ -1,14 +1,17 @@
-PLEASE NOTE THAT THIS PROJECT'S STILL UNDER DEVELOPMENT. Currently the following modules are completed:
+Please note that this plugin's still under developement. Currently the following modules are completed:
 1. Core Module
-
-Also, please note that the following plugins are made by the others(They're included here to demonstrate that SATB are indeed compatible to them all):
-1. 
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
-The following foreign plugins are addressed by the compatibility plugin but not placed in this repository due to their (at least possibly)restricted plugin distribution policies:
+The following foreign plugins are addressed by the compatibility plugin:
 1. MOG_BattleHud
+   - https://atelierrgss.wordpress.com/rmv-battle-hud/
 2. Yanfly Engine Plugins - Battle Engine Core
+   - http://www.yanfly.moe/wiki/Battle_Engine_Core_(YEP)
+The following foreign plugins are helpful when using this project:
+1. QInput
+   - https://quxios.github.io/plugins/QInput
+Please note that I'll only place plugins that are made by myself in this repository.
 
 Videos:
 1. Core Module Only
