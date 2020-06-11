@@ -6,6 +6,9 @@ Also, please note that the following plugins are made by the others(They're incl
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
+The following foreign plugins are addressed by the compatibility plugin but not placed in this repository due to their restricted plugin distribution policies:
+1. Yanfly Engine Plugins - Battle Engine Core
+
 Videos:
 1. Core Module Only
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
