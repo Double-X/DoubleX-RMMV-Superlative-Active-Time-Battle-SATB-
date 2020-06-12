@@ -18,6 +18,10 @@ Please note that I'll only place plugins that are made by myself in this reposit
 Videos:
 1. Core Module Only
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
+2. Compatibility With Just MOG_BattleHud
+- https://www.youtube.com/watch?v=0_v0KzU733E
+3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
+- https://www.youtube.com/watch?v=c6ZSvDVj0WM
 
 Posts:
 1. 
