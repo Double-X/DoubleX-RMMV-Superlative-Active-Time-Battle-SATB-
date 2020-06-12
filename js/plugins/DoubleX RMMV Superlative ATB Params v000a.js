@@ -78,14 +78,14 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type note
  * @desc Sets the turn duration as coreBaseFillUnit * coreTurnATBTime
  * It'll be contents of a function returning a positive Number
- * @default "return baseFillATB * 2.0;"
+ * @default "return baseFillATB * 2.0 * +$gameVariables.value(5);"
  *
  * @param coreTurnATBAct
  * @parent IsCoreEnabled
  * @type note
  * @desc Sets the number of actions constituting a turn
  * It'll be contents of a function returning a Natural Number
- * @default "return BattleManager.allBattleMembers().length * 2;"
+ * @default "var memNum = BattleManager.allBattleMembers().length;\nreturn memNum * 2 * +$gameVariables.value(5);"
  *
  * @param canCoreTurnClockOverflow
  * @parent IsCoreEnabled

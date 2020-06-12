@@ -45,6 +45,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
         $gameVariables.setValue(2, 2);
         $gameVariables.setValue(3, "return 1.25;");
         $gameVariables.setValue(4, "1.6");
+        $gameVariables.setValue(5, 1);
         //
         // This game switch's used in the unit test plugin
         setTimeout(function() { $gameSwitches.setValue(6, true); }, 500);
@@ -100,8 +101,8 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
              */
             coreTurnATBTime: function(baseFillATB) {
                 // coreBaseFillATBFrame or coreBaseFillATBSec * 2.0 = turn time
-                return baseFillATB * 2.0;
-                //
+                return baseFillATB * 2.0 * +$gameVariables.value(5);
+                // multiplied by the value of the game variable with id 5
             }, // coreTurnATBTime
 
             /**
@@ -112,8 +113,9 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
              */
             coreTurnATBAct: function() {
                 // The number of all battlers in battle
-                return BattleManager.allBattleMembers().length;
-                //
+                return BattleManager.allBattleMembers().length *
+                        +$gameVariables.value(5);
+                // multiplied by the value of the game variable with id 5
             }, // coreTurnATBAct
 
             /**
@@ -214,7 +216,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.00a";
              *                       positive) for the battler involved
              */
             CMATB_VAR: function(datum, datumType, latestMax) {
-                // Returns the value in the game variable with id 4
+                // Returns the Number value in the game variable with id 4
                 return +$gameVariables.value(4);
                 // Numbers with decimals should be stored in the String form
             }, // CMATB_VAR

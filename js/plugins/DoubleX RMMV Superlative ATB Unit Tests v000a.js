@@ -69,7 +69,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
  *           comprehend this unit test plugin
  *----------------------------------------------------------------------------*/
 
-(function(SATB, SATBUT) {
+(function(SATBUT) {
 
     "use strict";
 
@@ -634,7 +634,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
     }; // SATBUT.checkFuncs
     //
 
-})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+})(DoubleX_RMMV.SATB.Unit_Tests);
 
 /*----------------------------------------------------------------------------
  *    # Edit class: DataManager
@@ -727,7 +727,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         var satb = { datumType: "states" }, lines = [
             "<doublex rmmv coremax>",
             "<doublex rmmv satb coreMax cfg: CMATB_MAX>",
-            "<satb coreMax val: 102.4>",
+            "<satb coreMax val: -102.4>",
             // eval suffix has no side effects if is content's no switch/vars
             "<doublex rmmv satb coreMax>",
             "return 999.0 / this.agi;",
@@ -766,7 +766,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
                 SATBUT.showFailMsg(satbLines, "SATB.DataManager.new._readNote",
                         "The suffix of the 2nd coreMax notetag should be val!");
             }
-            if (secondCoreMax.entry1 !== "102.4") {
+            if (secondCoreMax.entry1 !== "-102.4") {
                 SATBUT.showFailMsg(satbLines, "SATB.DataManager.new._readNote",
                         "The entry of the 2nd coreMax notetag should be 100!");
             }
@@ -1168,7 +1168,7 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
             var prev = self[i - 1];
             if (!prev) return;
             // It isn't tautological as the Speed Module can behave differently
-            if (prev.latestSATBItem.speed < battler.latestSATBItem.speed) {
+            if (prev.latestSATBItem_.speed < battler.latestSATBItem_.speed) {
                 SATBUT.showFailMsg(prev.name() + " " + battler.name(),
                         "BM.new._checkSortActBattlers prev battler",
                         "The action execution queue should be sorted " +
@@ -1440,6 +1440,13 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         return baseCoreMax;
     }; // $.baseCoreMaxSATB
 
+    _GB.onBecomeActable = $.onBecomeActable;
+    _UT.onBecomeActable = $.onBecomeActable = function() {
+    // v0.00a - v0.00a; Extended
+        _GB.onBecomeActable.apply(this, arguments);
+        _UT._checkLatestItem.call(this);
+    }; // $.onBecomeActable
+
     _GB.initCoreSATBActs = $.initCoreSATBActs;
     _UT.initCoreSATBActs = $.initCoreSATBActs = function(atbVal) {
     // v0.00a - v0.00a; Extended
@@ -1448,6 +1455,17 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
         SATBUT.checkFuncs.checkNum(atbVal, "_GB.initCoreSATBActs atbVal");
         //
     }; // $.initCoreSATBActs
+
+    /**
+     * No-op
+     * @since v0.00a @version v0.00a
+     */
+    _UT._checkLatestItem = function() {
+        if (!this.latestSATBItem_) SATBUT.showFailMsg(this.name(),
+                "GB.new._checkLatestItem",
+                "A battler becoming actable should have an action to be " +
+                "exeucted!");
+    }; // _UT._checkLatestItem
 
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests); // Game_Battler
 
@@ -1591,12 +1609,14 @@ if (DoubleX_RMMV["Superlative ATB Implementations"]) {
      */
     _UT._checkWillCoreATBBecomeFull = function() {
         if (!$gameParty.inBattle()) return;
+        // Failing this check doesn't always mean immediate severe issues
         if (BattleManager._subject === this._battler) {
             SATBUT.showFailMsg(this._battler.name(),
                     "GSATBPT.new._checkWillCoreATBBecomeFull",
                     "A battler right before having full ATB value shouldn't " +
                     "be the action execution subject!");
         }
+        //
         if (BattleManager._satb.inputableActors.contains(this._battler)) {
             SATBUT.showFailMsg(this._battler.name(),
                     "GSATBPT.new._checkWillCoreATBBecomeFull",

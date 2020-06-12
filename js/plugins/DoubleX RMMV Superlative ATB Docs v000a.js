@@ -239,6 +239,10 @@
  *      Videos:
  *      1. Core Module Only
  *      - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
+ *      2. Compatibility With Just MOG_BattleHud
+ *      - https://www.youtube.com/watch?v=0_v0KzU733E
+ *      3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
+ *      - https://www.youtube.com/watch?v=c6ZSvDVj0WM
  *      Posts:
  *      1.
  *----------------------------------------------------------------------------
@@ -247,7 +251,7 @@
  *         open the configuration plugin js file to access those
  *         configurations
  *      2. The default plugin parameters file name is
- *         DoubleX RMMV Superlative ATB Params v100a
+ *         DoubleX RMMV Superlative ATB Params v000a
  *         If you want to change that, you must edit the value of
  *         DoubleX_RMMV.Superlative_ATB_Parameters_File, which must be done
  *         via opening the parameters plugin js file directly
@@ -263,29 +267,33 @@
  *      Feature Requesters:
  *----------------------------------------------------------------------------
  *    # Changelog
- *      Documentations:
- *      - v1.00a(GMT 0800 14-May-2020)
- *        1. Finished the core module
  *      Parameters:
- *      - v1.00a(GMT 0800 14-May-2020)
+ *      - v0.00a(GMT 1500 12-Jun-2020)
  *        1. Finished the core module
  *      Configurations:
- *      - v1.00a(GMT 0800 14-May-2020)
+ *      - v0.00a(GMT 1500 12-Jun-2020)
  *        1. Finished the core module
  *      Implementations:
- *      - v1.00a(GMT 0800 14-May-2020)
+ *      - v0.00a(GMT 1500 12-Jun-2020)
  *        1. Finished the core module
- *      Unit Test:
- *      - v1.00a(GMT 0800 14-May-2020)
+ *      Unit Tests:
+ *      - v0.00a(GMT 1500 12-Jun-2020)
  *        1. Finished the core module
- *      Compatibility:
- *      - v1.00a(GMT 0800 14-May-2020)
+ *      Compatibilities:
+ *      - v0.00a(GMT 1500 12-Jun-2020)
+ *        1. Finished the core module
+ *      Compatibility Tests:
+ *      - v0.00a(GMT 1500 12-Jun-2020)
+ *        1. Finished the core module
+ *      Documentations:
+ *      - v0.00a(GMT 1500 12-Jun-2020)
  *        1. Finished the core module
  *----------------------------------------------------------------------------
  *    # Todo
  *      1. Adds _isSaveParamNotes
  *      2. Fixes the actor command window not selecting the last command when
  *         it becomes able to be shown again bug
+ *      3. Allows party escape attempts when executing actions
  *============================================================================*/
 /*:
  * @plugindesc To be the most flexible, performant and powerful ATB system
@@ -629,14 +637,17 @@
  *         - The same as the script call addCoreSATB(increment) except that
  *           this one multiplies the current ATB value of the battler involved
  *           by multiplier
- *      6. clearCoreSATB()
+ *      6. fillUpCoreSATB()
+ *         - The same as the script call setCoreSATB(val) except that this one
+ *           uses the maximum ATB value of the battler instead of val
+ *      7. clearCoreSATB()
  *         - Sets the new current ATB value of the battler involved as 0 if
  *           it was positive(otherwise it'll remain unchanged)
  *         - E.g.:
  *           $gameTroop.deadMembers()[1].clearCoreSATB() won't have any effect
  *           if the current ATB value of the 2nd dead troop member is negative
  *         - (Advanced)It's supposed to be Idempotent
- *      7. setSATBActTimes(actTimes)
+ *      8. setSATBActTimes(actTimes)
  *         - Sets the number of virtual action slots of the battler involved
  *           as actTimes
  *         - If the number of virtual action slots becomes greater than 0,
@@ -653,25 +664,25 @@
  *           virtual action slot of the game actor with id 1 as 2
  *           The ATB value of that actor will immediately become full
  *         - (Advanced)It's supposed to be Idempotent
- *      8. addSATBActTimes(increment)
+ *      9. addSATBActTimes(increment)
  *         - Adds the number of virtual action slots of the battler involved
  *           by increment
  *         - Otherwise it's the same as the script call
  *           setSATBActTimes(actTimes)
  *         - (Advanced)increment is supposed to be an Integer
  *         - (Advanced)This script call isn't supposed to be idempotent
- *      9. multiplySATBActTimes(multiplier)
- *         - The same as the script call addSATBActTimes(increment) except
- *           that this one multiplies the number of virtual action slots of
- *           the battler involved by multiplier
- *      10. coreSATB()
+ *      10. multiplySATBActTimes(multiplier)
+ *          - The same as the script call addSATBActTimes(increment) except
+ *            that this one multiplies the number of virtual action slots of
+ *            the battler involved by multiplier
+ *      11. coreSATB()
  *          - Returns the current ATB value of the battler involved
  *          - (Advanced)It's supposed to return a Number
  *          - E.g.:
  *            $gameActors.actor(0).coreSATB() will return the current value
  *            of the 1st actor
  *          - (Advanced)It's supposed to be Nullipotent
- *      11. coreMaxSATB()
+ *      12. coreMaxSATB()
  *          - Returns the maximum ATB value of the battler involved
  *          - (Advanced)It's supposed to return a positive Number
  *          - E.g.:
@@ -680,13 +691,13 @@
  *          - (Advanced)Using this script call might recache the return value
  *          - (Advanced)It's supposed to be Nullipotent other than possibly
  *            recaching the return value
- *      12. (Advanced)raiseAllSATBNoteChangeFactors()
+ *      13. (Advanced)raiseAllSATBNoteChangeFactors()
  *          - Applies the script call
  *            raiseSATBNoteChangeFactors(note, factors) to all notes
  *          - You should probably use refresh() instead of this script call as
  *            refresh() will have all the effects this script call has, and
  *            also immediately recache values that are no longer valid
- *      13. (Advanced)raiseSATBNoteChangeFactors(note, factors)
+ *      14. (Advanced)raiseSATBNoteChangeFactors(note, factors)
  *         - Notifies that the notetag note might need to be recached due to
  *           potential changes in factors factors
  *         - note is either of the following:
@@ -709,7 +720,7 @@
  *           will notify the 1st alive party member that the coreMax notetags
  *           might need to be recached due to potential changes in the states
  *           and skills or their coreMax notetags
- *      14. (Advanced)invalidateSATBNoteResult(note, part)
+ *      15. (Advanced)invalidateSATBNoteResult(note, part)
  *         - Invalidates the cached intermediate result of part part in note
  *           note for the actor involved
  *         - note is either of the following:
@@ -728,7 +739,7 @@
  *           $gameParty.aliveMembers()[0].invalidateSATBNoteResult("coreMax", "states")
  *           will invalidate the cached intermediate result of all effective
  *           coreMax notetags in states for the 1t alive party member
- *      15. (Advanced)invalidateSATBNoteList(note, part)
+ *      16. (Advanced)invalidateSATBNoteList(note, part)
  *         - Invalidates the cached notetag list of part part in note note for
  *           the actor involved
  *         - note is either of the following:
@@ -816,35 +827,39 @@
  *          - The same as the script call multiplyCoreSATB(multiplier) in
  *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      6. clearCoreSATB targetType targets
+ *      6. fillUpCoreSATB targetType targets
+ *          - The same as the script call fillUpCoreSATB() in Battler
+ *            manipulations with the designated targets in the designated
+ *            targetType
+ *      7. clearCoreSATB targetType targets
  *          - The same as the script call clearCoreSATB() in Battler
  *            manipulations with the designated targets in the designated
  *            targetType
- *      7. setSATBActTimes targetType targets actTimes
+ *      8. setSATBActTimes targetType targets actTimes
  *          - The same as the script call setSATBActTimes(actTimes) in Battler
  *            manipulations with the designated targets in the designated
  *            targetType
- *      8. addSATBActTimes targetType targets increment
+ *      9. addSATBActTimes targetType targets increment
  *          - The same as the script call addSATBActTimes(increment) in
  *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      9. multiplySATBActTimes targetType targets multiplier
- *          - The same as the script call multiplySATBActTimes(multiplier) in
- *            Battler manipulations with the designated targets in the
- *            designated targetType
- *      10. raiseAllSATBNoteChangeFactors targetType targets
+ *      10. multiplySATBActTimes targetType targets multiplier
+ *           - The same as the script call multiplySATBActTimes(multiplier) in
+ *             Battler manipulations with the designated targets in the
+ *             designated targetType
+ *      11. raiseAllSATBNoteChangeFactors targetType targets
  *          - The same as the script call raiseAllSATBNoteChangeFactors() in
  *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      11. raiseSATBNoteChangeFactors targetType targets note factors
+ *      12. raiseSATBNoteChangeFactors targetType targets note factors
  *          - The same as the script call coreMaxSATB(note, factors) in
  *            Battler manipulations with the designated targets in the
  *            designated targetType
- *      12. invalidateSATBNoteResult targetType targets note part
+ *      13. invalidateSATBNoteResult targetType targets note part
  *          - The same as the script call invalidateSATBNoteResult(note, part)
  *            in Battler manipulations with the designated targets in the
  *            designated targetType
- *      13. invalidateSATBNoteList targetType targets note part
+ *      14. invalidateSATBNoteList targetType targets note part
  *          - The same as the script call invalidateSATBNoteList(note, part)in
  *            Battler manipulations with the designated targets in the
  *            designated targetType

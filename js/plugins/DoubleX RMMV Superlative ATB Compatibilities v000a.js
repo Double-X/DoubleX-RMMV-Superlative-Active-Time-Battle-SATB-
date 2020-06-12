@@ -23,15 +23,15 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.00a";
  *         - Applies the script call setCoreSATB(val) to targets included by
  *           Target Typing, which can be any Target Typing supported by Action
  *           Sequences
- *      2. set core satb %: Target Typing, proportion
+ *      2. set core satb proportion: Target Typing, proportion
  *         - Applies the script call setCoreSATBProportion(proportion) to
  *           targets included by Target Typing, which can be any Target Typing
  *           supported by Action Sequences
- *      1. add core satb: Target Typing, val
+ *      3. add core satb: Target Typing, val
  *         - Applies the script call addCoreSATB(val) to targets included by
  *           Target Typing, which can be any Target Typing supported by Action
  *           Sequences
- *      2. add core satb %: Target Typing, proportion
+ *      4. add core satb %: Target Typing, proportion
  *         - Applies the script call addCoreSATBProportion(proportion) to
  *           targets included by Target Typing, which can be any Target Typing
  *           supported by Action Sequences
@@ -39,31 +39,37 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.00a";
  *         - Applies the script call multiplyCoreSATB(multiplier) to targets
  *           included by Target Typing, which can be any Target Typing
  *           supported by Action Sequences
- *      6. clear core satb: Target Typing
+ *      6. fill up core satb: Target Typing
+ *         - Applies the script call fillUpCoreSATB() to targets included by
+ *           Target Typing, which can be any Target Typing supported by Action
+ *           Sequences
+ *      7. clear core satb: Target Typing
  *         - Applies the script call clearCoreSATB() to targets included by
  *           Target Typing, which can be any Target Typing supported by Action
  *           Sequences
- *      7. set satb act times: Target Typing, actTimes
+ *      8. set satb act times: Target Typing, actTimes
  *         - Applies the script call setSATBActTimes(actTimes) to targets
  *           included by Target Typing, which can be any Target Typing
  *           supported by Action Sequences
- *      8. add satb act times: Target Typing, increment
+ *      9. add satb act times: Target Typing, increment
  *         - Applies the script call addSATBActTimes(increment) to targets
  *           included by Target Typing, which can be any Target Typing
  *           supported by Action Sequences
- *      9. multiply satb act times: Target Typing, multiplier
+ *      10. multiply satb act times: Target Typing, multiplier
  *         - Applies the script call multiplySATBActTimes(multiplier) to
  *           targets included by Target Typing, which can be any Target
  *           Typing supported by Action Sequences
  *============================================================================
- *    ## Addressed Plugins
+ *    ## Addressed Foreign Plugins
  *----------------------------------------------------------------------------
  *    # MOG_BattleHud:
+ *      In general, this plugin should be placed before the SATB
+ *      implementation plugin unless actual test results prove the otherwise
  *      1. The ATB bar doesn't gather any DoubleX RMMV Superlative ATB data
  *         - Reference tag: MOG_BattleHud_SATB_Data
- *         - Extended Battle_Hud.prototype.at, Battle_Hud.prototype.max_at to
- *           support the current and maximum ATB values of battlers
- *         - Disabled Battle_Hud.is_casting
+ *         - Extended Battle_Hud.prototype.at and Battle_Hud.prototype.max_at
+ *           to support the current and maximum ATB values of battlers
+ *         - Disabled Battle_Hud.is_casting without the Charge Module enabled
  *      2. The original status window will be shown when the current inputable
  *         actor becomes not inputable
  *         - Reference tag: MOG_BattleHud_StopShowingStatusWindow
@@ -75,6 +81,8 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.00a";
  *         - Removed DoubleX_RMMV.SATB.Scene_Battle.new._updateActorWinPos to
  *           let MOG_BattleHud handle the actor window position
  *    # Yanfly Engine Plugins - Battle Engine Core:
+ *      In general, this plugin should be placed before the SATB
+ *      implementation plugin unless actual test results prove the otherwise
  *      1. No actions can be executed in the 1st turn
  *         - Reference tag: YEP_BattleEngineCore_Stop1stTurnCheck
  *         - Extended BattleManager.getNextSubject to remove the turn count
@@ -98,11 +106,15 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.00a";
  *         - Reference tag: YEP_BattleEngineCore_StopInputableActorReturnHome
  *         - Extended Game_Battler.prototype.spriteReturnHome to disable this
  *           function for the currently inputable actor
- *      6. The selection and help window lost info after refresh
+ *      6. The inputting actor has the wrong pose during party escape attempts
+ *         - Reference tag: YEP_BattleEngineCore_PartyCmdSelectStopNextCmd
+ *         - Extended startPartyCommandSelection to fallback to the default
+ *           rather than the extended YEP_BattleEngineCore version
+ *      7. The selection and help window lost info after refresh
  *         - Reference tag: YEP_BattleEngineCore_UpdateSelectionHelpWindow
  *         - Extended refreshSATBInputWins to reselect the selection windows
  *           and update their respective help windows
- *      7. The target help window remains when the actor's dead
+ *      8. The target help window remains when the actor's dead
  *         - Reference tag: YEP_BattleEngineCore_CloseInvalidTargetHelpWindow
  *         - Extended
  *           DoubleX_RMMV.SATB.Scene_Battle.new._deactivateHideSelectionWins
@@ -229,7 +241,7 @@ if (Imported.YEP_BattleEngineCore) {
             var val = +RegExp.$1;
             targets.forEach(function(target) { target.setCoreSATB(val); });
         },
-        'SET CORE SATB %': function(targets) {
+        'SET CORE SATB PROPORTION': function(targets) {
             var proportion = +RegExp.$1;
             targets.forEach(function(target) {
                 target.setCoreSATBProportion(proportion);
@@ -241,7 +253,7 @@ if (Imported.YEP_BattleEngineCore) {
                 target.addCoreSATB(increment);
             });
         },
-        'ADD CORE SATB %': function(targets) {
+        'ADD CORE SATB PROPORTION': function(targets) {
             var proportion = +RegExp.$1;
             targets.forEach(function(target) {
                 target.addCoreSATBProportion(proportion);
@@ -250,8 +262,11 @@ if (Imported.YEP_BattleEngineCore) {
         'MULTIPLY CORE SATB': function(targets) {
             var multiplier = +RegExp.$1;
             targets.forEach(function(target) {
-                target.multiplierCoreSATB(multiplier);
+                target.multiplyCoreSATB(multiplier);
             });
+        },
+        'FILL UP CORE SATB': function(targets) {
+            targets.forEach(function(target) { target.fillUpCoreSATB(); });
         },
         'CLEAR CORE SATB': function(targets) {
             targets.forEach(function(target) { target.clearCoreSATB(); });
@@ -278,15 +293,16 @@ if (Imported.YEP_BattleEngineCore) {
     }; // _SATBC._ACT_SEQS
     _SATBC._ACT_SEQ_REGEXES = {
         // Core Module
-        'SET CORE SATB': / *([0-9.]+) */i,
-        'SET CORE SATB %': / *([0-9.]+) */i,
-        'ADD CORE SATB': / *([0-9.]+) */i,
-        'ADD CORE SATB %': / *([0-9.]+) */i,
-        'MULTIPLY CORE SATB': / *([0-9.]+) */i,
+        'SET CORE SATB': / *([0-9\.-]+) */i,
+        'SET CORE SATB PROPORTION': / *([0-9\.-]+) */i,
+        'ADD CORE SATB': / *([0-9\.-]+) */i,
+        'ADD CORE SATB PROPORTION': / *([0-9\.-]+) */i,
+        'MULTIPLY CORE SATB': / *([0-9\.-]+) */i,
+        'FILL UP CORE SATB': / */i,
         'CLEAR CORE SATB': / */i,
-        'SET SATB ACT TIMES': / *(\d+) */i,
-        'ADD SATB ACT TIMES': / *(\d+) */i,
-        'MULTIPLY SATB ACT TIMES': / *(\d+) */i
+        'SET SATB ACT TIMES': / *([0-9-]+) */i,
+        'ADD SATB ACT TIMES': / *([0-9-]+) */i,
+        'MULTIPLY SATB ACT TIMES': / *([0-9-]+) */i
         //
     }; // _SATBC._ACT_SEQ_REGEXES
     _SATBC._ALL_ACT_SEQS = Object.keys(_SATBC._ACT_SEQS);
@@ -318,14 +334,18 @@ if (Imported.YEP_BattleEngineCore) {
         _BM.addSATBActBattler.apply(this, arguments);
     }; // BattleManager.addSATBActBattler
 
-    _BM.updateSATBAct = BattleManager.updateSATBAct;
-    _SATBC.updateSATBAct = BattleManager.updateSATBAct = function() {
+    _BM.addSATBInputableActor = BattleManager.addSATBInputableActor;
+    _SATBC.addSATBInputableActor = BattleManager.addSATBInputableActor = function(actor) {
     // v0.00a - v0.00a; Extended
-        _BM.updateSATBAct.apply(this, arguments);
-        // Added to update action executions for the new action sequence phases
-        _SATBC._updateSATBActSeq.call(this);
+        // Added to ensure the inputable actor can execute actions later on
+        if (!this._actionBattlers.contains(actor)) {
+            // The whole added code piece makes no sense outside this method
+            this._performedBattlers.eraseElem(actor);
+            //
+        }
         // YEP_BattleEngineCore_HandleNewPhases
-    }; // BattleManager.updateSATBAct
+        _BM.addSATBInputableActor.apply(this, arguments);
+    }; // BattleManager.addSATBInputableActor
 
     _BM.processActionSequence = BattleManager.processActionSequence;
     _SATBC.processActionSequence = BattleManager.processActionSequence = function(actionName, actionArgs) {
@@ -361,7 +381,16 @@ if (Imported.YEP_BattleEngineCore) {
         if (_SATBC._isActSeqPhase.call(this)) return true;
         // YEP_BattleEngineCore_AddNewActPhases
         return _BM._isActPhase.apply(this, arguments);
-    }; // _SATB._isActPhase
+      }; // _SATB._isActPhase
+
+    _BM._updateAct = _SATB._updateAct;
+    _SATBC._updateAct = _SATB._updateAct = function() {
+    // v0.00a - v0.00a; Extended
+        _BM._updateAct.apply(this, arguments);
+        // Added to update action executions for the new action sequence phases
+        _SATBC._updateActSeq.call(this);
+        // YEP_BattleEngineCore_HandleNewPhases
+    }; // _SATB._updateAct
 
     /**
      * The this pointer is BattleManager
@@ -385,9 +414,8 @@ if (Imported.YEP_BattleEngineCore) {
      */
     _SATBC._endActSeq = function() {
         // Otherwise no battler can ever execute actions again
-        var i = this._performedBattlers.indexOf(this._subject);
-        if (i >= 0) this._performedBattlers.splice(i, 1);
-        //
+        this._performedBattlers.eraseElem(this._subject);
+        /** @todo Checks for other places erasing the performed battlers */
         if (this._processingForcedAction) {
             this._subject.removeCurrentAction();
             this._phase = this._preForcePhase;
@@ -401,13 +429,13 @@ if (Imported.YEP_BattleEngineCore) {
      * Hotspot
      * @since v0.00a @version v0.00a
      */
-    _SATBC._updateSATBActSeq = function() {
+    _SATBC._updateActSeq = function() {
         if (!this.isBusy()) switch (this._phase) {
             case 'phaseChange': return this.updatePhase();
             case 'actionList': return this.updateActionList();
             case 'actionTargetList': return this.updateActionTargetList();
         }
-    }; // _SATB._updateSATBActSeq
+    }; // _SATB._updateActSeq
 
     /**
      * The this pointer is BattleManager
@@ -430,8 +458,12 @@ if (Imported.YEP_BattleEngineCore) {
         var targets = this.makeActionTargets(actArgs[0]);
         if (targets.length <= 0) return true;
         var cmd = actArgs[1];
-        if (cmd && !cmd.match(_SATBC._ACT_SEQ_REGEXES[actName])) return true;
-        return this[_SATBC._ACT_SEQS[actName]](targets);
+        // Returning false means that it's an invalid action sequence
+        if (typeof cmd !== "string" && !(cmd instanceof String)) return false;
+        if (!cmd.match(_SATBC._ACT_SEQ_REGEXES[actName])) return false;
+        // It's possible for cmd to be an empty String so !cmd can't be used
+        _SATBC._ACT_SEQS[actName](targets);
+        return true;
     }; // _SATBC._procActSeq
 
     /**
@@ -484,12 +516,30 @@ if (Imported.YEP_BattleEngineCore) {
     var $ = Scene_Battle.prototype, _SATB = SATB.Scene_Battle.new;
     var _SB = SATBC.Scene_Battle.orig, _SATBC = SATBC.Scene_Battle.new;
 
+    _SATBC._REFRESH_TARGET_WIN = function(win) {
+        if (!win.visible) return;
+        win.reselect();
+        win.updateHelp();
+    }; // _SATBC._REFRESH_TARGET_WIN
+
+    _SB.startPartyCommandSelection = $.startPartyCommandSelection;
+    _SATBC.startPartyCommandSelection = $.startPartyCommandSelection = function() {
+    // v0.00a - v0.00a; Extended
+        // Added to use the default startPartyCommandSelection for SATB
+        if (BattleManager.isSATB()) {
+            return Yanfly.BEC.Scene_Battle_startPartyCommandSelection.apply(
+                    this, arguments);
+        }
+        //
+        _SB.startPartyCommandSelection.apply(this, arguments);
+    }; // $.startPartyCommandSelection
+
     _SB.refreshSATBInputWins = $.refreshSATBInputWins;
     _SATBC.refreshSATBInputWins = $.refreshSATBInputWins = function() {
     // v0.00a - v0.00a; Extended
         _SB.refreshSATBInputWins.apply(this, arguments);
         // Added to refresh the target help window as well
-        _SATBC.refreshTargetWin.call(this);
+        _SATBC._refreshTargetWins.call(this);
         // YEP_BattleEngineCore_UpdateSelectionHelpWindow
     }; // $.refreshSATBInputWins
 
@@ -514,15 +564,14 @@ if (Imported.YEP_BattleEngineCore) {
     /**
      * The this pointer is Scene_Battle.prototype
      * Idempotent
-     * @interface @since v0.00a @version v0.00a
+     * @since v0.00a @version v0.00a
      */
-    _SATBC.refreshTargetWin = function() {
-        [this._actorWindow, this._enemyWindow].forEach(function(window) {
-            if (!window.visible) { return; }
-            window.reselect();
-            window.updateHelp();
-        });
-    }; // _SATBC.refreshTargetWin
+    _SATBC._refreshTargetWins = function() {
+        [
+            this._actorWindow,
+            this._enemyWindow
+        ].forEach(_SATBC._REFRESH_TARGET_WIN);
+    }; // _SATBC._refreshTargetWins
 
     /**
      * The this pointer is Scene_Battle.prototype
