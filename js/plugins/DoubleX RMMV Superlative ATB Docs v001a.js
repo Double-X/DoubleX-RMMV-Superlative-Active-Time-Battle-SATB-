@@ -243,6 +243,8 @@
  *      - https://www.youtube.com/watch?v=0_v0KzU733E
  *      3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
  *      - https://www.youtube.com/watch?v=c6ZSvDVj0WM
+ *      4. (v0.01a+) DoubleX RMMV Superlative ATB(Core And Hotkey Module Only)
+ *      - https://www.youtube.com/watch?v=4YyBFcj-nP0
  *      Posts:
  *      1.
  *----------------------------------------------------------------------------
