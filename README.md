@@ -2,6 +2,7 @@ IMPORTANT: YOU MUST OWN A LEGEL COPY OF THE RMMV SOFTWARE TO USE THIS PROJECT
 
 Please note that this plugin's still under developement. Currently the following modules are completed:
 1. Core Module
+2. Hotkey Module(v0.01a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -24,6 +25,8 @@ Videos:
 - https://www.youtube.com/watch?v=0_v0KzU733E
 3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
 - https://www.youtube.com/watch?v=c6ZSvDVj0WM
+4. Core And Hotkey Module Only
+- https://www.youtube.com/watch?v=4YyBFcj-nP0
 
 Posts:
 1. 
