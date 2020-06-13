@@ -59,7 +59,7 @@ Plugin Users:
 2. You'll be in the contributor list for raising accetped issues if you want(you can also tell me how you want me to credit you)
 
 Fellow Plugin Developers:
-1. The SATB folder stores the flowchart of some parts of the implementations of this plugin
+1. The SATB folder stores the flowchart of some parts of the implementations of this plugin and all the plugin older versions
 2. Reference tags in this plugin are supposed to be searched across the same plugin file and multiple plugin files
 4. You're welcome to submit pull requests for this project
 5. You'll be in the contributor list for submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
