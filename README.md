@@ -27,6 +27,8 @@ Videos:
 - https://www.youtube.com/watch?v=c6ZSvDVj0WM
 4. Core And Hotkey Module Only
 - https://www.youtube.com/watch?v=4YyBFcj-nP0
+5. DoubleX RMMV Superlative ATB(Core And Wait Module Only)
+- https://www.youtube.com/watch?v=8EfYexx8gVU
 
 Posts:
 1. 
