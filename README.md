@@ -4,6 +4,7 @@ Please note that this plugin's still under developement. Currently the following
 1. Core Module
 2. Hotkey Module(v0.01a+)
 3. Wait Module(v0.02a+)
+4. Bar Module(v0.03a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -30,6 +31,8 @@ Videos:
 - https://www.youtube.com/watch?v=4YyBFcj-nP0
 5. DoubleX RMMV Superlative ATB(Core And Wait Module Only)
 - https://www.youtube.com/watch?v=8EfYexx8gVU
+6. DoubleX RMMV Superlative ATB(Core And Bar Module Only)
+- https://www.youtube.com/watch?v=20UXh_qctNE
 
 Posts:
 1. 
