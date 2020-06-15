@@ -333,6 +333,15 @@ if (Imported.YEP_BattleEngineCore) {
         _BM.endAction.apply(this, arguments);
     }; // BattleManager.endAction
 
+    _BM._isActPhase = BattleManager.isSATBActPhase;
+    _SATBC._isActPhase = BattleManager.isSATBActPhase = function() {
+    // v0.00a - v0.00a; Extended
+        // Added to include the new action phases in YEP_BattleEngineCore
+        if (_SATBC._isActSeqPhase.call(this)) return true;
+        // YEP_BattleEngineCore_AddNewActPhases
+        return _BM._isActPhase.apply(this, arguments);
+      }; // BattleManager.isSATBActPhase
+
     _BM.addSATBActBattler = BattleManager.addSATBActBattler;
     _SATBC.addSATBActBattler = BattleManager.addSATBActBattler = function(battler) {
     // v0.00a - v0.00a; Extended
@@ -381,15 +390,6 @@ if (Imported.YEP_BattleEngineCore) {
         this._performedBattlers = [];
         // YEP_BattleEngineCore_Stop1stTurnCheck
     }; // _SATB._init
-
-    _BM._isActPhase = _SATB._isActPhase;
-    _SATBC._isActPhase = _SATB._isActPhase = function() {
-    // v0.00a - v0.00a; Extended
-        // Added to include the new action phases in YEP_BattleEngineCore
-        if (_SATBC._isActSeqPhase.call(this)) return true;
-        // YEP_BattleEngineCore_AddNewActPhases
-        return _BM._isActPhase.apply(this, arguments);
-      }; // _SATB._isActPhase
 
     _BM._updateAct = _SATB._updateAct;
     _SATBC._updateAct = _SATB._updateAct = function() {
@@ -548,7 +548,7 @@ if (Imported.YEP_BattleEngineCore) {
     } else {
         /**
          * Hotspot/Idempotent
-         * @since v0.01a @version v0.01a
+         * @interface @override @since v0.01a @version v0.01a
          */
         $.processTouch = function() {
             _SATB._procHotkeyTouch.call(this);
