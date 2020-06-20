@@ -59,6 +59,35 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.02a";
  *         - Applies the script call multiplySATBActTimes(multiplier) to
  *           targets included by Target Typing, which can be any Target
  *           Typing supported by Action Sequences
+ *    # (v0.04a+)Charge Module
+ *      1. set charge satb: Target Typing, val
+ *         - Applies the script call setChargeSATB(val) to targets included by
+ *           Target Typing, which can be any Target Typing supported by Action
+ *           Sequences
+ *      2. set charge satb proportion: Target Typing, proportion
+ *         - Applies the script call setChargeSATBProportion(proportion) to
+ *           targets included by Target Typing, which can be any Target Typing
+ *           supported by Action Sequences
+ *      3. add charge satb: Target Typing, val
+ *         - Applies the script call addChargeSATB(val) to targets included by
+ *           Target Typing, which can be any Target Typing supported by Action
+ *           Sequences
+ *      4. add charge satb %: Target Typing, proportion
+ *         - Applies the script call addChargeSATBProportion(proportion) to
+ *           targets included by Target Typing, which can be any Target Typing
+ *           supported by Action Sequences
+ *      5. multiply charge satb: Target Typing, multiplier
+ *         - Applies the script call multiplyChargeSATB(multiplier) to targets
+ *           included by Target Typing, which can be any Target Typing
+ *           supported by Action Sequences
+ *      6. fill up charge satb: Target Typing
+ *         - Applies the script call fillUpChargeSATB() to targets included by
+ *           Target Typing, which can be any Target Typing supported by Action
+ *           Sequences
+ *      7. clear charge satb: Target Typing
+ *         - Applies the script call clearChargeSATB() to targets included by
+ *           Target Typing, which can be any Target Typing supported by Action
+ *           Sequences
  *============================================================================
  *    ## Addressed Foreign Plugins
  *----------------------------------------------------------------------------
@@ -127,6 +156,11 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.02a";
  *         - Extended
  *           DoubleX_RMMV.SATB.Scene_Battle.new._deactivateHideSelectionWins
  *           to close the stale help window
+ *      10.(v0.04a+) The targets are wrongly shown as selected after inputting
+ *          a skill selecting all targets
+ *          - Reference tag: YEP_BattleEngineCore_ClearTargetSelections
+ *          - Extended DoubleX_RMMV.SATB.Scene_Battle.new._selectNextCmd to
+ *            clear the stale target selections
  *============================================================================
  */
 
@@ -145,7 +179,7 @@ DoubleX_RMMV["Superlative ATB Compatibilities"] = "v0.02a";
  *         Plugin Info and Plugin Implementations by searching them
  *----------------------------------------------------------------------------*/
 
-if (DoubleX_RMMV["Superlative ATB Implementations"]) {
+if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
 
 /*----------------------------------------------------------------------------*/
 
@@ -171,7 +205,7 @@ if (Imported.MOG_BattleHud) {
     _BH.at = $.at;
     _SATBC.at = $.at = function() { // v0.00a - v0.00a; Extended
         // Added to use the ATB value from SATB only if it's active
-        if (BattleManager.isSATB()) return this._battler.coreSATB();
+        if (SATBManager.isEnabled()) return this._battler.coreSATB();
         // MOG_BattleHud_SATB_Data
         return _BH.at.apply(this, arguments);
     }; // $.at
@@ -179,16 +213,34 @@ if (Imported.MOG_BattleHud) {
     _BH.max_at = $.max_at;
     _SATBC.max_at = $.max_at = function() { // v0.00a - v0.00a; Extended
         // Added to use the maximum ATB value from SATB only if it's active
-        if (BattleManager.isSATB()) return this._battler.coreMaxSATB();
+        if (SATBManager.isEnabled()) return this._battler.coreMaxSATB();
         // MOG_BattleHud_SATB_Data
         return _BH.max_at.apply(this, arguments);
     }; // $.max_at
 
-    _BH.is_casting = $.is_casting;
-    _SATBC.is_casting = $.is_casting = function() { // v0.00a - v0.00a; Extended
-        // Added to use disable charging when using SATB
-        return !BattleManager.isSATB() && _BH.is_casting.apply(this, arguments);
+    _BH.cast_at = $.cast_at;
+    _SATBC.cast_at = $.cast_at = function() { // v0.04a - v0.04a; Extended
+        // Added to use the charge ATB value from SATB only if it's active
+        if (SATBManager.isEnabled()) return this._battler.chargeSATB();
         // MOG_BattleHud_SATB_Data
+        return _BH.cast_at.apply(this, arguments);
+    }; // $.cast_at
+
+    _BH.cast_max_at = $.cast_max_at;
+    _SATBC.cast_max_at = $.cast_max_at = function() {
+    // v0.04a - v0.04a; Extended
+        // Added to use the charge max ATB value from SATB only if it's active
+        if (SATBManager.isEnabled()) return this._battler.chargeMaxSATB();
+        // MOG_BattleHud_SATB_Data
+        return _BH.cast_max_at.apply(this, arguments);
+    }; // $.cast_max_at
+
+    _BH.is_casting = $.is_casting;
+    _SATBC.is_casting = $.is_casting = function() { // v0.00a - v0.04a; Extended
+        // Added to use enable charging when using SATB
+        if (SATBManager.isEnabled()) return this._battler.isSATBCharge();
+        // MOG_BattleHud_SATB_Data
+        return _BH.is_casting.apply(this, arguments);
     }; // $.is_casting
 
 })(DoubleX_RMMV.SATB.Compatibilities); // Battle_Hud
@@ -243,60 +295,45 @@ if (Imported.YEP_BattleEngineCore) {
     var _SATB = SATB.BattleManager.new;
     var _BM = SATBC.BattleManager.orig, _SATBC = SATBC.BattleManager.new;
 
+    _SATBC._ACT_SEQ_1_ARG = function(func, targets) { // v0.04a+
+        var arg = +RegExp.$1;
+        targets.forEach(function(target) { target[func](arg); });
+    }; // _SATBC._ACT_SEQ_1_ARG
+
     _SATBC._ACT_SEQS = {
         // Core Module
-        'SET CORE SATB': function(targets) {
-            var val = +RegExp.$1;
-            targets.forEach(function(target) { target.setCoreSATB(val); });
-        },
-        'SET CORE SATB PROPORTION': function(targets) {
-            var proportion = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.setCoreSATBProportion(proportion);
-            });
-        },
-        'ADD CORE SATB': function(targets) {
-            var increment = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.addCoreSATB(increment);
-            });
-        },
-        'ADD CORE SATB PROPORTION': function(targets) {
-            var proportion = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.addCoreSATBProportion(proportion);
-            });
-        },
-        'MULTIPLY CORE SATB': function(targets) {
-            var multiplier = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.multiplyCoreSATB(multiplier);
-            });
-        },
-        'FILL UP CORE SATB': function(targets) {
-            targets.forEach(function(target) { target.fillUpCoreSATB(); });
-        },
-        'CLEAR CORE SATB': function(targets) {
-            targets.forEach(function(target) { target.clearCoreSATB(); });
-        },
-        'SET SATB ACT TIMES': function(targets) {
-            var actTimes = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.setSATBActTimes(actTimes);
-            });
-        },
-        'ADD SATB ACT TIMES': function(targets) {
-            var increment = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.addSATBActTimes(increment);
-            });
-        },
-        'MULTIPLY SATB ACT TIMES': function(targets) {
-            var multiplier = +RegExp.$1;
-            targets.forEach(function(target) {
-                target.multiplySATBActTimes(multiplier);
-            });
-        },
+        'SET CORE SATB': _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "setCoreSATB"),
+        'SET CORE SATB PROPORTION':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "setCoreSATBProportion"),
+        'ADD CORE SATB': _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "addCoreSATB"),
+        'ADD CORE SATB PROPORTION':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "addCoreSATBProportion"),
+        'MULTIPLY CORE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "multiplyCoreSATB"),
+        'FILL UP CORE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "fillUpCoreSATB"),
+        'CLEAR CORE SATB': _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "clearCoreSATB"),
+        'SET SATB ACT TIMES':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "setSATBActTimes"),
+        'ADD SATB ACT TIMES':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "addSATBActTimes"),
+        'MULTIPLY SATB ACT TIMES':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "multiplySATBActTimes"),
+        //
+        // (v0.04a+)Charge Module
+        'SET CHARGE SATB': _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "setChargeSATB"),
+        'SET CHARGE SATB PROPORTION':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "setChargeSATBProportion"),
+        'ADD CHARGE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "addChargeSATBProportion"),
+        'ADD CHARGE SATB PROPORTION':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "addChargeSATBProportion"),
+        'MULTIPLY CHARGE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "multiplyChargeSATB"),
+        'FILL UP CHARGE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "fillUpChargeSATB"),
+        'CLEAR CHARGE SATB':
+                _SATBC._ACT_SEQ_1_ARG.bind(_SATB, "clearChargeSATB"),
         //
     }; // _SATBC._ACT_SEQS
     _SATBC._ACT_SEQ_REGEXES = {
@@ -310,7 +347,16 @@ if (Imported.YEP_BattleEngineCore) {
         'CLEAR CORE SATB': / */i,
         'SET SATB ACT TIMES': / *([0-9-]+) */i,
         'ADD SATB ACT TIMES': / *([0-9-]+) */i,
-        'MULTIPLY SATB ACT TIMES': / *([0-9-]+) */i
+        'MULTIPLY SATB ACT TIMES': / *([0-9-]+) */i,
+        //
+        // (v0.04a+)Charge Module
+        'SET CHARGE SATB': / *([0-9\.-]+) */i,
+        'SET CHARGE SATB PROPORTION': / *([0-9\.-]+) */i,
+        'ADD CHARGE SATB': / *([0-9\.-]+) */i,
+        'ADD CHARGE SATB PROPORTION': / *([0-9\.-]+) */i,
+        'MULTIPLY CHARGE SATB': / *([0-9\.-]+) */i,
+        'FILL UP CHARGE SATB': / */i,
+        'CLEAR CHARGE SATB': / */i
         //
     }; // _SATBC._ACT_SEQ_REGEXES
     _SATBC._ALL_ACT_SEQS = Object.keys(_SATBC._ACT_SEQS);
@@ -319,7 +365,7 @@ if (Imported.YEP_BattleEngineCore) {
     _SATBC.getNextSubject = BattleManager.getNextSubject = function() {
     // v0.00a - v0.00a; Extended
         // Added to get the next subject in the 1st turn as well
-        if (this.isSATB()) return _SATBC._getNextSubject_.call(this);
+        if (SATBManager.isEnabled()) return _SATBC._getNextSubject_.call(this);
         // YEP_BattleEngineCore_Stop1stTurnCheck
         return _BM.getNextSubject.apply(this, arguments);
     }; // BattleManager.getNextSubject
@@ -328,7 +374,7 @@ if (Imported.YEP_BattleEngineCore) {
     _SATBC.endAction = BattleManager.endAction = function() {
     // v0.00a - v0.00a; Extended
         // Added to stop calling onAllActionsEnd for action execution subject
-        if (this.isSATB()) return _SATBC._endActSeq.call(this);
+        if (SATBManager.isEnabled()) return _SATBC._endActSeq.call(this);
         // YEP_BattleEngineCore_HandleNewPhases
         _BM.endAction.apply(this, arguments);
     }; // BattleManager.endAction
@@ -379,7 +425,7 @@ if (Imported.YEP_BattleEngineCore) {
     _SATBC.createActions = BattleManager.createActions = function() {
     // v0.00a - v0.00a; Extended
         // Rewritten to stop recreating battler acts when starting actor inputs
-        if (!this.isSATB()) _BM.createActions.apply(this, arguments);
+        if (!SATBManager.isEnabled()) _BM.createActions.apply(this, arguments);
         // YEP_BattleEngineCore_StopRecreateAction
     }; // BattleManager.createActions
 
@@ -456,7 +502,8 @@ if (Imported.YEP_BattleEngineCore) {
      * @returns {Boolean} The check result
      */
     _SATBC._isActSeq = function(actName) {
-        return this.isSATB() && _SATBC._ALL_ACT_SEQS.contains(actName);
+        if (!SATBManager.isEnabled()) return false;
+        return _SATBC._ALL_ACT_SEQS.contains(actName);
     }; // _SATBC._isActSeq
 
     /**
@@ -507,7 +554,7 @@ if (Imported.YEP_BattleEngineCore) {
     _SATBC.spriteReturnHome = $.spriteReturnHome = function() {
     // v0.00a - v0.00a; Extended
         // Added to stop returning home for sprite of the currently inpuable one
-        if (BattleManager.isSATB() && BattleManager.actor() === this) return;
+        if (SATBManager.isEnabled() && BattleManager.actor() === this) return;
         // YEP_BattleEngineCore_StopInputableActorReturnHome
         _GB.spriteReturnHome.apply(this, arguments);
     }; // $.spriteReturnHome
@@ -528,6 +575,7 @@ if (Imported.YEP_BattleEngineCore) {
         orig: {},
         new: {}
     }; // SATB.Window_ActorCommand
+    //
     var _SATB = SATB.Window_ActorCommand.new;
     SATBC.Window_ActorCommand = { orig: {}, new: {} };
     var $ = Window_ActorCommand.prototype, $$ = Window_Selectable.prototype;
@@ -560,10 +608,10 @@ if (Imported.YEP_BattleEngineCore) {
     /**
      * The this pointer is Scene_Battle.prototype
      * Hotspot/Idempotent
-     * @since v0.01a @version v0.01a
+     * @since v0.01a @version v0.04a
      */
     _SATB._procHotkeyTouch = function() {
-        if (!BattleManager.isSATBModuleEnabled("IsHotkeyEnabled")) return;
+        if (!SATBManager.areModulesEnabled(["IsHotkeyEnabled"])) return;
         if (!this.isOpenAndActive()) return;
         _SATB._procHotkeyTouchSelect.call(this);
         _SATB._procHotkeyTouchTrigger.call(this);
@@ -630,7 +678,7 @@ if (Imported.YEP_BattleEngineCore) {
     _SATBC.startPartyCommandSelection = $.startPartyCommandSelection = function() {
     // v0.00a - v0.00a; Extended
         // Added to use the default startPartyCommandSelection for SATB
-        if (BattleManager.isSATB()) {
+        if (SATBManager.isEnabled()) {
             return Yanfly.BEC.Scene_Battle_startPartyCommandSelection.apply(
                     this, arguments);
         }
@@ -665,6 +713,15 @@ if (Imported.YEP_BattleEngineCore) {
         // YEP_BattleEngineCore_CloseInvalidTargetHelpWindow
     }; // _SATB._hideSelectionWins
 
+    _SB._selectNextCmd = _SATB._selectNextCmd;
+    _SATBC._selectNextCmd = _SATB._selectNextCmd = function() {
+    // v0.04a - v0.04a; Extended
+        _SB._selectNextCmd.apply(this, arguments);
+        // Added to stop wrongly showing that all targets are selected afterward
+        _SATBC._clearTargetSelections.call(this);
+        // YEP_BattleEngineCore_ClearTargetSelections
+    }; // _SATB._selectNextCmd
+
     /**
      * The this pointer is Scene_Battle.prototype
      * Idempotent
@@ -686,6 +743,16 @@ if (Imported.YEP_BattleEngineCore) {
         if (Yanfly.Param.BECSelectHelp) this._helpWindow.hide();
         this._helpWindow.clear();
     }; // _SATBC._hideClearHelpWin
+
+    /**
+     * The this pointer is Scene_Battle.prototype
+     * Idempotent
+     * @since v0.04a @version v0.04a
+     */
+    _SATBC._clearTargetSelections = function() {
+        this._helpWindow.clear();
+        BattleManager.stopAllSelection();
+    }; // _SATBC._clearTargetSelections
 
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Compatibilities); // Scene_Battle
 

@@ -12,7 +12,8 @@ DoubleX_RMMV["Superlative ATB Compatibility Tests"] = "v0.01a";
  * PLUGIN ITSELF UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  */
 
-if (DoubleX_RMMV.SATB.Unit_Tests && DoubleX_RMMV.SATB.Compatibilities) {
+if (DoubleX_RMMV.SATB && DoubleX_RMMV.SATB.Unit_Tests &&
+        DoubleX_RMMV.SATB.Compatibilities) {
 
 DoubleX_RMMV.SATB.Compatibility_Tests = {};
 
@@ -65,11 +66,11 @@ if (Imported.MOG_BattleHud) {
 /*----------------------------------------------------------------------------*/
 
 } else {
-    if (!DoubleX_RMMV.SATB.Unit_Tests) {
+    if (!DoubleX_RMMV.SATB || !DoubleX_RMMV.SATB.Unit_Tests) {
         alert("DoubleX RMMV Superlative ATB Unit Tests should be above " +
                 "DoubleX RMMV Superlative ATB Compatibility Tests");
     }
-    if (!DoubleX_RMMV.SATB.Compatibilities) {
+    if (!DoubleX_RMMV.SATB || !DoubleX_RMMV.SATB.Compatibilities) {
         alert("DoubleX RMMV Superlative ATB Compatibilities should be above " +
                 "DoubleX RMMV Superlative ATB Compatibility Tests");
     }
