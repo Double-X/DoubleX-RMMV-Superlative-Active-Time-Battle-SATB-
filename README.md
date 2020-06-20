@@ -34,6 +34,8 @@ Videos:
 - https://www.youtube.com/watch?v=8EfYexx8gVU
 6. DoubleX RMMV Superlative ATB(Core And Bar Module Only)
 - https://www.youtube.com/watch?v=20UXh_qctNE
+7. DoubleX RMMV Superlative ATB(Core And Charge Module Only)
+- https://www.youtube.com/watch?v=kkvGK2AoOY8
 
 Posts:
 1. 
