@@ -28,13 +28,13 @@ Videos:
 - https://www.youtube.com/watch?v=0_v0KzU733E
 3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
 - https://www.youtube.com/watch?v=c6ZSvDVj0WM
-4. Core And Hotkey Module Only
+4. (v0.01a+)Core And Hotkey Module Only
 - https://www.youtube.com/watch?v=4YyBFcj-nP0
-5. DoubleX RMMV Superlative ATB(Core And Wait Module Only)
+5. (v0.02a+)DoubleX RMMV Superlative ATB(Core And Wait Module Only)
 - https://www.youtube.com/watch?v=8EfYexx8gVU
-6. DoubleX RMMV Superlative ATB(Core And Bar Module Only)
+6. (v0.03a+)DoubleX RMMV Superlative ATB(Core And Bar Module Only)
 - https://www.youtube.com/watch?v=20UXh_qctNE
-7. DoubleX RMMV Superlative ATB(Core And Charge Module Only)
+7. (v0.04a+)DoubleX RMMV Superlative ATB(Core And Charge Module Only)
 - https://www.youtube.com/watch?v=kkvGK2AoOY8
 
 Posts:
