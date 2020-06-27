@@ -6,6 +6,7 @@ Please note that this plugin's still under developement. Currently the following
 3. Wait Module(v0.02a+)
 4. Bar Module(v0.03a+)
 5. Charge Module(v0.04a+)
+6. Cooldown Module(v0.05a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -36,6 +37,8 @@ Videos:
 - https://www.youtube.com/watch?v=20UXh_qctNE
 7. (v0.04a+)DoubleX RMMV Superlative ATB(Core And Charge Module Only)
 - https://www.youtube.com/watch?v=kkvGK2AoOY8
+8. (v0.05a+)DoubleX RMMV Superlative ATB(Core And Cooldown Module Only)
+- https://www.youtube.com/watch?v=H3B4TU8cs2U
 
 Posts:
 1. 
