@@ -55,7 +55,7 @@ if (Imported.MOG_BattleHud) {
         if (!partyCmdWin.active) return;
         if (!partyCmdWin.visible) SATBUT.showFailMsg("partyCmdWin",
                 "SB.new._checkDisplayableActiveVisibleCmdWins",
-                "The active party command window must be visible!");
+                "The active party command window must be visible!", {});
         /** @todo Checks why the same doesn't apply to actor command window */
     }; // _UT._checkDisplayableActiveVisibleCmdWins
 
