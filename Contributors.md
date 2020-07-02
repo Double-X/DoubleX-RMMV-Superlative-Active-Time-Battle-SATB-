@@ -1,5 +1,6 @@
 Authors:
 1. DoubleX
+
 Plugin Development Collaborators:
 - None So Far
 Bug Reporters:
