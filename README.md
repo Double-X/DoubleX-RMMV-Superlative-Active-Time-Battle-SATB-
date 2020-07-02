@@ -23,11 +23,11 @@ The following foreign plugins are helpful when using this project:
 Please note that I'll only place plugins that are made by myself in this repository.
 
 Videos:
-1. Core Module Only
+1. DoubleX RMMV Superlative ATB(Core Module Only)
 - https://www.youtube.com/watch?v=ZmW8ZGVwfy0
-2. Compatibility With Just MOG_BattleHud
+2. DoubleX RMMV Superlative ATB Compatibility(With MOG_BattleHud Only)
 - https://www.youtube.com/watch?v=0_v0KzU733E
-3. Compatibility With Just Yanfly Engine Plugins - Battle Engine Core
+3. DoubleX RMMV Superlative ATB Compatibility(With Yanfly Engine Plugins - Battle Engine Core Only)
 - https://www.youtube.com/watch?v=c6ZSvDVj0WM
 4. (v0.01a+)Core And Hotkey Module Only
 - https://www.youtube.com/watch?v=4YyBFcj-nP0
