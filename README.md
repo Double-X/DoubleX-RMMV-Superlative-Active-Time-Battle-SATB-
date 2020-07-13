@@ -79,3 +79,7 @@ Fellow Plugin Developers:
 2. Reference tags in this plugin are supposed to be searched across the same plugin file and multiple plugin files
 4. You're welcome to submit pull requests for this project
 5. You'll be in the contributor list for submitting accepted pull requests if you want(you can also tell me how you want me to credit you)
+
+Using Older Versions:
+1. Download the older version of the documentation plugin
+2. That documentation plugin will tell you which versions of the other plugins to download
