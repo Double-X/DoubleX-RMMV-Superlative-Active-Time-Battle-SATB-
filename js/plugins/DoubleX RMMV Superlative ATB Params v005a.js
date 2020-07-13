@@ -24,7 +24,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type boolean
  * @desc (Advanced)Sets whether function parameters will be cached
  * Sets this off if at least some of those results' random
- * @default false
+ * @default true
  *
  * @param _isNoteCached
  * @parent IsCoreEnabled
@@ -36,8 +36,8 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @param _isAlwaysRecacheAllSwitchVars
  * @parent IsCoreEnabled
  * @type boolean
- * @desc (Advanced)Please refer to _alwaysRecacheAllSwitchVars
- * in the help section of this parameter plugin
+ * @desc (Advanced)Please refer to _alwaysRecacheAllSwitchVars in the
+ * help section of this parameter plugin
  * @default false
 
  * @param _coreBaseFillUnit
@@ -371,8 +371,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type note
  * @desc Sets the ATB frame wait conditions to be met
  * It'll be the contents of a function returning a Boolean
- * @default "// Checks if any action's executing\nif (BattleManager.isSATBActPhase()) return true;\n//\n// Checks if the actor targets' being selected\nif (this._actorWindow.active) return true;\n//\n// Checks if the enemy targets' being selected\nif (this._enemyWindow.active) return true;\n//\n// Checks if the skills' being selected\nif (this._skillWindow.active) return true;\n//\n// Check if the items' being selected\nif (this._itemWindow.active) return true;\n//\n// Check if the actor commands' being selected\nif (this._actorCommandWindow.active) return true;\n//\n// Check if the party commands' being selected\nreturn this._partyCommandWindow.active;\n//"
- *
+ * @default "if (BattleManager.isSATBActPhase()) return true;\nif (this._actorWindow.active) return true;\nif (this._enemyWindow.active) return true;\nif (this._skillWindow.active) return true;\nif (this._itemWindow.active) return true;\nif (this._actorCommandWindow.active) return true;\nif (this._partyCommandWindow.active) return true;\nreturn this._changeWindow && this._changeWindow.active;"
  * @param forceRunATBKey
  * @parent IsWaitEnabled
  * @type note
@@ -1083,10 +1082,13 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *    # Additional Descriptions
  *      Core Module:
  *      1. IsCoreEnabled
- *         None
+ *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
  *      2. _isParamFuncCached
  *         Setting it on is more advnatageous when most of the parameter
  *         functions are costly to run, but more disadvantageous otherwise
+ *         Setting it on can boost performance a lot with the Bar Module
+ *         enabled
  *      3. _isNoteCached
  *         This should be set on in general, especially when many script/eval
  *         notetags are used, but can be set off if only a few notetags are
@@ -1097,11 +1099,18 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         $gameSwitches.values(x)/$gameVariables.values(y), where x an y are
  *         Number literals rather than variables
  *      5. _coreBaseFillUnit
+ *         None
  *      6. coreBaseFillATBFrame
  *      7. coreBaseFillATBSec
+ *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
+ *         UNLESS _isParamFuncCached IS ON
  *      8. _coreTurnUnit
- *      9. coreTurnATBTime
  *         None
+ *      9. coreTurnATBTime
+ *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
+ *         UNLESS _isParamFuncCached IS ON
  *      10. coreTurnATBAct
  *          Forced actions won't update the battle turn clock action counter
  *      11. canCoreTurnClockOverflow
@@ -1159,7 +1168,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         the rightmost actor, until a new inputable actor's found or the one
  *         just at the right of the currently selected one's reached
  *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
  *         DON'T RETURN A DIFFERENT KEYBOARD MAPPING DURING THE SAME BATTLE
  *         UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  *      3. nextInputableActorKey
@@ -1169,14 +1178,14 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         found or the one just at the left of the currently selected one's
  *         reached
  *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
  *         DON'T RETURN A DIFFERENT KEYBOARD MAPPING DURING THE SAME BATTLE
  *         UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  *      4. inputableActorKeys
  *         The ith element of the returned String Array is the hotkey to
  *         select the ith party member if that party member's inputable
  *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
  *         DON'T RETURN A DIFFERENT KEYBOARD MAPPING LIST DURING THE SAME
  *         BATTLE UNLESS YOU REALLY KNOW WHAT YOU'RE TRULY DOING
  *      (v0.02a+)Wait Module:
@@ -1195,13 +1204,11 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         stop to normal or from normal to forcibly run
  *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
  *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
- *         UNLESS _isParamFuncCached IS ON
  *      4. forceStopATBKey
  *         It changes ther force ATB frame update status from either forcibly
  *         run to normal or from normal to forcibly stop
  *         THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
  *         BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND SMALL
- *         UNLESS _isParamFuncCached IS ON
  *      5. isShowForceATBStatWin
  *         The forceRunATBKey/forceStopATBKey still works even when the
  *         window's hidden
