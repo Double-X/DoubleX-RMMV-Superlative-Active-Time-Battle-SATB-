@@ -27,8 +27,8 @@ var Imported = Imported || {};
  *      1. Prerequisites
  *         - Basic knowledge on what unit test does in general
  *         - Solid understanding on how the implementation plugin and those of
- *           the plugins addressed by the compatibility plugin works in
- *           details to fully comprehend this compatibility test plugin
+ *           the plugins addressed by the compatibility plugin works on their
+ *           own in details to fully comprehend this compatibility test plugin
  *----------------------------------------------------------------------------*/
 
 if (Imported.MOG_BattleHud) {
