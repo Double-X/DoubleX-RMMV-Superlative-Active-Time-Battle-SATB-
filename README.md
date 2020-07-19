@@ -7,6 +7,7 @@ Please note that this plugin's still under developement. Currently the following
 4. Bar Module(v0.03a+)
 5. Charge Module(v0.04a+)
 6. Cooldown Module(v0.05a+)
+7. Event Module(v0.06a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -43,6 +44,8 @@ Videos:
    - https://www.youtube.com/watch?v=H3B4TU8cs2U
 9. (v0.05b+)DoubleX RMMV Superlative ATB Compatibility(With SEK_ChangeActor Only)
    - https://www.youtube.com/watch?v=dgx51xE5Svw
+10. (v0.06a+)DoubleX RMMV Superlative ATB(Core And Event Module Only)
+   - https://www.youtube.com/watch?v=RVeEoSa-IdY
 
 Posts:
 1. 
