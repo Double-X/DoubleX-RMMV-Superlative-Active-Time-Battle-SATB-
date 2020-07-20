@@ -372,6 +372,7 @@
  *      - v0.07a(GMT 1400 20-Jul-2020):
  *        1. Finished the reset module
  *        2. Fixed the corrupt notetag cache bug involving latestSkillItem
+ *        3. Fixed the notetag cache invalidation not working at all bug
  *      - v0.06a(GMT 0700 19-Jul-2020):
  *        1. Finished the event module
  *        2. Added more parameters for attaching actor ATB bars to the status

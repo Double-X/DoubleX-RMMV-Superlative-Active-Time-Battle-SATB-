@@ -619,7 +619,7 @@ function Window_SATBForceStatus() { // v0.02a+
             return true;
         }
         if (!wasPressed[keyName] || this._currentState[keyName]) return false;
-        wasPressed[keyName] = false;
+        delete wasPressed[keyName];
         return true;
         //
     }; // Input.isReleased
@@ -4513,7 +4513,7 @@ function Window_SATBForceStatus() { // v0.02a+
 
     /**
      * Idempotent
-     * @constructor @since v0.00a @version v0.04a
+     * @constructor @since v0.00a @version v0.07a
      * @param {Game_Battler} battler - The battler with effective notetag list
      */
     $.initialize = function(battler) {
@@ -4528,7 +4528,7 @@ function Window_SATBForceStatus() { // v0.02a+
         this._lastMaxes[_SATB._PHASE_COOLDOWN] = battler.cooldownMaxSATB();
         // The latest item should be deleted as well to avoid invalid states
         delete battler.latestSATBItem_;
-        //
+        // refresh can't be called or the game crash with uninitialized battler
     }; // $.initialize
 
     /**
@@ -5837,6 +5837,7 @@ function Window_SATBForceStatus() { // v0.02a+
     }; // _SATB._FACTOR_DATA
     //
 
+    _SATB._FACTORS = Object.keys(_SATB._FACTOR_DATA);
     // Refers to reference tag NOTE_TYPE
     _SATB._NOTES = Object.keys(SATB.Game_System.new.PARAM_NOTE_FUNCS.notes);
     //
@@ -6105,31 +6106,33 @@ function Window_SATBForceStatus() { // v0.02a+
 
     /**
      * Potential Hotspot/Nullipotent
-     * @since v0.00a @version v0.00a
+     * @since v0.00a @version v0.07a
      * @param {NoteType} note - Note to have its marked change factors raised
      * @enum @returns {[Factor]} The note change factors to be raised
      */
     $._raisedNoteChangeFactors = function(note) {
         var marks = this._changeFactorMarks[note];
+        // It's just to play safe
         var factors = _SATB._MARKED_NOTE_CHANGE_FACTORS(marks);
+        //
         // Falsy this._hasUnknownChangeFactor might reduce redundant recaches
         var isMarkedOnly = !this._hasUnknownChangeFactor || factors.length > 0;
         //
         // Raises all factors if none's marked to avoid missing possible changes
-        return isMarkedOnly ? factors : Object.keys(marks);
+        return isMarkedOnly ? factors : _SATB._FACTORS;
         //
     }; // $._raisedNoteChangeFactors
 
     /**
      * Potential Hotspot/Idempotent
-     * @since v0.00a @version v0.00a
+     * @since v0.00a @version v0.07a
      * @param {NoteType} note - The note to have its change factor raised
      * @param {Factor} factor - The change factor to be raised for the note
      */
     $._raiseChangeFactor = function(note, factor) {
         this.invalidateResultCache(note, factor);
         this.invalidatePairFuncListCache(note, factor);
-        this._changeFactorMarks[note][factor] = false;
+        delete this._changeFactorMarks[note][factor];
     }; // $._raiseChangeFactor
 
 })(DoubleX_RMMV.SATB); // Game_SATBCache.prototype

@@ -853,7 +853,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
 
         /**
          * Hotspot/No-op
-         * @since v0.04a @version v0.05a
+         * @since v0.04a @version v0.07a
          * @param {*} val - The actual parameter value
          * @param {String} param - The parameter being tested
          * @param {{*}?} context_ - The context of the failed test
@@ -866,7 +866,8 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 "IsWaitEnabled",
                 "IsChargeEnabled",
                 "IsCooldownEnabled",
-                "IsEventEnabled"
+                "IsEventEnabled",
+                "IsResetEnabled"
             ], context_);
         }, // checkModule
 
@@ -3094,6 +3095,16 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         //
         _GSATBPT.onStartFill.apply(this, arguments);
     }; // $.onStartFill
+
+    _GSATBPT.setResetATBVal = $.setResetATBVal;
+    _UT.setResetATBVal = $.setResetATBVal = function(resetATBVal) {
+    // v0.07a - v0.07a; Extended
+        _GSATBPT.setResetATBVal.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkNum(
+                resetATBVal, "_GSATBPT.setResetATBVal resetATBVal");
+        //
+    }; // setResetATBVal
 
     _GSATBPT._onCoreATBBecomeFull = $._onCoreATBBecomeFull;
     _UT._onCoreATBBecomeFull = $._onCoreATBBecomeFull = function() {
