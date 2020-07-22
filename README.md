@@ -48,7 +48,7 @@ Videos:
 9. (v0.05b+)DoubleX RMMV Superlative ATB Compatibility(With SEK_ChangeActor Only)
    - https://www.youtube.com/watch?v=dgx51xE5Svw
 10. (v0.06a+)DoubleX RMMV Superlative ATB(Core And Event Module Only)
-   - https://www.youtube.com/watch?v=RVeEoSa-IdY
+    - https://www.youtube.com/watch?v=RVeEoSa-IdY
 11. (v0.07a+)DoubleX RMMV Superlative ATB(Core And Reset Module Only)
     - https://www.youtube.com/watch?v=3KRIllS_rWc
 12. (v0.08a+)DoubleX RMMV Superlative ATB(Core And Speed Module Only)
