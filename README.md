@@ -12,6 +12,7 @@ Please note that this plugin's still under developement. Currently the following
 9. Reset Module(v0.07a+)
 10. Speed Module(v0.08a+)
 11. Start Module(v0.09a+)
+12. Turn Module(v0.11a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -58,6 +59,8 @@ Videos:
     - https://www.youtube.com/watch?v=r3g6H4r8ws0
 14. (v0.09a+)DoubleX RMMV Superlative ATB(Core And Start Module Only)
     - https://www.youtube.com/watch?v=zOpBlz6G0YA
+15. (v0.11a+)DoubleX RMMV Superlative ATB(Core And Turn Module Only)
+    - https://www.youtube.com/watch?v=Nv1bEQAl3ik
 
 Posts:
 1. 
