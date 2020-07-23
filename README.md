@@ -8,9 +8,10 @@ Please note that this plugin's still under developement. Currently the following
 5. Charge Module(v0.04a+)
 6. Cooldown Module(v0.05a+)
 7. Event Module(v0.06a+)
-8. Reset Module(v0.07a+)
-9. Speed Module(v0.08a+)
-10. Start Module(v0.09a+)
+8. Rate Module(v0.10a+)
+9. Reset Module(v0.07a+)
+10. Speed Module(v0.08a+)
+11. Start Module(v0.09a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -49,11 +50,13 @@ Videos:
    - https://www.youtube.com/watch?v=dgx51xE5Svw
 10. (v0.06a+)DoubleX RMMV Superlative ATB(Core And Event Module Only)
     - https://www.youtube.com/watch?v=RVeEoSa-IdY
-11. (v0.07a+)DoubleX RMMV Superlative ATB(Core And Reset Module Only)
+11. (v0.10a)DoubleX RMMV Superlative ATB(Core And Rate Module Only)
+    - https://www.youtube.com/watch?v=kvrxnhagO4I
+12. (v0.07a+)DoubleX RMMV Superlative ATB(Core And Reset Module Only)
     - https://www.youtube.com/watch?v=3KRIllS_rWc
-12. (v0.08a+)DoubleX RMMV Superlative ATB(Core And Speed Module Only)
+13. (v0.08a+)DoubleX RMMV Superlative ATB(Core And Speed Module Only)
     - https://www.youtube.com/watch?v=r3g6H4r8ws0
-13. (v0.09a+)DoubleX RMMV Superlative ATB(Core And Start Module Only)
+14. (v0.09a+)DoubleX RMMV Superlative ATB(Core And Start Module Only)
     - https://www.youtube.com/watch?v=zOpBlz6G0YA
 
 Posts:
