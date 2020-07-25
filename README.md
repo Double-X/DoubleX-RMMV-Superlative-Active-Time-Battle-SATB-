@@ -7,12 +7,13 @@ Please note that this plugin's still under developement. Currently the following
 4. Bar Module(v0.03a+)
 5. Charge Module(v0.04a+)
 6. Cooldown Module(v0.05a+)
-7. Event Module(v0.06a+)
-8. Rate Module(v0.10a+)
-9. Reset Module(v0.07a+)
-10. Speed Module(v0.08a+)
-11. Start Module(v0.09a+)
-12. Turn Module(v0.11a+)
+7. Countdown Module(v0.12a+)
+8. Event Module(v0.06a+)
+9. Rate Module(v0.10a+)
+10. Reset Module(v0.07a+)
+11. Speed Module(v0.08a+)
+12. Start Module(v0.09a+)
+13. Turn Module(v0.11a+)
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
@@ -61,6 +62,8 @@ Videos:
     - https://www.youtube.com/watch?v=zOpBlz6G0YA
 15. (v0.11a+)DoubleX RMMV Superlative ATB(Core And Turn Module Only)
     - https://www.youtube.com/watch?v=Nv1bEQAl3ik
+16. (v0.12a+)DoubleX RMMV Superlative ATB(Core And Countdown Module Only)
+    - https://www.youtube.com/watch?v=yw5UgvzTAIw
 
 Posts:
 1. 
