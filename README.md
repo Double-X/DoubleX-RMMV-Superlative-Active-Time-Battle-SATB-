@@ -2,19 +2,68 @@ IMPORTANT: YOU MUST OWN A LEGEL COPY OF THE RMMV SOFTWARE TO USE THIS PROJECT
 
 Please note that this plugin's still under developement. Currently the following modules are completed:
 1. Core Module
+   - Lets you enable and disable this plugin on the fly
+   - Lets you define the battle turn in terms of number of actions executed, or frames/seconds elapsed
+   - Lets you set the maximum ATB value of each battler
+   - Lets you set some states to have their turn counts updated right before the battler involved executes actions
 2. Hotkey Module(v0.01a+)
+   - Lets you set some hotkeys to change the currently selected inputable actors
 3. Wait Module(v0.02a+)
+   - Lets you set the ATB frame update wait conditions
+   - Lets you show the ATB frame update force status
+   - Lets you set some hotkeys to forcibly run/stop the ATB frame updates
+   - Lets you show some clickable command windows behaving like the aforementioned hotkeys
 4. Bar Module(v0.03a+)
+   - Lets you show the battler ATB bars on the battler sprites
+   - Lets you show the actor ATB bars attached to the status window
 5. Charge Module(v0.04a+)
+    - Lets you set some skills/items to need to be charged before beingexecuted
+    - Lets you set some hotkeys to cancel the action being charged(this applies to those not needing charging as well if the players cancel fast enough)
+    - Lets you set some hotkeys to force the action charge so it can beexecuted before the charge's full or overcharged beyond the maximum charge value
 6. Cooldown Module(v0.05a+)
+   - Lets you set some skills/items to cause the battler involved needto be cooled down after executing those skills/items
+   - Lets you set some hotkeys to cancel the the battler cooldown
 7. Countdown Module(v0.12a+)
+   - Lets you set some states to have their turn count updated basedon the number of frames/seconds elapsed, with additional effectstriggered upon each turn count update
 8. CTB Module(v0.13a+)
+   - Lets you change toggle the battle system between ATB and CTB on the fly and even during the same battle(you can actually set a hotkey to do that in battle)
 9. Event Module(v0.06a+)
+   - Lets you set some additional events to be triggered upon important timings inthe ATB system
 10. Rate Module(v0.10a+)
+   - Lets you set the ATB, charge and cooldown fill rate for each battler
 11. Reset Module(v0.07a+)
+   - Lets you set the ATB value of each battler right after that battler has executed an action and becomes out of virtual action slots
 12. Speed Module(v0.08a+)
+   - Lets you set the action execution priority among all battlers being able to execute actions(it likely means next to nothing in the full wait mode)
 13. Start Module(v0.09a+)
+   - Lets you set the starting ATB value upon normal, preemptive and surprise battle starts
 14. Turn Module(v0.11a+)
+   - Lets you show the progress of the current battle turn
+
+While the following modules are upcoming:
+1. Delay Module
+   - Lets you set the amount of delay between becoming able to input actions and actually inputting them for battlers can't have their actions inputted by the player(enemies and actors with auto battle or confusion)
+2. Escape Module
+   - Lets you set the conditions allowing party escape attempt
+   - Lets you set the charging requirements for the party escape attempt
+   - Lets you set the cooldown requirements for the failed party escape attempt
+   - Lets you set the cost for failed party escape attempts
+3. Status Module
+   - Shows the charge, cooldown, action cost and ATB reset settings for each skill/item in battle and outside battle
+   - Shows the ATB statues for each actor in the actor status window outside battle
+4. Action Module
+   - Lets you set the number of virtual action slots needed for skills/items
+   - Lets you set how the virtual action slots are gained(gain all upon a single full ATB or gain 1 upon each full ATB then empties the ATB afterwards until the number of virtual action slots reaches the limited specified by Action Times+)
+   - Lets you abandon the concept of virtual action slots altogether and base the action cost in the form of subtracting the battler ATB value
+5. Combo Module
+   - Lets you set some charging skills/items made by different battlers to form a new combo skills under certain conditions
+6. Pool Module
+   - Lets you bind some battlers to share the same ATB pool
+7. Unison Module
+   - Lets you set some skills/items to be unison ones
+And the following modules are possibly upcoming:
+1. Type Module
+   - Lets you have multiple ATB bars for each battler
 
 IMPORTANT: THE COMPATIBILITY PLUGIN WILL NEVER ADDRESS ANY COMPATIBILITY ISSUE WITH ANY PLUGIN THAT ARE SUPPOSED TO HAVE RESTRICTED ACCESSES CURRENTLY(ESPECIALLY COMMERCIAL PLUGINS) WITHOUT THE DEMONSTRABLY EXPLICIT CONSENTS FROM THEIR RESPECTIVE AUTHORS TO AVOID VIOLATING THEIR TERMS OF USE
 
