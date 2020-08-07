@@ -30,15 +30,15 @@ Please note that this plugin's still under developement. Currently the following
 9. Event Module(v0.06a+)
    - Lets you set some additional events to be triggered upon important timings inthe ATB system
 10. Rate Module(v0.10a+)
-   - Lets you set the ATB, charge and cooldown fill rate for each battler
+    - Lets you set the ATB, charge and cooldown fill rate for each battler
 11. Reset Module(v0.07a+)
-   - Lets you set the ATB value of each battler right after that battler has executed an action and becomes out of virtual action slots
+    - Lets you set the ATB value of each battler right after that battler has executed an action and becomes out of virtual action slots
 12. Speed Module(v0.08a+)
-   - Lets you set the action execution priority among all battlers being able to execute actions(it likely means next to nothing in the full wait mode)
+    - Lets you set the action execution priority among all battlers being able to execute actions(it likely means next to nothing in the full wait mode)
 13. Start Module(v0.09a+)
-   - Lets you set the starting ATB value upon normal, preemptive and surprise battle starts
+    - Lets you set the starting ATB value upon normal, preemptive and surprise battle starts
 14. Turn Module(v0.11a+)
-   - Lets you show the progress of the current battle turn
+    - Lets you show the progress of the current battle turn
 
 While the following modules are upcoming:
 1. Delay Module
