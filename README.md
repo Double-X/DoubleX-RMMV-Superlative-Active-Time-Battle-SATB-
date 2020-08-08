@@ -43,23 +43,26 @@ Please note that this plugin's still under developement. Currently the following
 While the following modules are upcoming:
 1. Delay Module
    - Lets you set the amount of delay between becoming able to input actions and actually inputting them for battlers can't have their actions inputted by the player(enemies and actors with auto battle or confusion)
-2. Status Module
+2. Exchange Module
+   - Lets you set some skills/items to exchange the charging skill/item of the targets with the cooldown of the action exeuction subject triggering the exchange
+   - This can apply to skills/items with multiple targets but the setup can be very complicated and convoluted this way
+3. Status Module
    - Shows the charge, cooldown, action cost and ATB reset settings for each skill/item in battle and outside battle
    - Shows the ATB statues for each actor in the actor status window outside battle
-3. Action Module
+4. Action Module
    - Lets you set the number of virtual action slots needed for skills/items
    - Lets you set how the virtual action slots are gained(gain all upon a single full ATB or gain 1 upon each full ATB then empties the ATB afterwards until the number of virtual action slots reaches the limited specified by Action Times+)
    - Lets you abandon the concept of virtual action slots altogether and base the action cost in the form of subtracting the battler ATB value
-4. Combo Module
+5. Combo Module
    - Lets you set some charging skills/items made by different battlers to form a new combo skills under certain conditions
-5. Escape Module
+6. Escape Module
    - Lets you set the conditions allowing party escape attempt
    - Lets you set the charging requirements for the party escape attempt
    - Lets you set the cooldown requirements for the failed party escape attempt
    - Lets you set the cost for failed party escape attempts
-6. Pool Module
+7. Pool Module
    - Lets you bind some battlers to share the same ATB pool
-7. Unison Module
+8. Unison Module
    - Lets you set some skills/items to be unison ones
 And the following modules are possibly upcoming:
 1. Type Module
