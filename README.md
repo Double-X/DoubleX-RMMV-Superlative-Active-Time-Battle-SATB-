@@ -51,6 +51,7 @@ While the following modules are upcoming:
    - Shows the ATB statues for each actor in the actor status window outside battle
 4. Action Module
    - Lets you set the number of virtual action slots needed for skills/items
+   - Lets you demands players to input all the virtual action slots at once before executing them all as a batch
    - Lets you set how the virtual action slots are gained(gain all upon a single full ATB or gain 1 upon each full ATB then empties the ATB afterwards until the number of virtual action slots reaches the limited specified by Action Times+)
    - Lets you abandon the concept of virtual action slots altogether and base the action cost in the form of subtracting the battler ATB value
 5. Combo Module
