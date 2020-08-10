@@ -23,7 +23,7 @@ Please note that this plugin's still under developement. Currently the following
     - Lets you set some hotkeys to cancel the action being charged(this applies to those not needing charging as well if the players cancel fast enough)
     - Lets you set some hotkeys to force the action charge so it can be executed before the charge's full or overcharged beyond the maximum charge value
 6. Cooldown Module(v0.05a+)
-   - Lets you set some skills/items to cause the battler involved needto be cooled down after executing those skills/items
+   - Lets you set some skills/items to cause the battler involved need to be cooled down after executing those skills/items
    - Lets you set some hotkeys to cancel the the battler cooldown
 7. Countdown Module(v0.12a+)
    - Lets you set some states to have their turn count updated basedon the number of frames/seconds elapsed, with additional effectstriggered upon each turn count update
