@@ -19,9 +19,9 @@ Please note that this plugin's still under developement. Currently the following
    - Lets you show the battler ATB bars on the battler sprites
    - Lets you show the actor ATB bars attached to the status window
 5. Charge Module(v0.04a+)
-    - Lets you set some skills/items to need to be charged before beingexecuted
+    - Lets you set some skills/items to need to be charged before being executed
     - Lets you set some hotkeys to cancel the action being charged(this applies to those not needing charging as well if the players cancel fast enough)
-    - Lets you set some hotkeys to force the action charge so it can beexecuted before the charge's full or overcharged beyond the maximum charge value
+    - Lets you set some hotkeys to force the action charge so it can be executed before the charge's full or overcharged beyond the maximum charge value
 6. Cooldown Module(v0.05a+)
    - Lets you set some skills/items to cause the battler involved needto be cooled down after executing those skills/items
    - Lets you set some hotkeys to cancel the the battler cooldown
