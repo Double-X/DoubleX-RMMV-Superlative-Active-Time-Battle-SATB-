@@ -148,7 +148,7 @@ Getting Started:
 2. Play the demo to be familiar with the essential features and the demo first
 3. Enable other modules of interest one at a time to be familiar with them one by one by playing the demo
 4. Enable other compatible plugins to determine whether SATB suits your needs with those plugins
-5. Only read the directly related parts of the documentation plugin and the help section of the parameters plugin, as they're too long to be read all at once :)
+5. Only read the directly related parts of the documentation plugin and the help section of the parameters plugin when you've issues using this plugin, as they're too long to be read all at once :)
 
 Plugin Users:
 1. You're welcome to make bug reports, compatibility problem reports and feature requests as raising issues
