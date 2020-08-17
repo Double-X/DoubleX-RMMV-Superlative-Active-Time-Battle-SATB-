@@ -32,7 +32,8 @@ Please note that this plugin's still under developement. Currently the following
 9. Event Module(v0.06a+)
    - Lets you set some additional events to be triggered upon important timings inthe ATB system
 10. Order Module(v0.14a)+
-   - Lets you show a window to show all battler ATB values on the same bar
+   - Lets you show the ATB values of all battlers in the same ATB bar
+   - Lets you show the battler action ordering in the CTB system style(You should only use this with the full wait mode unless you really know what you're truly doing)
 11. Rate Module(v0.10a+)
     - Lets you set the ATB, charge and cooldown fill rate for each battler
 12. Reset Module(v0.07a+)
