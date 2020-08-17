@@ -476,12 +476,13 @@ function Window_SATBTurnClock() { // v0.11a+
             //
         });
         //
-        var l = newArray.length;
+        var i = 0, l = newArray.length;
         /** @todo Uses forEach to be faster */
-        for (var i = 0; i < l; i++) {
+        while (i < l) {
             if (someCallback.call(someThis_, newArray[i], i, newArray)) {
                 return true;
             }
+            i++;
         }
         //
         return false;
@@ -1135,11 +1136,19 @@ function Window_SATBTurnClock() { // v0.11a+
     SATB.BattleManager = { orig: {}, new: {} };
     var _BM = SATB.BattleManager.orig, _SATB = SATB.BattleManager.new;
 
-    _SATB._UPDATE = function(mem) { mem.updateSATB(); }; // v0.10a+
     _SATB._REDUCED_AVG_AGI = function(agiSum, mem) { return agiSum + mem.agi; };
     _SATB._SORT_BATTLER_SPEEDS_DESCENDINGLY = function(a, b) {
         return b.satbActSpeed() - a.satbActSpeed();
     }; // _SATB._SORT_BATTLER_SPEEDS_DESCENDINGLY
+    _SATB._UPDATE = function(mem) { mem.updateSATB(); }; // v0.10a+
+    _SATB._UPDATE_ACT_SPEED = function(speedIncrement, battler) { // v0.14a+
+        // A battler being able to execute actions should have an action
+        var item = battler.latestSATBItem_;
+        //
+        // 2000 is the action speed cap in the default RMMV editor
+        item.speed = Math.min(item.speed + speedIncrement, 2000);
+        //
+    }; // _SATB._UPDATE_ACT_SPEED
 
     /*------------------------------------------------------------------------
      *    New public variable
@@ -1613,21 +1622,15 @@ function Window_SATBTurnClock() { // v0.11a+
     /**
      * This method's semantically idempotent but not technically so
      * The this pointer is BattleManager
-     * @since v0.00a @version v0.00a
+     * @since v0.00a @version v0.14a
      */
     _SATB._updateActSpeeds = function() {
         // 2000 is the action speed cap in the default RMMV editor
         var speedIncrement = 2000.0 / this._actionBattlers.length;
         //
         // Otherwise battlers with slow actions might never execute any action
-        this._actionBattlers.forEach(function(battler) {
-            // A battler being able to execute actions should have an action
-            var item = battler.latestSATBItem_;
-            //
-            // 2000 is the action speed cap in the default RMMV editor
-            item.speed = Math.min(item.speed + speedIncrement, 2000);
-            //
-        });
+        this._actionBattlers.forEach(
+                _SATB._UPDATE_ACT_SPEED.bind(null, speedIncrement));
         //
     }; // _SATB._updateActSpeeds
 
@@ -2292,6 +2295,10 @@ function Window_SATBTurnClock() { // v0.11a+
 
     var _SATB = SATB.SATBManager = {};
 
+    _SATB._SORT_INPUTABLE_INDICES = function(sign, a, b) { // v0.14a+
+        return (a - b) * sign;
+    }; // _SATB._SORT_INPUTABLE_INDICES
+
     _SATB.RUN_MODULES = { // v0.06a+
         didFinishInput: {
             modules: ["IsEventEnabled"],
@@ -2465,7 +2472,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     SATBManager.newInputableActorIndex = function(sign, inputableIndices) {
         // It's ok to sort this in place as inputableIndices is a new array
-        inputableIndices.sort(function(a, b) { return (a - b) * sign; });
+        inputableIndices.sort(_SATB._SORT_INPUTABLE_INDICES.bind(null, sign));
         //
         // inputableIndices is supposed to have at least 2 indices
         var selectedIndex = BattleManager.actor().index();
@@ -2583,6 +2590,14 @@ function Window_SATBTurnClock() { // v0.11a+
     var _GS = SATB.Game_System.orig, _SATB = SATB.Game_System.new;
     var $ = Game_System.prototype, DM = SATB.DataManager.new;
 
+    _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC = function(content) { // v0.14a+
+        var c = "'use strict';\n" + content;
+        return new Function("datum", "datumType", "continuousOrderSprite", c);
+    }, // _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC
+    _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC = function(content) { // v0.14a+
+        var c = "'use strict';\n" + content;
+        return new Function("datum", "datumType", "discreteOrderSprite", c);
+    }, // _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC
     // Using Function.bind would cause the function to have the wrong contect
     _SATB.NOTE_FUNC = function(content) { // v0.04a+; Potential Hotspot
         var c = "'use strict';\n" + content;
@@ -2607,10 +2622,10 @@ function Window_SATBTurnClock() { // v0.11a+
         var c = "'use strict';\n" + content;
         return new Function("continuousOrderSprite", c);
     }, // _SATB._CONTINUOUS_ORDER_SPRITE_FUNC
-    _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC = function(content) { // v0.14a+
+    _SATB._DISCRETE_ORDER_SPRITE_FUNC = function(content) { // v0.14a+
         var c = "'use strict';\n" + content;
-        return new Function("datum", "datumType", "continuousOrderSprite", c);
-    }, // _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC
+        return new Function("discreteOrderSprite", c);
+    }, // _SATB._DISCRETE_ORDER_SPRITE_FUNC
     _SATB._FUNC_CONTENT = function(func) {
         var funcStart = /^[^{]*{\s*/, funcEnd = /\s*}[^}]*$/;
         // Only the function contents are stored in save files
@@ -2910,22 +2925,51 @@ function Window_SATBTurnClock() { // v0.11a+
             continuousOrderChargeTextY: _SATB.ZERO_ARG_FUNC,
             continuousOrderChargeTextAlign: _SATB.ZERO_ARG_FUNC,
             continuousOrderSpriteOpacity: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
-            continuousOrderSpriteIconFolder: 
+            continuousOrderSpriteIconFolder:
                     _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
-            continuousOrderSpriteIconFilename: 
+            continuousOrderSpriteIconFilename:
                     _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteIconHue: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
-            continuousOrderSpriteIconSmooth: 
+            continuousOrderSpriteIconSmooth:
                     _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteIconXCoor: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteIconYCoor: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
-            continuousOrderSpriteIconSourceW: 
+            continuousOrderSpriteIconSourceW:
                     _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
-            continuousOrderSpriteIconSourceH: 
+            continuousOrderSpriteIconSourceH:
                     _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteIconW: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteIconH: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
             continuousOrderSpriteY: _SATB._CONTINUOUS_ORDER_SPRITE_FUNC,
+            isShowDiscreteOrderWin: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinX: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinY: _SATB.ZERO_ARG_FUNC,
+            discreteOrderOpacity: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinW: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinH: _SATB.ZERO_ARG_FUNC,
+            discreteOrderPadding: _SATB.ZERO_ARG_FUNC,
+            discreteOrderBackOpacity: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinskinPath: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinskinFile: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinskinHue: _SATB.ZERO_ARG_FUNC,
+            discreteOrderWinskinSmooth: _SATB.ZERO_ARG_FUNC,
+            showingDiscreteOrderBattlerSpriteOpacity:
+                    _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            hidingDiscreteOrderBattlerSpriteOpacity:
+                    _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteX: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteY: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteTargetOpacity: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconFolder: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconFilename: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconHue: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconSmooth: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconXCoor: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconYCoor: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconSourceW: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconSourceH: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconW: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
+            discreteOrderSpriteIconH: _SATB._DISCRETE_ORDER_SPRITE_FUNC,
             //
             // (v0.10a+) Rate Module
             IsRateEnabled: _SATB.ZERO_ARG_FUNC,
@@ -2998,30 +3042,52 @@ function Window_SATBTurnClock() { // v0.11a+
             }, // cooldownMax
             canCancelCooldown: _SATB.NOTE_FUNC, // v0.05a+
             countdown: _SATB.NOTE_FUNC, // v0.12a+
-            continuousOrderSpriteOpacity: 
+            continuousOrderSpriteOpacity:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconFolder: 
+            continuousOrderSpriteIconFolder:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconFilename: 
+            continuousOrderSpriteIconFilename:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconHue: 
+            continuousOrderSpriteIconHue:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconSmooth: 
+            continuousOrderSpriteIconSmooth:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconXCoor: 
+            continuousOrderSpriteIconXCoor:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconYCoor: 
+            continuousOrderSpriteIconYCoor:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconSourceW: 
+            continuousOrderSpriteIconSourceW:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconSourceH: 
+            continuousOrderSpriteIconSourceH:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconW: 
+            continuousOrderSpriteIconW:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteIconH: 
+            continuousOrderSpriteIconH:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
-            continuousOrderSpriteY: 
+            continuousOrderSpriteY:
                     _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteTargetOpacity:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconFolder:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconFilename:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconHue:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconSmooth:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconXCoor:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconYCoor:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconSourceW:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconSourceH:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconW:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
+            discreteOrderSpriteIconH:
+                    _SATB._DISCRETE_ORDER_SPRITE_NOTE_FUNC, // v0.14a+
             coreATBRate: _SATB.NOTE_FUNC, // v0.10a+
             chargeATBRate: _SATB.NOTE_FUNC, // v0.10a+
             cooldownATBRate: _SATB.NOTE_FUNC, // v0.10a+
@@ -3327,6 +3393,46 @@ function Window_SATBTurnClock() { // v0.11a+
                 SATBManager, "continuousOrderSpriteIconH"),
         continuousOrderSpriteY: SATBManager.updateNoteDefault.bind(
                 SATBManager, "continuousOrderSpriteY"),
+        isShowDiscreteOrderWin: SATBManager.invalidateParamCache,
+        discreteOrderWinX: SATBManager.invalidateParamCache,
+        discreteOrderWinY: SATBManager.invalidateParamCache,
+        discreteOrderOpacity: SATBManager.invalidateParamCache,
+        discreteOrderWinW: SATBManager.invalidateParamCache,
+        discreteOrderWinH: SATBManager.invalidateParamCache,
+        discreteOrderPadding: SATBManager.invalidateParamCache,
+        discreteOrderBackOpacity: SATBManager.invalidateParamCache,
+        discreteOrderWinskinPath: SATBManager.invalidateParamCache,
+        discreteOrderWinskinFile: SATBManager.invalidateParamCache,
+        discreteOrderWinskinHue: SATBManager.invalidateParamCache,
+        discreteOrderWinskinSmooth: SATBManager.invalidateParamCache,
+        showingDiscreteOrderBattlerSpriteOpacity:
+                SATBManager.invalidateParamCache,
+        hidingDiscreteOrderBattlerSpriteOpacity:
+                SATBManager.invalidateParamCache,
+        discreteOrderSpriteX: SATBManager.invalidateParamCache,
+        discreteOrderSpriteY: SATBManager.invalidateParamCache,
+        discreteOrderSpriteTargetOpacity: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteTargetOpacity"),
+        discreteOrderSpriteIconFolder: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconFolder"),
+        discreteOrderSpriteIconFilename: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconFilename"),
+        discreteOrderSpriteIconHue: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconHue"),
+        discreteOrderSpriteIconSmooth: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconSmooth"),
+        discreteOrderSpriteIconXCoor: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconXCoor"),
+        discreteOrderSpriteIconYCoor: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconYCoor"),
+        discreteOrderSpriteIconSourceW: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconSourceW"),
+        discreteOrderSpriteIconSourceH: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconSourceH"),
+        discreteOrderSpriteIconW: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconW"),
+        discreteOrderSpriteIconH: SATBManager.updateNoteDefault.bind(
+                SATBManager, "discreteOrderSpriteIconH"),
         //
         // (v0.10a+) Rate Module
         coreATBRate:
@@ -3673,6 +3779,33 @@ function Window_SATBTurnClock() { // v0.11a+
         "continuousOrderSpriteIconW",
         "continuousOrderSpriteIconH",
         "continuousOrderSpriteY",
+        "isShowDiscreteOrderWin",
+        "discreteOrderWinX",
+        "discreteOrderWinY",
+        "discreteOrderOpacity",
+        "discreteOrderWinW",
+        "discreteOrderWinH",
+        "discreteOrderPadding",
+        "discreteOrderBackOpacity",
+        "discreteOrderWinskinPath",
+        "discreteOrderWinskinFile",
+        "discreteOrderWinskinHue",
+        "discreteOrderWinskinSmooth",
+        "showingDiscreteOrderBattlerSpriteOpacity",
+        "hidingDiscreteOrderBattlerSpriteOpacity",
+        "discreteOrderSpriteX",
+        "discreteOrderSpriteY",
+        "discreteOrderSpriteTargetOpacity",
+        "discreteOrderSpriteIconFolder",
+        "discreteOrderSpriteIconFilename",
+        "discreteOrderSpriteIconHue",
+        "discreteOrderSpriteIconSmooth",
+        "discreteOrderSpriteIconXCoor",
+        "discreteOrderSpriteIconYCoor",
+        "discreteOrderSpriteIconSourceW",
+        "discreteOrderSpriteIconSourceH",
+        "discreteOrderSpriteIconW",
+        "discreteOrderSpriteIconH",
         //
         // (v0.10a+) Rate Module
         "IsRateEnabled",
@@ -4016,6 +4149,33 @@ function Window_SATBTurnClock() { // v0.11a+
         continuousOrderSpriteIconW: "order",
         continuousOrderSpriteIconH: "order",
         continuousOrderSpriteY: "order",
+        isShowDiscreteOrderWin: "order",
+        discreteOrderWinX: "order",
+        discreteOrderWinY: "order",
+        discreteOrderOpacity: "order",
+        discreteOrderWinW: "order",
+        discreteOrderWinH: "order",
+        discreteOrderPadding: "order",
+        discreteOrderBackOpacity: "order",
+        discreteOrderWinskinPath: "order",
+        discreteOrderWinskinFile: "order",
+        discreteOrderWinskinHue: "order",
+        discreteOrderWinskinSmooth: "order",
+        showingDiscreteOrderBattlerSpriteOpacity: "order",
+        hidingDiscreteOrderBattlerSpriteOpacity: "order",
+        discreteOrderSpriteX: "order",
+        discreteOrderSpriteY: "order",
+        discreteOrderSpriteTargetOpacity: "order",
+        discreteOrderSpriteIconFolder: "order",
+        discreteOrderSpriteIconFilename: "order",
+        discreteOrderSpriteIconHue: "order",
+        discreteOrderSpriteIconSmooth: "order",
+        discreteOrderSpriteIconXCoor: "order",
+        discreteOrderSpriteIconYCoor: "order",
+        discreteOrderSpriteIconSourceW: "order",
+        discreteOrderSpriteIconSourceH: "order",
+        discreteOrderSpriteIconW: "order",
+        discreteOrderSpriteIconH: "order",
         //
         // v0.10a+
         IsRateEnabled: "rate",
@@ -7548,6 +7708,13 @@ function Window_SATBTurnClock() { // v0.11a+
         return func.call(battler, datum, datumType, argObj_.stateId);
     }; // _SATB.STATE_ID_NOTE_FUNC
 
+    _SATB._DEFAULT_BATTLER_RESULT = function(note) { // v0.09a+
+        return $gameSystem.satbParamFunc(note).call(this._battler);
+    }; // _SATB._DEFAULT_BATTLER_RESULT
+    _SATB._DEFAULT_BATTLER_SPRITE_RESULT = function(note, argObj_) { // v0.14a+
+        return $gameSystem.satbParamFunc(note).
+                call(this._battler, argObj_.sprite);
+    }; // _SATB._DEFAULT_BATTLER_SPRITE_RESULT
     _SATB._COUNTDOWN_PAIR_FUNC = function(note, datum, pair) {
     // v0.12a+; Potential Hotspot
         // Refers to reference tag THIS_GAME_BATTLER
@@ -7605,9 +7772,6 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._PAIR_FUNC_SUFFIX
     _SATB._STRING_TO_NUM = function(r) { return +r; }; // Potential Hotspot
 
-    _SATB._DEFAULT_BATTLER_RESULT = function(note) { // v0.09a+
-        return $gameSystem.satbParamFunc(note).call(this._battler);
-    }; // _SATB._DEFAULT_BATTLER_RESULT
     // Refers to reference tag NOTE_DEFAULT_RESULTS
     _SATB._DEFAULT_RESULTS = { // Potential Hotspot
         // Core Module
@@ -7644,56 +7808,97 @@ function Window_SATBTurnClock() { // v0.11a+
         //
         // (v0.14a+)Order Module
         continuousOrderSpriteOpacity: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteOpacity").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteOpacity", argObj_);
         }, // continuousOrderSpriteOpacity
         continuousOrderSpriteIconFolder: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconFolder").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconFolder", argObj_);
         }, // continuousOrderSpriteIconFolder
         continuousOrderSpriteIconFilename: function(argObj_) {
-            return $gameSystem.satbParamFunc(
-                    "continuousOrderSpriteIconFilename").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconFilename", argObj_);
         }, // continuousOrderSpriteIconFilename
         continuousOrderSpriteIconHue: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconHue").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconHue", argObj_);
         }, // continuousOrderSpriteIconHue
         continuousOrderSpriteIconSmooth: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconSmooth").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconSmooth", argObj_);
         }, // continuousOrderSpriteIconSmooth
         continuousOrderSpriteIconXCoor: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconYCoor").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconXCoor", argObj_);
         }, // continuousOrderSpriteIconXCoor
         continuousOrderSpriteIconYCoor: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconYCoor").
-                    call(this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconYCoor", argObj_);
         }, // continuousOrderSpriteIconYCoor
         continuousOrderSpriteIconSourceW: function(argObj_) {
-            return $gameSystem.satbParamFunc(
-                    "continuousOrderSpriteIconSourceW").call(
-                    this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconSourceW", argObj_);
         }, // continuousOrderSpriteIconSourceW
         continuousOrderSpriteIconSourceH: function(argObj_) {
-            return $gameSystem.satbParamFunc(
-                    "continuousOrderSpriteIconSourceH").call(
-                    this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconSourceH", argObj_);
         }, // continuousOrderSpriteIconSourceH
         continuousOrderSpriteIconW: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconW").call(
-                    this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconW", argObj_);
         }, // continuousOrderSpriteIconW
         continuousOrderSpriteIconH: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteIconH").call(
-                    this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteIconH", argObj_);
         }, // continuousOrderSpriteIconH
         continuousOrderSpriteY: function(argObj_) {
-            return $gameSystem.satbParamFunc("continuousOrderSpriteY").call(
-                    this._battler, argObj_.sprite);
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "continuousOrderSpriteY", argObj_);
         }, // continuousOrderSpriteY
+        discreteOrderSpriteTargetOpacity: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteTargetOpacity", argObj_);
+        }, // discreteOrderSpriteTargetOpacity
+        discreteOrderSpriteIconFolder: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconFolder", argObj_);
+        }, // discreteOrderSpriteIconFolder
+        discreteOrderSpriteIconFilename: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconFilename", argObj_);
+        }, // discreteOrderSpriteIconFilename
+        discreteOrderSpriteIconHue: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconHue", argObj_);
+        }, // discreteOrderSpriteIconHue
+        discreteOrderSpriteIconSmooth: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconSmooth", argObj_);
+        }, // discreteOrderSpriteIconSmooth
+        discreteOrderSpriteIconXCoor: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconXCoor", argObj_);
+        }, // discreteOrderSpriteIconXCoor
+        discreteOrderSpriteIconYCoor: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconYCoor", argObj_);
+        }, // discreteOrderSpriteIconYCoor
+        discreteOrderSpriteIconSourceW: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconSourceW", argObj_);
+        }, // discreteOrderSpriteIconSourceW
+        discreteOrderSpriteIconSourceH: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconSourceH", argObj_);
+        }, // discreteOrderSpriteIconSourceH
+        discreteOrderSpriteIconW: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconW", argObj_);
+        }, // discreteOrderSpriteIconW
+        discreteOrderSpriteIconH: function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, "discreteOrderSpriteIconH", argObj_);
+        }, // discreteOrderSpriteIconH
         //
         // (v0.10a+)Rate Module
         coreATBRate: function(argObj_) {
@@ -7765,23 +7970,34 @@ function Window_SATBTurnClock() { // v0.11a+
         countdown: _SATB.NOTE_FUNC, // (v0.12a+)Countdown Module
         // (v0.14a+)Order Module
         continuousOrderSpriteOpacity: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconFolder: 
+        continuousOrderSpriteIconFolder:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconFilename: 
+        continuousOrderSpriteIconFilename:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
         continuousOrderSpriteIconHue: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconSmooth: 
+        continuousOrderSpriteIconSmooth:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconXCoor: 
+        continuousOrderSpriteIconXCoor:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
         continuousOrderSpriteIconYCoor: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconSourceW: 
+        continuousOrderSpriteIconSourceW:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
-        continuousOrderSpriteIconSourceH: 
+        continuousOrderSpriteIconSourceH:
                 _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
         continuousOrderSpriteIconW: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
         continuousOrderSpriteIconH: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
         continuousOrderSpriteY: _SATB.CONTINUOUS_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteTargetOpacity: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconFolder: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconFilename: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconHue: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconSmooth: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconXCoor: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconYCoor: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconSourceW: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconSourceH: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconW: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
+        discreteOrderSpriteIconH: _SATB.DISCRETE_ORDER_SPRITE_NOTE_FUNC,
         //
         // (v0.10a+)Rate Module
         coreATBRate: _SATB._NOTE_ARG_OBJ_LATEST_VAL,
@@ -7925,6 +8141,17 @@ function Window_SATBTurnClock() { // v0.11a+
         continuousOrderSpriteIconW: _SATB._NUM_RESULT_NOTES,
         continuousOrderSpriteIconH: _SATB._NUM_RESULT_NOTES,
         continuousOrderSpriteY: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteTargetOpacity: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconFolder: _SATB._STRING_RESULT_NOTES,
+        discreteOrderSpriteIconFilename: _SATB._STRING_RESULT_NOTES,
+        discreteOrderSpriteIconHue: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconSmooth: _SATB._BOOL_RESULT_NOTES,
+        discreteOrderSpriteIconXCoor: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconYCoor: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconSourceW: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconSourceH: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconW: _SATB._NUM_RESULT_NOTES,
+        discreteOrderSpriteIconH: _SATB._NUM_RESULT_NOTES,
         //
         // (v0.10a+)Rate Module
         coreATBRate: _SATB._NUM_RESULT_NOTES,
@@ -8231,6 +8458,8 @@ function Window_SATBTurnClock() { // v0.11a+
         return truthyMono && _SATB._TRUTHY_MONO[note](truthyMono);
     }; // _SATB._LAST_LIST_TRUTHY_MONO_FUNC
     //
+    _SATB._NOTE_PRIORITY_BATTLER = function() { return ["actor", "enemy"]; };
+    _SATB._NOTE_PRIORITY_THIS_STATE = function() { return ["thisState"]; };
     _SATB._MONO_RESULT_CHAINING_RULES = function(func, valFunc) {
     // Potential Hotspot
         // It's understood that associativity means nothing when running a list
@@ -8272,7 +8501,7 @@ function Window_SATBTurnClock() { // v0.11a+
         coreMax: function() {
             return $gameSystem.satbParam("_coreMaxATBValNotePriorities");
         }, // coreMax
-        coreActState: function() { return ["thisState"]; },
+        coreActState: _SATB._NOTE_PRIORITY_THIS_STATE,
         //
         isBarVisible: function() { // (v0.04a+)Bar Module
             return $gameSystem.satbParam("_isBarVisibleNotePriorities");
@@ -8304,35 +8533,32 @@ function Window_SATBTurnClock() { // v0.11a+
         }, // canCancelCooldown
         //
         // (v0.12a+)Countdown Module
-        countdown: function() { return ["thisState"]; },
+        countdown: _SATB._NOTE_PRIORITY_THIS_STATE,
         //
         // (v0.14a+)Order Module
-        continuousOrderSpriteOpacity: function() { return ["actor", "enemy"]; },
-        continuousOrderSpriteIconFolder: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconFilename: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconHue: function() { return ["actor", "enemy"]; },
-        continuousOrderSpriteIconSmooth: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconSmooth
-        continuousOrderSpriteIconXCoor: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconYCoor: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconSourceW: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconSourceH: function() {
-            return ["actor", "enemy"];
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconW: function() { return ["actor", "enemy"]; },
-        continuousOrderSpriteIconH: function() { return ["actor", "enemy"]; },
-        continuousOrderSpriteY: function() { return ["actor", "enemy"]; },
+        continuousOrderSpriteOpacity: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconFolder: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconFilename: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconHue: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconSmooth: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconXCoor: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconYCoor: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconSourceW: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconSourceH: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconW: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteIconH: _SATB._NOTE_PRIORITY_BATTLER,
+        continuousOrderSpriteY: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteTargetOpacity: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconFolder: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconFilename: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconHue: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconSmooth: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconXCoor: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconYCoor: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconSourceW: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconSourceH: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconW: _SATB._NOTE_PRIORITY_BATTLER,
+        discreteOrderSpriteIconH: _SATB._NOTE_PRIORITY_BATTLER,
         //
         // (v0.10a+)Rate Module
         coreATBRate: function() {
@@ -8469,6 +8695,17 @@ function Window_SATBTurnClock() { // v0.11a+
         continuousOrderSpriteIconW: false,
         continuousOrderSpriteIconH: false,
         continuousOrderSpriteY: false,
+        discreteOrderSpriteTargetOpacity: false,
+        discreteOrderSpriteIconFolder: false,
+        discreteOrderSpriteIconFilename: false,
+        discreteOrderSpriteIconHue: false,
+        discreteOrderSpriteIconSmooth: false,
+        discreteOrderSpriteIconXCoor: false,
+        discreteOrderSpriteIconYCoor: false,
+        discreteOrderSpriteIconSourceW: false,
+        discreteOrderSpriteIconSourceH: false,
+        discreteOrderSpriteIconW: false,
+        discreteOrderSpriteIconH: false,
         //
         // (v0.10a+)Rate Module
         coreATBRate: true,
@@ -8573,6 +8810,17 @@ function Window_SATBTurnClock() { // v0.11a+
         continuousOrderSpriteIconW: "mono",
         continuousOrderSpriteIconH: "mono",
         continuousOrderSpriteY: "mono",
+        discreteOrderSpriteTargetOpacity: "mono",
+        discreteOrderSpriteIconFolder: "mono",
+        discreteOrderSpriteIconFilename: "mono",
+        discreteOrderSpriteIconHue: "mono",
+        discreteOrderSpriteIconSmooth: "mono",
+        discreteOrderSpriteIconXCoor: "mono",
+        discreteOrderSpriteIconYCoor: "mono",
+        discreteOrderSpriteIconSourceW: "mono",
+        discreteOrderSpriteIconSourceH: "mono",
+        discreteOrderSpriteIconW: "mono",
+        discreteOrderSpriteIconH: "mono",
         //
         // (v0.10a+)Rate Module
         coreATBRate: "operator",
@@ -8739,6 +8987,7 @@ function Window_SATBTurnClock() { // v0.11a+
         mem.eraseVirtualSATBActSlot();
     }; // _SATB._ERASE_VIRTUAL_ACT_SLOT
     _SATB._INIT_NOTES = function(mem) { mem.initSATBNotes(); };
+    _SATB._IS_ALIVE = function(mem) { return mem.isAlive(); }; // v0.14a+
 
     /*------------------------------------------------------------------------
      *    (v0.05b+)New private variables
@@ -8779,11 +9028,22 @@ function Window_SATBTurnClock() { // v0.11a+
     _SATB.swapOrder = $.swapOrder = function(index1, index2) {
     // v0.14a - v0.14a; Extended
         _GP.swapOrder.apply(this, arguments);
-        // Added to update the continuous order window actor sprite icons
+        // Added to update continuous/discrete order window actor sprite icons
         if (!BattleManager.isSATBBattle()) return;
         _SATB._swapOrder.call(this, index1, index2);
         //
     }; // $.swapOrder
+
+    /**
+     * Hotspot/Nullipotent
+     * @interface @since v0.05b @version v0.05b
+     * @returns {[Game_Actor]} The list of alive members in the battle
+     */
+    $.aliveSATBMems = function() {
+        var allMems = this.allMembers();
+        allMems.length = this.maxBattleMembers();
+        return allMems.filter(_SATB._IS_ALIVE, this);
+    }; // _SATB.aliveSATBMems
 
     /**
      * Hotspot/Nullipotent
@@ -8965,7 +9225,7 @@ function Window_SATBTurnClock() { // v0.11a+
         } else if (is1Appeared && !is2Appeared) {
             return _SATB._removeThenAddActors.call(this, [id2], [actor1]);
         }
-        // It's to ensure the continuous order window have no stale data
+        // It's to ensure continuous/discrete order window have no stale data
         _SATB._removeThenAddActors.call(this, [id1, id2], [actor1, actor2]);
         //
     }; // _SATB._swapOrder
@@ -9379,7 +9639,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
 /*----------------------------------------------------------------------------
  *    # (v0.14a+)New class: Sprite_SATBContinuousOrderBattlerIcon
- *      Shows the battler icon in the order window
+ *      Shows the battler icon in the continuous order window
  *----------------------------------------------------------------------------*/
 
 (function() {
@@ -9406,14 +9666,6 @@ function Window_SATBTurnClock() { // v0.11a+
     // {Boolean} _lastIconSmooth: The icon sheet smooth
     // {Natural Num} _sw: The icon source width
     // {Natural Num} _sh: The icon source height
-    // {{}} _cache: The parameter return result cache
-    //      {Nonnegative Int} cooldownBarX: The cached cooldown bar x position
-    //      {Nonnegative Int} cooldownBarW: The cached cooldown bar width
-    //      {Nonnegative Int} coreBarX: The cached fill bar x position
-    //      {Nonnegative Int} coreBarW: The cached fill bar width
-    //      {Nonnegative Int} chargeBarX: The cached charge bar x position
-    //      {Nonnegative Int} chargeBarW: The cached charge bar width
-    //      {Nonnegative Int} y: The cached battler icon y position
 
     /**
      * Idempotent
@@ -9457,17 +9709,7 @@ function Window_SATBTurnClock() { // v0.11a+
      * @interface @since v0.14a @version v0.14a
      * @param {Game_Battler} battler - The battler owning this icon sprite
      */
-    $.setBattler = function(battler) {
-        var lastBattler = this._battler;
-        this._battler = battler;
-        if (lastBattler !== battler) this.refresh();
-    }; // $.setBattler
-
-    /**
-     * Idempotent
-     * @interface @since v0.14a @version v0.14a
-     */
-    $.refresh = function() { this._invalidateCachedParams(); };
+    $.setBattler = function(battler) { this._battler = battler; };
 
     /**
      * Hotspot/Idempotent
@@ -9525,9 +9767,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @returns {Boolean} The check result
      */
     $._isSameCoors = function() {
-        var isSameIconXCoor = 
+        var isSameIconXCoor =
                 this._isSameCachedVal("_lastIconXCoor", "_iconXCoor");
-        var isSameIconYCoor = 
+        var isSameIconYCoor =
                 this._isSameCachedVal("_lastIconYCoor", "_iconYCoor");
         return isSameIconXCoor && isSameIconYCoor;
     }; // $._isSameCoors
@@ -9684,9 +9926,373 @@ function Window_SATBTurnClock() { // v0.11a+
         if (this[valName] !== val) this[valName] = val;
     }; // $._updateVal
 
-    $._invalidateCachedParams = function() { this._cache = {}; };
-
 })(); // Sprite_SATBContinuousOrderBattlerIcon.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.14a+)New class: Sprite_SATBDiscreteOrderBattlerIcon
+ *      Shows the battler icon in the discrete order window
+ *----------------------------------------------------------------------------*/
+
+(function(SATB) {
+
+    "use strict";
+
+    var $$ = Sprite_Base.prototype;
+    var _SATB = SATB.Sprite_SATBDiscreteOrderBattlerIcon = {};
+
+    Sprite_SATBDiscreteOrderBattlerIcon.prototype = Object.create($$);
+
+    var $ = Sprite_SATBDiscreteOrderBattlerIcon.prototype;
+
+    $.constructor = Sprite_SATBDiscreteOrderBattlerIcon;
+
+    _SATB._PHASE_INIT = "init", _SATB._PHASE_CLEAR = "clear";
+    _SATB._PHASE_IDLE = "idle", _SATB._PHASE_MOVE = "move";
+    _SATB._SMALLEST_X_DIFF = Math.pow(2, -32);
+
+    /*------------------------------------------------------------------------
+     *    New private instance variables
+     *------------------------------------------------------------------------*/
+    // {Boolean} _lastIconSmooth: The icon sheet smooth
+    // {Hue} _lastIconHue: The icon sheet hue
+    // {Natural Num} _sw: The icon source width
+    // {Natural Num} _sh: The icon source height
+    // {Nonnegative Int} _lastIconXCoor: The x coordinate of the icon in sheet
+    // {Nonnegative Int} _lastIconYCoor: The y coordinate of the icon in sheet
+    // {Nonnegative Int} _lastTargetX: The last targeted x position in window
+    // {Nonnegative Int} _targetX: The current targeted x position in window
+    // {String} _lastIconFolder: The folder name having the icon sheet
+    // {String} _lastIconFilename: The icon sheet filename
+    // {String} _phase: The current phase ofthe battler sprite icon
+
+    /**
+     * Idempotent
+     * @constructor @since v0.14a @version v0.14a
+     * @param {Game_Battler} battler - The battler owning this icon sprite
+     */
+    $.initialize = function(battler) {
+        // It must be called first or super initialize would crash the game
+        this.setBattler(battler);
+        //
+        $$.initialize.call(this);
+        this._lastTargetX = this._targetX = this.x;
+        this._phase = _SATB._PHASE_INIT, this.opacity = 0;
+        this.bitmap = new Bitmap(this._iconW(), this._iconH());
+    }; // $.initialize
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     */
+    $.clear = function() { this._phase = _SATB._PHASE_CLEAR; };
+
+    /**
+     * Idempotent
+     * @interface @override @since v0.14a @version v0.14a
+     */
+    $.update = function() {
+        this.visible = this._battler.isAlive();
+        if (!this.visible) return;
+        this._updateOpacity();
+        if (this.opacity <= 0) return;
+        $$.update.call(this);
+        this._updateWhenVisible();
+    }; // $.update
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Game_Battler} battler - The battler owning this icon sprite
+     */
+    $.setBattler = function(battler) { this._battler = battler; };
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Nonnegative Int} targetX - The new targeted x position in window
+     */
+    $.setTargetX = function(targetX) {
+        this._lastTargetX = this.x;
+        this._targetX = targetX;
+        if (this._lastTargetX !== targetX) this._phase = _SATB._PHASE_MOVE;
+    }; // setTargetX
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._updateOpacity = function() {
+        this._updateVal("targetOpacity");
+        if (this._phase === _SATB._PHASE_INIT) return this._updateInitOpacity();
+        if (this._phase === _SATB._PHASE_CLEAR) {
+            return this._updateClearOpacity();
+        }
+        this.opacity = this.targetOpacity;
+    }; // $._updateOpacity
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     */
+    $._updateInitOpacity = function() {
+        this.opacity = this._initOpacity();
+        if (this.opacity >= this.targetOpacity) this._phase = _SATB._PHASE_IDLE;
+    }; // $._updateInitOpacity
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {Opacity} The battler icon opacity when it's still showing
+     */
+    $._initOpacity = function() {
+        var param = "showingDiscreteOrderBattlerSpriteOpacity";
+        return Math.round($gameSystem.satbParamFunc(param).call(this));
+    }; // $._initOpacity
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     */
+    $._updateClearOpacity = function() {
+        if (this.opacity <= 0) return;
+        this.opacity = this._clearOpacity();
+        if (this.opacity <= 0) this._clear();
+    }; // $._updateClearOpacity
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {Opacity} The battler icon opacity when it's still hiding
+     */
+    $._clearOpacity = function() {
+        var param = "hidingDiscreteOrderBattlerSpriteOpacity";
+        return Math.round($gameSystem.satbParamFunc(param).call(this));
+    }; // $._clearOpacity
+
+    /**
+     * Destructor/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._clear = function() { delete this._battler; };
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._updateWhenVisible = function() {
+        this._updateBitmap();
+        this._updateVal("x");
+        this._updateVal("y");
+    }; // $._updateWhenVisible
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._updateBitmap = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isSameIconSheet = this._isSameIconSheet();
+        var isSameIconCoors = this._isSameCoors();
+        var isSameIconSourceSize = this._isSameIconSourceSize();
+        var isSameIconSize = this._isSameIconSize();
+        //
+        if (isSameIconSheet && isSameIconCoors && isSameIconSourceSize &&
+                isSameIconSize) return;
+        this.bitmap.clear();
+        if (!isSameIconSheet) this._reloadBitmap();
+        if (!isSameIconSize) this.bitmap.resize(this.width, this.height);
+        this._redrawBitmap();
+    }; // $._updateBitmap
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isSameIconSheet = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isSameIconFolder =
+                this._isSameCachedVal("_lastIconFolder", "_iconFolder");
+        var isSameIconFilename =
+                this._isSameCachedVal("_lastIconFilename", "_iconFilename");
+        var isSameIconHue = this._isSameCachedVal("_lastIconHue", "_iconHue");
+        var isSameIconSmooth =
+                this._isSameCachedVal("_lastIconSmooth", "_iconSmooth");
+        //
+        if (!isSameIconFolder || !isSameIconFilename) return;
+        return isSameIconHue && isSameIconSmooth;
+    }; // $._isSameIconSheet
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isSameCoors = function() {
+        var isSameIconXCoor =
+                this._isSameCachedVal("_lastIconXCoor", "_iconXCoor");
+        var isSameIconYCoor =
+                this._isSameCachedVal("_lastIconYCoor", "_iconYCoor");
+        return isSameIconXCoor && isSameIconYCoor;
+    }; // $._isSameCoors
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._reloadBitmap = function() {
+        var folder = this._lastIconFolder, filename = this._lastIconFilename;
+        var hue = this._lastIconHue, smooth = this._lastIconSmooth;
+        this._bitmapSource =
+                ImageManager.loadBitmap(folder, filename, hue, smooth);
+    }; // $._reloadBitmap
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isSameIconSourceSize = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isSameIconSourceW = this._isSameCachedVal("_sw", "_iconSourceW");
+        var isSameIconSourceH = this._isSameCachedVal("_sh", "_iconSourceH");
+        //
+        return isSameIconSourceW && isSameIconSourceH;
+    }; // $._isSameIconSourceSize
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isSameIconSize = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isSameIconW = this._isSameCachedVal("width", "_iconW");
+        var isSameIconH = this._isSameCachedVal("height", "_iconH");
+        //
+        return isSameIconW && isSameIconH;
+    }; // $._isSameIconSize
+
+    [
+        "targetOpacity",
+        "iconFolder",
+        "iconFilename",
+        "iconHue",
+        "iconSmooth",
+        "iconXCoor",
+        "iconYCoor",
+        "iconSourceW",
+        "iconSourceH",
+        "iconW",
+        "iconH"
+    ].forEach(function(funcName) {
+        var upperFuncName = funcName[0].toUpperCase() + funcName.slice(1);
+        var note = "discreteOrderSprite" + upperFuncName;
+        /**
+         * Hotspot/Idempotent
+         * @since v0.14a @version v0.14a
+         * @returns {*} The notetag result
+         */
+        $["_" + funcName] = function() {
+            return this._battler.satbNoteResult_(note, { sprite: this });
+        }; // $["_" + funcName]
+    });
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {String} cachedVal - The name of the variable as the cache
+     * @param {String} newVal - The name of the function getting the new value
+     * @returns {Boolean} The check result
+     */
+    $._isSameCachedVal = function(cachedVal, newVal) {
+        var val = this[newVal]();
+        var isSameVal = this[cachedVal] === val;
+        if (!isSameVal) this[cachedVal] = val;
+        return isSameVal;
+    }; // $._isSameCachedVal
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._redrawBitmap = function() {
+        var sw = this._sw, sh = this._sh;
+        var iconXCoor = this._lastIconXCoor, iconYCoor = this._lastIconYCoor;
+        var sx = iconXCoor * sw, sy = iconYCoor * sh;
+        var dw = this.width, dh = this.height;
+        this.bitmap.blt(this._bitmapSource, sx, sy, sw, sh, 0, 0, dw, dh);
+    }; // $._redrawBitmap
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Nonnegative Num} The battler icon x position in order window
+     */
+    $._x = function() {
+        return this._phase === _SATB._PHASE_MOVE ? this._updatedX() : this.x;
+    }; // $._x
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Nonnegative Num} The battler icon x position in order window
+     */
+    $._updatedX = function() {
+        if (this._isFinishUpdateX()) {
+            this._onFinishUpdateX();
+            return this._targetX;
+        }
+        var x = $gameSystem.satbParamFunc("discreteOrderSpriteX").call(this);
+        return Math.round(x);
+    }; // $._updatedX
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isFinishUpdateX = function() {
+        return Math.abs(this._targetX - this.x) <= _SATB._SMALLEST_X_DIFF;
+    }; // _isFinishUpdateX
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._onFinishUpdateX = function() { this._phase = _SATB._PHASE_IDLE; };
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {Nonnegative Num} The battler icon y position in order window
+     */
+    $._y = function() {
+        return this._phase === _SATB._PHASE_MOVE ? this._updatedY() : this.y;
+    }; // $._y
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {Nonnegative Num} The battler icon y position in order window
+     */
+    $._updatedY = function() {
+        var y = $gameSystem.satbParamFunc("discreteOrderSpriteY").call(this);
+        return Math.round(y);
+    }; // $._updatedY
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {String} valName - The name of the icon value to be updated
+     */
+    $._updateVal = function(valName) {
+        var val = this["_" + valName]();
+        if (this[valName] !== val) this[valName] = val;
+    }; // $._updateVal
+
+})(DoubleX_RMMV.SATB); // Sprite_SATBDiscreteOrderBattlerIcon.prototype
 
 /*----------------------------------------------------------------------------
  *    # (v0.05a+)Edit class: Window_Selectable
@@ -10337,7 +10943,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._updateBackOpacity
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @since v0.05b @version v0.05b
      * @param {String} name - The name of the property to be updated
      * @param {*} val - The new value of the property to be updated
@@ -10997,7 +11603,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._updateOpacities
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @since v0.05b @version v0.05b
      * @param {String} name - The name of the property to be updated
      * @param {*} val - The new value of the property to be updated
@@ -11637,8 +12243,8 @@ function Window_SATBTurnClock() { // v0.11a+
 })(); // Window_SATBCTB.prototype
 
 /*----------------------------------------------------------------------------
- *    # (v0.11a+)New class: Window_SATBContinuousOrder
- *      - Shows the battle turn clock statuses
+ *    # (v0.14a+)New class: Window_SATBContinuousOrder
+ *      - Shows all battler ATB values on the same bar in a continuous manner
  *----------------------------------------------------------------------------*/
 
 (function(SATB) {
@@ -11982,7 +12588,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $._isVisible = function() {
         var param = "isShowContinuousOrderWin";
-        return SATBManager.funcParam.call(this._cache, param, "_isShow", this);
+        return SATBManager.funcParam.call(this._cache, param, "isShow", this);
     }; // $._isVisible
 
     /**
@@ -12018,7 +12624,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._updateOpacities
 
     /**
-     * Idempotent
+     * Hotspot/Idempotent
      * @since v0.05b @version v0.05b
      * @param {String} name - The name of the property to be updated
      * @param {*} val - The new value of the property to be updated
@@ -12108,8 +12714,10 @@ function Window_SATBTurnClock() { // v0.11a+
     $._isUpdateBarTexts = function() {
         var phases = _SATB._CACHED_PHASES, isUpdateBarTexts = false;
         // All of them must be run per frame to keep all these caches up to date
-        for (var i = 0, l = phases.length; i < l; i++) {
+        var i = 0, l = phases.length;
+        while (i < l) {
             if (this._isUpdateBarText(phases[i])) isUpdateBarTexts = true;
+            i++;
         }
         //
         return isUpdateBarTexts;
@@ -12237,6 +12845,530 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._spriteXFuncs
 
 })(DoubleX_RMMV.SATB); // Window_SATBContinuousOrder.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.14a+)New class: Window_SATBDiscreteOrder
+ *      - Shows all battler ATB values on the same bar in a discrete manner
+ *----------------------------------------------------------------------------*/
+
+(function(SATB) {
+
+    "use strict";
+
+    var _SATB = SATB.Window_SATBDiscreteOrder = {};
+
+    var $$ = Window_Base.prototype;
+
+    Window_SATBDiscreteOrder.prototype = Object.create($$);
+
+    var $ = Window_SATBDiscreteOrder.prototype;
+
+    $.constructor = Window_SATBDiscreteOrder;
+
+    _SATB._SORT_BATTLER_ORDERS_ASCENDINGLY = function(a, b) {
+        return a.order - b.order;
+    }; // _SATB._SORT_BATTLER_ORDERS_ASCENDINGLY
+
+    _SATB._STRINGIFIED_BATTLER_ORDER = function(mem) {
+        delete mem.order;
+        return JSON.stringify(mem);
+    }; // _STRINGIFIED_BATTLER_ORDER
+
+    _SATB._FUNC_PARAM_CACHES = {
+        standardPadding: "padding",
+        standardBackOpacity: "backOpacity",
+        _winskinPath: "winskinPath",
+        _winskinFile: "winskinFile",
+        _winskinHue: "winskinHue",
+        _winskinSmooth: "winskinSmooth",
+        _x: "winX",
+        _y: "winY",
+        _opacity: "opacity",
+        _w: "winW",
+        _h: "winH"
+    }; // _SATB._FUNC_PARAM_CACHES
+
+    /*------------------------------------------------------------------------
+     *    New private variables
+     *------------------------------------------------------------------------*/
+    // {String} _lastBattlerOrders: The stored battler orders in the last frame
+    // {String} _lastWinskinPath: The last windowskin file path
+    // {String} _lastWinskinFile: The last windowskin file name
+    // {String} _lastWinskinHue: The last windowskin hue
+    // {String} _lastWinskinSmooth: The last windowskin smooth
+    // {{}} _cache: The parameter return result cache
+    //     {Nonnegative Int} padding: The cached padding
+    //     {Opacity} backOpacity: The cached back opacity
+    //     {String} winskinPath: The cached windowskin path
+    //     {String} winskinFile: The cached windowskin name
+    //     {Hue} winskinHue: The cached windowskin hue
+    //     {Boolean} winskinSmooth: The cached windowskin smooth
+    //     {Nonnegative Int} winX: The cached x position
+    //     {Nonnegative Int} winY: The cached y position
+    //     {Opacity} opacity: The cached opacity
+    //     {Natural Num} winW: The cached bar width
+    //     {Natural Num} winH: The cached bar height
+
+    /**
+     * Idempotent
+     * @constructor @since v0.14a @version v0.14a
+     */
+    $.initialize = function() {
+        this._actorSprites = {}, this._enemySprites = {};
+        this._lastBattlerOrders = [];
+        // It must be called first or _isVisible will crash the game
+        this._invalidateCachedParams();
+        //
+        this._updateProp("visible", this._isVisible());
+        var xywh = this._xywh();
+        $$.initialize.call(this, xywh.x, xywh.y, xywh.width, xywh.height);
+        if ($gameSystem.satbParam("_isParamFuncCached")) this.refresh();
+    }; // $.initialize
+
+    /**
+     * Destructor/Idempotent
+     * @interface @since v0.14a @version v0.14a
+     */
+    $.clear = function() {
+        Object.keys(this._actorSprites).forEach(this.removeActorSprite, this);
+        Object.keys(this._enemySprites).forEach(this.removeEnemySprite, this);
+    }; // $.clear
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @override @since v0.14a @version v0.14a
+     */
+    $.loadWindowskin = function() {
+        var path = this._winskinPath(), name = this._winskinFile();
+        var hue = this._winskinHue(), smooth = this._winskinSmooth();
+        this.windowskin = ImageManager.loadBitmap(path, name, hue, smooth);
+    }; // $.loadWindowskin
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @override @since v0.14a @version v0.14a
+     */
+    $.update = function() {
+        if (!SATBManager.areModulesEnabled(["IsOrderEnabled"])) {
+            return this._updateProp("visible", false);
+        }
+        $$.update.call(this);
+        if ($gameSystem.satbParam("_isParamFuncCached")) {
+            return this._updateBattlerOrders();
+        }
+        this._updateWithoutCache();
+    }; // $.update
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @interface @since v0.14a @version v0.14a
+     */
+    $.refresh = function() {
+        if (!$gameSystem.satbParam("_isParamFuncCached")) return;
+        this._refreshWithCache();
+    }; // $.refresh
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Game_Actor} actor - The actor to have the sprite icon added
+     */
+    $.addActorSprite = function(actor) {
+        var actorId = actor.actorId();
+        if (this._actorSprites[actorId]) return;
+        this._actorSprites[actorId] =
+                new Sprite_SATBDiscreteOrderBattlerIcon(actor);
+        this.addChild(this._actorSprites[actorId]);
+    }; // $.addActorSprite
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Game_Enemy} enemy - The enemy to have the sprite icon added
+     */
+    $.addEnemySprite = function(enemy) {
+        var i = enemy.index();
+        if (this._enemySprites[i]) return;
+        this._enemySprites[i] = new Sprite_SATBDiscreteOrderBattlerIcon(enemy);
+        this.addChild(this._enemySprites[i]);
+    }; // $.addEnemySprite
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Id} actorId - The id of the actor to have the sprite icon removed
+     */
+    $.removeActorSprite = function(actorId) {
+        var actorSprite = this._actorSprites[actorId];
+        if (!actorSprite) return;
+        this.removeChild(actorSprite);
+        actorSprite.clear();
+        delete this._actorSprites[actorId];
+    }; // $.removeActorSprite
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Index} i - The index of the enemy to have the sprite icon removed
+     */
+    $.removeEnemySprite = function(i) {
+        var enemySprite = this._enemySprites[i];
+        if (!enemySprite) return;
+        this.removeChild(enemySprite);
+        enemySprite.clear();
+        delete this._enemySprites[i];
+    }; // $.removeEnemySprite
+
+    /**
+     * Idempotent
+     * @interface @since v0.14a @version v0.14a
+     * @param {Game_Enemy} enemy - The enemy to have the sprite icon transformed
+     */
+    $.transformEnemySprite = function(enemy) {
+        var enemySprite = this._enemySprites[enemy.index()];
+        if (enemySprite) enemySprite.setBattler(enemy);
+    }; // $.transformEnemySprite
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {XYWH} The window x and y positions and its width and its height
+     */
+    $._xywh = function() {
+        return {
+            x: this._x(),
+            y: this._y(),
+            width: this._w(),
+            height: this._h()
+        };
+    }; // $._xywh
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._refreshWithCache = function() {
+        this._invalidateCachedParams();
+        this._updateWithoutCache();
+    }; // $._refreshWithCache
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._invalidateCachedParams = function() { this._cache = {}; };
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.04a @version v0.14a
+     */
+    $._updateWithoutCache = function() {
+        this._updateProp("visible", this._isVisible());
+        if (this.visible) this._refreshWhenVisible();
+    }; // $._updateWithoutCache
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.04a @version v0.14a
+     * @returns {Boolean} The check result
+     */
+    $._isVisible = function() {
+        var param = "isShowDiscreteOrderWin";
+        return SATBManager.funcParam.call(this._cache, param, "isShow", this);
+    }; // $._isVisible
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._refreshWhenVisible = function() {
+        this._updateXY();
+        this._updateOpacities();
+        this._updateWinskin();
+        this._updateWH();
+        this._updateBattlerOrders();
+    }; // $._refreshWhenVisible
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.02a @version v0.04a
+     */
+    $._updateXY = function() {
+        this._updateProp("x", this._x());
+        this._updateProp("y", this._y());
+    }; // $._updateXY
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.02a @version v0.14a
+     * @todo Updates the translucent opacity as well
+     */
+    $._updateOpacities = function() {
+        this._updateProp("opacity", this._opacity());
+        this._updateProp("backOpacity", this.standardBackOpacity());
+    }; // $._updateOpacities
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._updateWinskin = function() {
+        if (this._isUpdateWinskin()) this.loadWindowskin();
+    }; // $._updateWinskin
+
+    $._isUpdateWinskin = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isPathChanged =
+                this._isCacheUpdated("_lastWinskinPath", this._winskinPath());
+        var isFileChanged =
+                this._isCacheUpdated("_lastWinskinFile", this._winskinFile());
+        var isHueChanged =
+                this._isCacheUpdated("_lastWinskinHue", this._winskinHue());
+        var isSmoothChanged = this._isCacheUpdated(
+                "_lastWinskinSmooth", this._winskinSmooth());
+        //
+        if (isPathChanged || isFileChanged) return true;
+        return isHueChanged || isSmoothChanged;
+    }; // $._isUpdateWinskin
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @enum @param {String} cache - Name of the variable as the cache to check
+     * @param {*} newVal - The new value of the cache to check
+     * @returns {Boolean} The check result
+     */
+    $._isCacheUpdated = function(cache, newVal) {
+        var isUpdated = this[cache] !== newVal;
+        if (isUpdated) this[cache] = newVal;
+        return isUpdated;
+    }; // $._isCacheUpdated
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._updateWH = function() {
+        this._updateProp("width", this._w());
+        this._updateProp("height", this._h());
+    }; // $._updateWH
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.05b @version v0.05b
+     * @param {String} name - The name of the property to be updated
+     * @param {*} val - The new value of the property to be updated
+     */
+    $._updateProp = function(name, val) {
+        if (this[name] !== val) this[name] = val;
+    }; // $._updateProp
+
+    Object.keys(_SATB._FUNC_PARAM_CACHES).forEach(function(funcName) {
+        var cache = _SATB._FUNC_PARAM_CACHES[funcName];
+        var param = "discreteOrder" + cache[0].toUpperCase() + cache.slice(1);
+        /**
+         * Hotspot/Nullipotent
+         * @since v0.14a @version v0.14a
+         * @returns {*} The parameter function return result
+         */
+        $[funcName] = function() {
+            return SATBManager.funcParam.call(this._cache, param, cache, this);
+        }; // $[funcName]
+    });
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     */
+    $._updateBattlerOrders = function() {
+        var curBattlerOrders = this._curBattlerOrders();
+        this._updateBattlerSprites(curBattlerOrders);
+        this._lastBattlerOrders = curBattlerOrders;
+    }; // $._updateBattlerOrders
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @returns {[String]} - Latest battler order list of battler JSON strings
+     */
+    $._curBattlerOrders = function() {
+        var partyOrders = $gameParty.aliveSATBMems().map(
+                this._actorOrder, this);
+        var troopOrders = $gameTroop.aliveMembers().map(this._enemyOrder, this);
+        partyOrders.fastMerge(troopOrders);
+        partyOrders.sort(_SATB._SORT_BATTLER_ORDERS_ASCENDINGLY);
+        return partyOrders.map(_SATB._STRINGIFIED_BATTLER_ORDER);
+    }; // $._curBattlerOrders
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @param {Game_Actor} actor - The actor to have the order retrieved
+     * @returns {{Number}} - The battler and ordering identifier pairs
+     */
+    $._actorOrder = function(actor) {
+        return { id: actor.actorId(), order: this._battlerOrder(actor) };
+    }; // $._actorOrder
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @param {Game_Enemy} enemy - The enemy to have the order retrieved
+     * @returns {{Number}} - The battler and ordering identifier pairs
+     */
+    $._enemyOrder = function(enemy) {
+        return { i: enemy.index(), order: this._battlerOrder(enemy) };
+    }; // $._enemyOrder
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @param {Game_Battler} battler - The battler to have the order retrieved
+     * @returns {Number} - The ordering of the battler(smaller means lower)
+     */
+    $._battlerOrder = function(battler) {
+        // The ordering must be charge > core > cooldown
+        if (battler.isSATBCooldown()) return -battler.cooldownSATBProportion();
+        if (battler.isSATBFill()) return battler.coreSATBProportion();
+        if (battler.isSATBCharge()) return 1 + battler.chargeSATBProportion();
+        //
+        throw new Error("An alive battler must be charging/cooldown/fill!");
+    }; // $._battlerOrder
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     */
+    $._updateBattlerSprites = function(curBattlerOrders) {
+        this._lastBattlerOrders.forEach(function(order, oldI) {
+            this._updateLastBattlerSprites(curBattlerOrders, order, oldI);
+        }, this);
+        curBattlerOrders.forEach(this._updateCurBattlerSprites, this);
+    }; // $._updateBattlerSprites
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {String} order - The battler order info in the JSON String form
+     * @param {Index} oldI - The old index of the specified battler order info
+     */
+    $._updateLastBattlerSprites = function(curBattlerOrders, order, oldI) {
+        var newI = curBattlerOrders.indexOf(order);
+        if (newI === oldI) return;
+        if (newI < 0) return this._removeBattlerSprite(order);
+        this._updateBattlerSpriteTargetX(curBattlerOrders, newI);
+    }; // $._updateLastBattlerSprites
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {String} order - The battler order info in the JSON String form
+     */
+    $._removeBattlerSprite = function(order) {
+        var obj = JSON.parse(order), id = obj.id;
+        if (id) return this.removeActorSprite(id);
+        var i = obj.i;
+        if (!isNaN(i)) this.removeEnemySprite(i);
+    }; // $._removeBattlerSprite
+
+    /**
+     * Potential Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {Index} newI - The new index of the specified battler order info
+     */
+    $._updateBattlerSpriteTargetX = function(curBattlerOrders, newI) {
+        var battlerSprite_ = this._battlerSprite_(curBattlerOrders[newI]);
+        if (!battlerSprite_) return;
+        battlerSprite_.setTargetX(this._targetX(curBattlerOrders, newI));
+    }; // $._updateBattlerSpriteTargetX
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {String} order - The battler order info in the JSON String form
+     * @param {Index} newI - The new index of the specified battler order info
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     */
+    $._updateCurBattlerSprites = function(order, newI, curBattlerOrders) {
+        if (this._lastBattlerOrders.contains(order)) return;
+        this._addBattlerSprite(curBattlerOrders, newI);
+    }; // $._updateCurBattlerSprites
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {Index} newI - The new index of the specified battler order info
+     */
+    $._addBattlerSprite = function(curBattlerOrders, newI) {
+        var obj = JSON.parse(curBattlerOrders[newI]), id = obj.id;
+        if (id) return this._addActorSprite(curBattlerOrders, id, newI);
+        var i = obj.i;
+        // 0 is falsy but is still a valid index so isNaN should be used instead
+        if (!isNaN(i)) this._addEnemySprite(curBattlerOrders, i, newI);
+        //
+    }; // $._addBattlerSprite
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {Id} id - The id of the actor to have the sprite icon added
+     * @param {Index} newI - The new index of the specified battler order info
+     */
+    $._addActorSprite = function(curBattlerOrders, id, newI) {
+        this.addActorSprite($gameActors.actor(id));
+        var targetX = this._targetX(curBattlerOrders, newI);
+        this._actorSprites[id].setTargetX(targetX);
+    }; // $._addActorSprite
+
+    /**
+     * Idempotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {Index} i - The index of the enemy to have the sprite icon added
+     * @param {Index} newI - The new index of the specified battler order info
+     */
+    $._addEnemySprite = function(curBattlerOrders, i, newI) {
+        this.addEnemySprite($gameTroop.aliveMembers()[i]);
+        this._enemySprites[i].setTargetX(this._targetX(curBattlerOrders, newI));
+    }; // $._addEnemySprite
+
+    /**
+     * Potential Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @param {[String]} curBattlerOrders - The latest battler order list
+     * @param {Index} newI - The new index of the specified battler order info
+     */
+    $._targetX = function(curBattlerOrders, newI) {
+        var targetX = this.standardPadding(), i = 0;
+        while (i < newI) {
+            var battlerSprite_ = this._battlerSprite_(curBattlerOrders[i]);
+            // It's too hard to take changed icon width later into account
+            if (battlerSprite_) targetX += battlerSprite_.width;
+            //
+            i++;
+        }
+        return targetX;
+    }; // $._targetX
+
+    /**
+     * Potential Hotspot/Nullipotent
+     * @since v0.14a @version v0.14a
+     * @param {String} order - The battler order info in the JSON String form
+     * @returns {Sprite_SATBDiscreteOrderBattlerIcon?} The battler sprite icon
+     */
+    $._battlerSprite_ = function(order) {
+        var obj = JSON.parse(order), id = obj.id;
+        if (id) return this._actorSprites[id];
+        var i = obj.i;
+        if (!isNaN(i)) return this._enemySprites[i];
+    }; // $._battlerSprite_
+
+})(DoubleX_RMMV.SATB); // Window_SATBDiscreteOrder.prototype
 
 /*----------------------------------------------------------------------------
  *    # (v0.11a+)New class: Window_SATBTurnClock
@@ -12759,8 +13891,8 @@ function Window_SATBTurnClock() { // v0.11a+
         _SATB._createForceWins.call(this);
         _SATB._createWin.call(
                 this, "continuousOrderWin", Window_SATBContinuousOrder);
-        //_SATB._createWin.call(
-        //        this, "discreteOrderWin", Window_SATBDiscreteOrder);
+        _SATB._createWin.call(
+                this, "discreteOrderWin", Window_SATBDiscreteOrder);
         _SATB._createWin.call(this, "turnClockWin", Window_SATBTurnClock);
     }; // _SATB._createAllWins
 

@@ -2413,7 +2413,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type note
  * @desc Sets if the continuous order window will be shown
  * It'll be the contents of a function returning a Boolean
- * @default "return true;"
+ * @default "return !SATBManager.areModulesEnabled(['IsCTBEnabled']);"
  *
  * @param continuousOrderWinX
  * @parent IsOrderEnabled
@@ -2749,7 +2749,7 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @type note
  * @desc Sets the opacity of the continuous order battler sprite
  * It'll be the contents of a function returning an Integer
- * @default "return 255;"
+ * @default "return this.canMakeSATBCmds() ? 255 : 160;"
  *
  * @param continuousOrderSpriteIconFolder
  * @parent IsOrderEnabled
@@ -2827,6 +2827,195 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  * @desc Sets icon y position of continuous order battler sprite
  * It'll be the contents of a function returning an Integer
  * @default "return this.isActor() ? 48 : 8;"
+ *
+ * @param isShowDiscreteOrderWin
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets if the continuous order window will be shown
+ * It'll be the contents of a function returning a Boolean
+ * @default "return SATBManager.areModulesEnabled(['IsCTBEnabled']);"
+ *
+ * @param discreteOrderWinX
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the x position of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return 320;"
+ *
+ * @param discreteOrderWinY
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the y position of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return 0;"
+ *
+ * @param discreteOrderOpacity
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the opacity of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return 255;"
+ *
+ * @param discreteOrderWinW
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the width of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return Graphics.width - 320;"
+ *
+ * @param discreteOrderWinH
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the height of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return 80;"
+ *
+ * @param discreteOrderPadding
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the padding of the discrete order window
+ * It'll be the contents of a function returning an Integer
+ * @default "return 8;"
+ *
+ * @param discreteOrderBackOpacity
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the back opacity of the discrete order window
+ * It'll be the contents of a function returning an Opacity
+ * @default "return 192;"
+ *
+ * @param discreteOrderWinskinPath
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the windowskin file path of the discrete order window
+ * It'll be the contents of a function returning a String
+ * @default "return 'img/system/';"
+ *
+ * @param discreteOrderWinskinFile
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the windowskin file name of the discrete order window
+ * It'll be the contents of a function returning a String
+ * @default "return 'Window';"
+ *
+ * @param discreteOrderWinskinHue
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the windowskin hue of the discrete order window
+ * It'll be the contents of a function returning a Hue
+ * @default "return 0;"
+ *
+ * @param discreteOrderWinskinSmooth
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the windowskin smooth of discrete order window
+ * It'll be the contents of a function returning a Boolean
+ * @default "return false;"
+ *
+ * @param showingDiscreteOrderBattlerSpriteOpacity
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the opacity of a showing discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "var target = this.targetOpacity;\nreturn Math.min(target, this.opacity + target / 60.0);"
+ *
+ * @param hidingDiscreteOrderBattlerSpriteOpacity
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the opacity of a hiding discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return Math.max(0, this.opacity - this.targetOpacity / 60.0);"
+ *
+ * @param discreteOrderSpriteX
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon x position of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "var cur = this.x, target = this._targetX;\nvar rate = (target - this._lastTargetX) / 60.0;\nif (cur < target) return Math.min(target, cur + rate);\nif (cur > target)return Math.max(target, cur + rate);\nreturn cur;"
+ *
+ * @param discreteOrderSpriteY
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon y position of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "var baseY = 16, cur = this.x;\nvar last = this._lastTargetX, target = this._targetX;\nvar curDiff = this.x - last;\nif (curDiff === 0) return baseY;\nvar targetDiffSq = Math.pow(this._targetX - last, 2);\nvar absY = 50 * curDiff * (target - cur) / targetDiffSq;\nreturn baseY + (curDiff > 0 ? -1 : 1) * absY;"
+ *
+ * @param discreteOrderSpriteTargetOpacity
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the opacity of the discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return this.canMakeSATBCmds() ? 255 : 160;"
+ *
+ * @param discreteOrderSpriteIconFolder
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the icon folder of the discrete order battler sprite
+ * It'll be the contents of a function returning a String
+ * @default "return 'img/characters/';"
+ *
+ * @param discreteOrderSpriteIconFilename
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon filename of the discrete order battler sprite
+ * It'll be the contents of a function returning a String
+ * @default "return '';"
+ *
+ * @param discreteOrderSpriteIconHue
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the hue of the discrete order battler sprite
+ * It'll be the contents of a function returning a Hue
+ * @default "return 0;"
+ *
+ * @param discreteOrderSpriteIconSmooth
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets the smooth of the discrete order battler sprite
+ * It'll be the contents of a function returning a Boolean
+ * @default "return false;"
+ *
+ * @param discreteOrderSpriteIconXCoor
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon x coordinate of discrete order battler sprite
+ * It'll be the contents of a function returning an Object
+ * @default "return 0;"
+ *
+ * @param discreteOrderSpriteIconYCoor
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon y coordinate of discrete order battler sprite
+ * It'll be the contents of a function returning an Object
+ * @default "return 0;"
+ *
+ * @param discreteOrderSpriteIconSourceW
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon source width of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return 48;"
+ *
+ * @param discreteOrderSpriteIconSourceH
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon source height of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return 48;"
+ *
+ * @param discreteOrderSpriteIconW
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon width of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return 24;"
+ *
+ * @param discreteOrderSpriteIconH
+ * @parent IsOrderEnabled
+ * @type note
+ * @desc Sets icon height of discrete order battler sprite
+ * It'll be the contents of a function returning an Integer
+ * @default "return 24;"
  *
  * @param IsRateEnabled
  * @type note
@@ -4513,53 +4702,32 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *      54. continuousOrderSpriteIconSmooth
  *          You'll likely have to experimenet this yourselves to find values
  *          that suit your needs
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      55. continuousOrderSpriteIconXCoor
  *          If it returns x, it means the icon with column x + 1 in the icon
  *          sheet will be chosen
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      56. continuousOrderSpriteIconYCoor
  *          If it returns y, it means the icon with row y + 1 in the icon
  *          sheet will be chosen
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      57. continuousOrderSpriteIconSourceW
  *          It's the width of an icon in the specified icon sheet
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      58. continuousOrderSpriteIconSourceH
  *          It's the height of an icon in the specified icon sheet
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      59. continuousOrderSpriteIconW
  *          It's the width of an icon drawn on the continuous order window
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      60. continuousOrderSpriteIconH
  *          It's the height of an icon drawn on the continuous order window
- *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
- *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
- *          SMALL UNLESS _isParamFuncCached IS ON
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      61. continuousOrderSpriteY
@@ -4569,9 +4737,117 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *          continuous order window
  *          You'll likely have to experimenet this yourselves to find values
  *          that suit your needs
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      62. isShowDiscreteOrderWin
  *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
  *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
  *          SMALL UNLESS _isParamFuncCached IS ON
+ *          DON'T RETURN A TRUTHY RESULT WITHOUT THE CTB MODULE ENABLED UNLESS
+ *          YOU REALLY KNOW WHAT YOU'RE TRULY DOING
+ *          (Advanced)The context of the function used by this parameter is
+ *          the discrete order window involved
+ *          (Window_SATBDiscreteOrder.prototype)
+ *      63. discreteOrderWinX
+ *          The smaller the value, the more left the window position wil be
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *          SMALL UNLESS _isParamFuncCached IS ON
+ *          (Advanced)The context of the function used by this parameter is
+ *          the discrete order window involved
+ *          (Window_SATBDiscreteOrder.prototype)
+ *      64. discreteOrderWinY
+ *          The smaller the value, the upper the window position wil be
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *          SMALL UNLESS _isParamFuncCached IS ON
+ *          (Advanced)The context of the function used by this parameter is
+ *          the discrete order window involved
+ *          (Window_SATBDiscreteOrder.prototype)
+ *      65. discreteOrderOpacity
+ *      66. discreteOrderWinW
+ *      67. discreteOrderWinH
+ *      68. discreteOrderPadding
+ *      69. discreteOrderBackOpacity
+ *      70. discreteOrderWinskinPath
+ *      71. discreteOrderWinskinFile
+ *      72. discreteOrderWinskinHue
+ *      73. discreteOrderWinskinSmooth
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *          SMALL UNLESS _isParamFuncCached IS ON
+ *          (Advanced)The context of the function used by this parameter is
+ *          the discrete order window involved
+ *          (Window_SATBDiscreteOrder.prototype)
+ *      74. showingDiscreteOrderBattlerSpriteOpacity
+ *      75. hidingDiscreteOrderBattlerSpriteOpacity
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      76. discreteOrderSpriteX
+ *          The x position's relative to the discrete order window x
+ *          position
+ *          The smaller the value, the upper the battler sprite will be in the
+ *          discrete order window
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *          SMALL UNLESS _isParamFuncCached IS ON
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      77. discreteOrderSpriteY
+ *          The y position's relative to the discrete order window y
+ *          position
+ *          The smaller the value, the upper the battler sprite will be in the
+ *          discrete order window
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
+ *          BE RUN PER FRAME SO THIS PARAMETER SHOULD BE EASY, SIMPLE AND
+ *          SMALL UNLESS _isParamFuncCached IS ON
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      78. discreteOrderSpriteTargetOpacity
+ *      79. discreteOrderSpriteIconFolder
+ *      80. discreteOrderSpriteIconFilename
+ *      81. discreteOrderSpriteIconHue
+ *      82. discreteOrderSpriteIconSmooth
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      83. discreteOrderSpriteIconXCoor
+ *          If it returns x, it means the icon with column x + 1 in the icon
+ *          sheet will be chosen
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      84. discreteOrderSpriteIconYCoor
+ *          If it returns y, it means the icon with row y + 1 in the icon
+ *          sheet will be chosen
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      85. discreteOrderSpriteIconSourceW
+ *          It's the width of an icon in the specified icon sheet
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      86. discreteOrderSpriteIconSourceH
+ *          It's the height of an icon in the specified icon sheet
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      87. discreteOrderSpriteIconW
+ *          It's the width of an icon drawn on the discrete order window
+ *          (Advanced)The context of the function used by this parameter is the
+ *          battler involved(Game_Battler.prototype)
+ *      88. discreteOrderSpriteIconH
+ *          It's the height of an icon drawn on the discrete order window
  *          (Advanced)The context of the function used by this parameter is the
  *          battler involved(Game_Battler.prototype)
  *      (v0.10a+)Rate Module
@@ -4986,6 +5262,35 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *      60. continuousOrderSpriteIconH
  *      61. continuousOrderSpriteY
  *          continuousOrderSprite - The continuous order battler sprite icon
+ *      62. isShowDiscreteOrderWin
+ *      63. discreteOrderWinX
+ *      64. discreteOrderWinY
+ *      65. discreteOrderOpacity
+ *      66. discreteOrderWinW
+ *      67. discreteOrderWinH
+ *      68. discreteOrderPadding
+ *      69. discreteOrderBackOpacity
+ *      70. discreteOrderWinskinPath
+ *      71. discreteOrderWinskinFile
+ *      72. discreteOrderWinskinHue
+ *      73. discreteOrderWinskinSmooth
+ *          None
+ *      74. showingDiscreteOrderBattlerSpriteOpacity
+ *      75. hidingDiscreteOrderBattlerSpriteOpacity
+ *      76. discreteOrderSpriteX
+ *      77. discreteOrderSpriteY
+ *      78. discreteOrderSpriteTargetOpacity
+ *      79. discreteOrderSpriteIconFolder
+ *      80. discreteOrderSpriteIconFilename
+ *      81. discreteOrderSpriteIconHue
+ *      82. discreteOrderSpriteIconSmooth
+ *      83. discreteOrderSpriteIconXCoor
+ *      84. discreteOrderSpriteIconYCoor
+ *      85. discreteOrderSpriteIconSourceW
+ *      86. discreteOrderSpriteIconSourceH
+ *      87. discreteOrderSpriteIconW
+ *      88. discreteOrderSpriteIconH
+ *          discreteOrderSprite - The discrete order battler sprite icon
  *      (v0.10a+)Start Module
  *      1. IsRateEnabled
  *      2. coreATBRate
@@ -5490,6 +5795,53 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *          Any valid Javascript returning a Natural Number
  *      61. continuousOrderSpriteY
  *          Any valid Javascript returning a non-negative Integer
+ *      62. isShowDiscreteOrderWin
+ *          Any valid Javascript(It'll always be regarded as truthy/falsy)
+ *      63. discreteOrderWinX
+ *      64. discreteOrderWinY
+ *          Any valid Javascript returning a non-negative Integer
+ *      65. discreteOrderOpacity
+ *          Any valid Javascript returning an Integer ranging from 0 to 255
+ *          inclusive
+ *      66. discreteOrderWinW
+ *      67. discreteOrderWinH
+ *      68. discreteOrderPadding
+ *          Any valid Javascript returning a Natural Number
+ *      69. discreteOrderBackOpacity
+ *          Any valid Javascript returning an Integer ranging from 0 to 255
+ *          inclusive
+ *      70. discreteOrderWinskinPath
+ *      71. discreteOrderWinskinFile
+ *          Any valid Javascript returning a String
+ *      72. discreteOrderWinskinHue
+ *          Any valid Javascript returning an Integer ranging from 0 to 360
+ *      73. discreteOrderWinskinSmooth
+ *          Any valid Javascript(It'll always be regarded as truthy/falsy)
+ *      74. showingDiscreteOrderBattlerSpriteOpacity
+ *      75. hidingDiscreteOrderBattlerSpriteOpacity
+ *          Any valid Javascript returning an Integer ranging from 0 to 255
+ *          inclusive
+ *      76. discreteOrderSpriteX
+ *      77. discreteOrderSpriteY
+ *          Any valid Javascript returning a non-negative Integer
+ *      78. discreteOrderSpriteTargetOpacity
+ *          Any valid Javascript returning an Integer ranging from 0 to 255
+ *          inclusive
+ *      79. discreteOrderSpriteIconFolder
+ *      80. discreteOrderSpriteIconFilename
+ *          Any valid Javascript returning a String
+ *      81. discreteOrderSpriteIconHue
+ *          Any valid Javascript returning an Integer ranging from 0 to 360
+ *      82. discreteOrderSpriteIconSmooth
+ *          Any valid Javascript(It'll always be regarded as truthy/falsy)
+ *      83. discreteOrderSpriteIconXCoor
+ *      84. discreteOrderSpriteIconYCoor
+ *          Any valid Javascript returning a non-negative Integer
+ *      85. discreteOrderSpriteIconSourceW
+ *      86. discreteOrderSpriteIconSourceH
+ *      87. discreteOrderSpriteIconW
+ *      88. discreteOrderSpriteIconH
+ *          Any valid Javascript returning a Natural Number
  *      (v0.10a+)Rate Module
  *      1. IsRateEnabled
  *         Any valid Javascript(It'll always be regarded as truthy/falsy)
@@ -6067,8 +6419,10 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *         Setting IsOrderEnabled as return false; will disable the
  *         Order Module
  *      2. isShowContinuousOrderWin
- *         Setting isShowContinuousOrderWin as return true; will always show
- *         the continuous order window when the Order Module's enabled
+ *         Setting isShowContinuousOrderWin as
+ *         return !SATBManager.areModulesEnabled(['IsCTBEnabled']);
+ *         will show the continuous order window when the Order Module's
+ *         enabled but the CTB Module's disabled
  *      3. continuousOrderWinX
  *      4. continuousOrderWinY
  *      5. continuousOrderOpacity
@@ -6185,6 +6539,8 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *          set the continuous order charge bar text to be aligned to the
  *          center
  *      50. continuousOrderSpriteOpacity
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
  *      51. continuousOrderSpriteIconFolder
  *          Setting continuousOrderSpriteIconFolder as
  *          return 'img/characters/';
@@ -6205,6 +6561,59 @@ DoubleX_RMMV.Superlative_ATB_Parameters_File =
  *      59. continuousOrderSpriteIconW
  *      60. continuousOrderSpriteIconH
  *      61. continuousOrderSpriteY
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *      62. isShowDiscreteOrderWin
+ *          Setting isShowContinuousOrderWin as
+ *          return SATBManager.areModulesEnabled(['IsCTBEnabled']);
+ *          will show the discrete order window when the Order Module's
+ *          enabled but the CTB Module's enabled
+ *      63. discreteOrderWinX
+ *      64. discreteOrderWinY
+ *      65. discreteOrderOpacity
+ *      66. discreteOrderWinW
+ *      67. discreteOrderWinH
+ *      68. discreteOrderPadding
+ *      69. discreteOrderBackOpacity
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *      70. discreteOrderWinskinPath
+ *          Setting discreteOrderWinskinPath as return 'img/system/'; will
+ *          use the windowskin file in the system image folder
+ *      71. discreteOrderWinskinFile
+ *          Setting discreteOrderWinskinFile as return 'Window'; will use
+ *          the windowskin file named Window
+ *      72. discreteOrderWinskinHue
+ *          Setting discreteOrderWinskinHue as return 0; will set the
+ *          discrete order windowskin to have no hue adjustments
+ *      73. discreteOrderWinskinSmooth
+ *          Setting discreteOrderWinskinSmooth as return true; will set the
+ *          discrete order windowskin to have its smooth enabled
+ *      74. showingDiscreteOrderBattlerSpriteOpacity
+ *      75. hidingDiscreteOrderBattlerSpriteOpacity
+ *      76. discreteOrderSpriteX
+ *      77. discreteOrderSpriteY
+ *      78. discreteOrderSpriteTargetOpacity
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *      79. discreteOrderSpriteIconFolder
+ *          Setting discreteOrderSpriteIconFolder as return 'img/characters/';
+ *          will use the icon sheet file in the character image folder
+ *      80. discreteOrderSpriteIconFilename
+ *          Setting discreteOrderSpriteIconFilename as return 'Actor1'; will
+ *          use the icon sheet named Actor1
+ *      81. discreteOrderSpriteIconHue
+ *          Setting discreteOrderSpriteIconHue as return 0; will set the
+ *          discrete order battler sprite to have no hue adjustments
+ *      82. discreteOrderSpriteIconSmooth
+ *          Setting discreteOrderSpriteIconSmooth as return true; will set
+ *          the discrete order battler sprite to have its smooth enabled
+ *      83. discreteOrderSpriteIconXCoor
+ *      84. discreteOrderSpriteIconYCoor
+ *      85. discreteOrderSpriteIconSourceW
+ *      86. discreteOrderSpriteIconSourceH
+ *      87. discreteOrderSpriteIconW
+ *      88. discreteOrderSpriteIconH
  *          You'll likely have to experimenet this yourselves to find values
  *          that suit your needs
  *      (v0.10a+)Rate Module

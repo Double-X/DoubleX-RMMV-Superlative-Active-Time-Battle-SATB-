@@ -155,7 +155,6 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 atbBarWinskinFile: "checkString", // v0.14a+
                 atbBarWinskinHue: "checkHue", // v0.14a+
                 atbBarWinskinSmooth: "checkBool", // v0.14a+
-                atbBarTextColor: "checkColor", // v0.14a+
                 atbBarTextAlign: "checkTextAlign", // v0.14a+
                 atbBarTextXOffset: "checkInt",
                 atbBarTextYOffset: "checkInt",
@@ -182,7 +181,6 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 statusATBBarWinskinFile: "checkString", // v0.14a+
                 statusATBBarWinskinHue: "checkHue", // v0.14a+
                 statusATBBarWinskinSmooth: "checkBool", // v0.14a+
-                statusATBBarTextColor: "checkColor", // v0.14a+
                 statusATBBarTextAlign: "checkTextAlign", // v0.14a+
                 statusATBBarTextXOffset: "checkInt",
                 statusATBBarTextYOffset: "checkInt",
@@ -444,6 +442,33 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 continuousOrderSpriteIconW: "checkNaturalNum",
                 continuousOrderSpriteIconH: "checkNaturalNum",
                 continuousOrderSpriteY: "checkNonnegativeInt",
+                isShowDiscreteOrderWin: "checkBool",
+                discreteOrderWinX: "checkNonnegativeInt",
+                discreteOrderWinY: "checkNonnegativeInt",
+                discreteOrderOpacity: "checkOpacity",
+                discreteOrderWinW: "checkNaturalNum",
+                discreteOrderWinH: "checkNaturalNum",
+                discreteOrderPadding: "checkNonnegativeInt",
+                discreteOrderBackOpacity: "checkOpacity",
+                discreteOrderWinskinPath: "checkString",
+                discreteOrderWinskinFile: "checkString",
+                discreteOrderWinskinHue: "checkHue",
+                discreteOrderWinskinSmooth: "checkBool",
+                showingDiscreteOrderBattlerSpriteOpacity: "checkOpacity",
+                hidingDiscreteOrderBattlerSpriteOpacity: "checkOpacity",
+                discreteOrderSpriteX: "checkNonnegativeInt",
+                discreteOrderSpriteY: "checkNonnegativeInt",
+                discreteOrderSpriteTargetOpacity: "checkOpacity",
+                discreteOrderSpriteIconFolder: "checkString",
+                discreteOrderSpriteIconFilename: "checkString",
+                discreteOrderSpriteIconHue: "checkHue",
+                discreteOrderSpriteIconSmooth: "checkBool",
+                discreteOrderSpriteIconXCoor: "checkNonnegativeInt",
+                discreteOrderSpriteIconYCoor: "checkNonnegativeInt",
+                discreteOrderSpriteIconSourceW: "checkNaturalNum",
+                discreteOrderSpriteIconSourceH: "checkNaturalNum",
+                discreteOrderSpriteIconW: "checkNaturalNum",
+                discreteOrderSpriteIconH: "checkNaturalNum"
             },
             rate: { // v0.10a+
                 IsRateEnabled: "checkBool",
@@ -582,6 +607,17 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             continuousOrderSpriteIconW: "checkNaturalNum",
             continuousOrderSpriteIconH: "checkNaturalNum",
             continuousOrderSpriteY: "checkNonnegativeInt",
+            discreteOrderSpriteTargetOpacity: "checkOpacity",
+            discreteOrderSpriteIconFolder: "checkString",
+            discreteOrderSpriteIconFilename: "checkString",
+            discreteOrderSpriteIconHue: "checkHue",
+            discreteOrderSpriteIconSmooth: "checkBool",
+            discreteOrderSpriteIconXCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconYCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconSourceW: "checkNaturalNum",
+            discreteOrderSpriteIconSourceH: "checkNaturalNum",
+            discreteOrderSpriteIconW: "checkNaturalNum",
+            discreteOrderSpriteIconH: "checkNaturalNum",
             //
             // (v0.10a+)Rate Module
             coreATBRate: "checkNum",
@@ -630,6 +666,17 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             continuousOrderSpriteIconW: "checkNaturalNum",
             continuousOrderSpriteIconH: "checkNaturalNum",
             continuousOrderSpriteY: "checkNonnegativeInt",
+            discreteOrderSpriteTargetOpacity: "checkOpacity",
+            discreteOrderSpriteIconFolder: "checkString",
+            discreteOrderSpriteIconFilename: "checkString",
+            discreteOrderSpriteIconHue: "checkHue",
+            discreteOrderSpriteIconSmooth: "checkBool",
+            discreteOrderSpriteIconXCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconYCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconSourceW: "checkNaturalNum",
+            discreteOrderSpriteIconSourceH: "checkNaturalNum",
+            discreteOrderSpriteIconW: "checkNaturalNum",
+            discreteOrderSpriteIconH: "checkNaturalNum",
             //
             // (v0.10a+)Rate Module
             coreATBRate: "checkNum",
@@ -675,6 +722,17 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             continuousOrderSpriteIconW: "checkNaturalNum",
             continuousOrderSpriteIconH: "checkNaturalNum",
             continuousOrderSpriteY: "checkNonnegativeInt",
+            discreteOrderSpriteTargetOpacity: "checkOpacity",
+            discreteOrderSpriteIconFolder: "checkString",
+            discreteOrderSpriteIconFilename: "checkString",
+            discreteOrderSpriteIconHue: "checkHue",
+            discreteOrderSpriteIconSmooth: "checkBool",
+            discreteOrderSpriteIconXCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconYCoor: "checkNonnegativeInt",
+            discreteOrderSpriteIconSourceW: "checkNaturalNum",
+            discreteOrderSpriteIconSourceH: "checkNaturalNum",
+            discreteOrderSpriteIconW: "checkNaturalNum",
+            discreteOrderSpriteIconH: "checkNaturalNum",
             //
             // (v0.10a+)Rate Module
             coreATBRate: "checkNum",
@@ -742,6 +800,17 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             continuousOrderSpriteIconW: "checkChainDefaultRule",
             continuousOrderSpriteIconH: "checkChainDefaultRule",
             continuousOrderSpriteY: "checkChainDefaultRule",
+            discreteOrderSpriteTargetOpacity: "checkChainDefaultRule",
+            discreteOrderSpriteIconFolder: "checkChainDefaultRule",
+            discreteOrderSpriteIconFilename: "checkChainDefaultRule",
+            discreteOrderSpriteIconHue: "checkChainDefaultRule",
+            discreteOrderSpriteIconSmooth: "checkChainDefaultRule",
+            discreteOrderSpriteIconXCoor: "checkChainDefaultRule",
+            discreteOrderSpriteIconYCoor: "checkChainDefaultRule",
+            discreteOrderSpriteIconSourceW: "checkChainDefaultRule",
+            discreteOrderSpriteIconSourceH: "checkChainDefaultRule",
+            discreteOrderSpriteIconW: "checkChainDefaultRule",
+            discreteOrderSpriteIconH: "checkChainDefaultRule",
             //
             // (v0.10a+)Rate Module
             coreATBRate: "checkChainNumRule",
@@ -803,6 +872,39 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             continuousOrderSpriteY: { // Order Module
                 sprite: "checkContinuousOrderSprite"
             }, // continuousOrderSpriteY
+            discreteOrderSpriteTargetOpacity: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteTargetOpacity
+            discreteOrderSpriteIconFolder: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconFolder
+            discreteOrderSpriteIconFilename: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconFilename
+            discreteOrderSpriteIconHue: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconHue
+            discreteOrderSpriteIconSmooth: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconSmooth
+            discreteOrderSpriteIconXCoor: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconXCoor
+            discreteOrderSpriteIconYCoor: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconYCoor
+            discreteOrderSpriteIconSourceW: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconSourceW
+            discreteOrderSpriteIconSourceH: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconSourceH
+            discreteOrderSpriteIconW: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconW
+            discreteOrderSpriteIconH: { // Order Module
+                sprite: "checkDiscreteOrderSprite"
+            }, // discreteOrderSpriteIconH
             resetATBVal: { latestResetATBVal: "checkNum" } // Reset Module
             //
         }
@@ -1148,6 +1250,18 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         checkDataType: function(val, param, context_) {
             SATBUT.checkFuncs.checkVal(val, param, SATBUT.DATA_TYPES, context_);
         }, // checkDataType
+
+        /**
+         * Hotspot/No-op
+         * @since v0.14a @version v0.14a
+         * @param {*} val - The actual parameter value
+         * @param {String} param - The parameter being tested
+         * @param {{*}?} context_ - The context of the failed test
+         */
+        checkDiscreteOrderSprite: function(val, param, context_) {
+            SATBUT.checkFuncs.checkObjType(val, param, 
+                    Sprite_SATBDiscreteOrderBattlerIcon, context_);
+        }, // checkDiscreteOrderSprite
 
         /**
          * Hotspot/No-op
@@ -5234,7 +5348,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
 
     _SSATBCOBI.setBattler = $.setBattler;
     _UT.setBattler = $.setBattler = function(battler_) {
-    // v0.03a - v0.05b; Extended
+    // v0.14a - v0.14a; Extended
         _SSATBCOBI.setBattler.apply(this, arguments);
         // Added to test the argument of this public api
         if (battler_) SATBUT.checkFuncs.checkObjType(
@@ -5244,6 +5358,93 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
 
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
 // Sprite_SATBContinuousOrderBattlerIcon
+
+/*----------------------------------------------------------------------------
+ *    # (v0.04a+)New class: Sprite_SATBDiscreteOrderBattlerIcon
+ *      - Tests Sprite_SATBDiscreteOrderBattlerIcon precond, postcond,invar
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var SSATBDOBI = SATBUT.Sprite_SATBDiscreteOrderBattlerIcon = {
+        orig: {},
+        new: {}
+    };
+    var $ = Sprite_SATBDiscreteOrderBattlerIcon.prototype;
+    var _SSATBDOBI = SSATBDOBI.orig, _UT = SSATBDOBI.new;
+
+    _SSATBDOBI.initialize = $.initialize;
+    _UT.initialize = $.initialize = function(battler) {
+    // v0.14a - v0.14a; Extended
+        _SSATBDOBI.initialize.apply(this, arguments);
+        // Added to test the argument of this constructor
+        SATBUT.checkFuncs.checkObjType(
+                battler, "_SSATBDOBI.initialize battler", Game_Battler);
+        //
+    }; // $.initialize
+
+    _SSATBDOBI.setBattler = $.setBattler;
+    _UT.setBattler = $.setBattler = function(battler_) {
+    // v0.14a - v0.14a; Extended
+        _SSATBDOBI.setBattler.apply(this, arguments);
+        // Added to test the argument of this public api
+        if (battler_) SATBUT.checkFuncs.checkObjType(
+                battler_, "_SSATBDOBI.initialize battler", Game_Battler);
+        //
+    }; // $.setBattler
+
+    _SSATBDOBI._initOpacity = $._initOpacity;
+    _UT._initOpacity = $._initOpacity = function() {
+    // v0.14a - v0.14a; Extended
+        var initOpacity = _SSATBDOBI._initOpacity.apply(this, arguments);
+        // Added to check the return result on the call site directly
+        var param = "showingDiscreteOrderBattlerSpriteOpacity";
+        SATBUT.checkFuncs[SATBUT.unitTests.params.order[param]](
+                initOpacity, "_SSATBDOBI._initOpacity initOpacity");
+        //
+        return initOpacity;
+    }; // $._initOpacity
+
+    _SSATBDOBI._clearOpacity = $._clearOpacity;
+    _UT._clearOpacity = $._clearOpacity = function() {
+    // v0.14a - v0.14a; Extended
+        var clearOpacity = _SSATBDOBI._clearOpacity.apply(this, arguments);
+        // Added to check the return result on the call site directly
+        var param = "hidingDiscreteOrderBattlerSpriteOpacity";
+        SATBUT.checkFuncs[SATBUT.unitTests.params.order[param]](
+                clearOpacity, "_SSATBDOBI._clearOpacity clearOpacity");
+        //
+        return clearOpacity;
+    }; // $._clearOpacity
+
+    _SSATBDOBI._updatedX = $._updatedX;
+    _UT._updatedX = $._updatedX = function() {
+    // v0.14a - v0.14a; Extended
+        var updatedX = _SSATBDOBI._updatedX.apply(this, arguments);
+        // Added to check the return result on the call site directly
+        var param = "discreteOrderSpriteX";
+        SATBUT.checkFuncs[SATBUT.unitTests.params.order[param]](
+                updatedX, "_SSATBDOBI._updatedX updatedX");
+        //
+        return updatedX;
+    }; // $._updatedX
+
+    _SSATBDOBI._updatedY = $._updatedY;
+    _UT._updatedY = $._updatedY = function() {
+    // v0.14a - v0.14a; Extended
+        var updatedY = _SSATBDOBI._updatedY.apply(this, arguments);
+        // Added to check the return result on the call site directly
+        var param = "discreteOrderSpriteY";
+        SATBUT.checkFuncs[SATBUT.unitTests.params.order[param]](
+                updatedY, "_SSATBDOBI._updatedY updatedY");
+        //
+        return updatedY;
+    }; // $._updatedY
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+// Sprite_SATBDiscreteOrderBattlerIcon
 
 /*----------------------------------------------------------------------------
  *    # (v0.04a+)New class: Window_Selectable
@@ -5616,6 +5817,98 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
 
 })(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
 // Window_SATBContinuousOrder
+
+/*----------------------------------------------------------------------------
+ *    # (v0.14a+)New class: Window_SATBDiscreteOrder
+ *      - Tests Window_SATBDiscreteOrder preconds, postconds and invariants
+ *----------------------------------------------------------------------------*/
+
+(function(SATB, SATBUT) {
+
+    "use strict";
+
+    var WSATBDO = SATBUT.Window_SATBDiscreteOrder = { orig: {}, new: {} };
+    var $ = Window_SATBDiscreteOrder.prototype;
+    var _WSATBDO = WSATBDO.orig, _UT = WSATBDO.new;
+
+    _WSATBDO.addActorSprite = $.addActorSprite;
+    _UT.addActorSprite = $.addActorSprite = function(actor) {
+    // v0.14a - v0.14a; Extended
+        _WSATBDO.addActorSprite.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkObjType(
+                actor, "_WSATBDO.addActorSprite actor", Game_Actor);
+        //
+    }; // $.addActorSprite
+
+    _WSATBDO.addEnemySprite = $.addEnemySprite;
+    _UT.addEnemySprite = $.addEnemySprite = function(enemy) {
+    // v0.14a - v0.14a; Extended
+        _WSATBDO.addEnemySprite.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkObjType(
+                enemy, "_WSATBDO.addEnemySprite enemy", Game_Enemy);
+        //
+    }; // $.addEnemySprite
+
+    _WSATBDO.removeActorSprite = $.removeActorSprite;
+    _UT.removeActorSprite = $.removeActorSprite = function(actorId) {
+    // v0.14a - v0.14a; Extended
+        _WSATBDO.removeActorSprite.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkNaturalNum(
+                actorId, "_WSATBDO.removeActorSprite actorId");
+        //
+    }; // $.removeActorSprite
+
+    _WSATBDO.removeEnemySprite = $.removeEnemySprite;
+    _UT.removeEnemySprite = $.removeEnemySprite = function(i) {
+    // v0.14a - v0.14a; Extended
+        _WSATBDO.removeEnemySprite.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkNonnegativeInt(
+                i, "_WSATBDO.removeEnemySprite i");
+        //
+    }; // $.removeEnemySprite
+
+    _WSATBDO.transformEnemySprite = $.transformEnemySprite;
+    _UT.transformEnemySprite = $.transformEnemySprite = function(enemy) {
+    // v0.14a - v0.14a; Extended
+        _WSATBDO.transformEnemySprite.apply(this, arguments);
+        // Added to test the argument of this public api
+        SATBUT.checkFuncs.checkObjType(
+                enemy, "_WSATBDO.transformEnemySprite enemy", Game_Enemy);
+        //
+    }; // $.transformEnemySprite
+
+    var funcParamCaches = SATB.Window_SATBDiscreteOrder._FUNC_PARAM_CACHES;
+    Object.keys(funcParamCaches).forEach(function(funcName) {
+        var cache = funcParamCaches[funcName];
+        var param = "discreteOrder" + cache[0].toUpperCase() + cache.slice(1);
+        _WSATBDO[funcName] = $[funcName];
+        _UT[funcName] = $[funcName] = function() { // v0.14a - v0.14a; Extended
+            var val = _WSATBDO[funcName].apply(this, arguments);
+            // Added to check the return result on the call site directly
+            SATBUT.checkFuncs[SATBUT.unitTests.params.order[param]](
+                    val, "_WSATBDO." + funcName + " val");
+            //
+            return val;
+        }; // $[funcName]
+    });
+
+    _WSATBDO._isVisible = $._isVisible;
+    _UT._isVisible = $._isVisible = function() { // v0.14a - v0.14a; Extended
+        var isVisible = _WSATBDO._isVisible.apply(this, arguments);
+        // Added to check the return result on the call site directly
+        var checkFunc = SATBUT.unitTests.params.order.isShowDiscreteOrderWin;
+        SATBUT.checkFuncs[checkFunc](
+                isVisible, "_WSATBDO._isVisible isVisible");
+        //
+        return isVisible;
+    }; // $._isVisible
+
+})(DoubleX_RMMV.SATB, DoubleX_RMMV.SATB.Unit_Tests);
+// Window_SATBDiscreteOrder
 
 /*----------------------------------------------------------------------------
  *    # (v0.11a+)New class: Window_SATBTurnClock

@@ -305,8 +305,10 @@
  *          - https://www.youtube.com/watch?v=yw5UgvzTAIw
  *      17. (v0.13a+)DoubleX RMMV Superlative ATB(Core And CTB Module Only)
  *          - https://www.youtube.com/watch?v=HaUuQnOlgfs
+ *      18. (v0.14a+)DoubleX RMMV Superlative ATB(Core And Order Module Only)
+ *          - https://www.youtube.com/watch?v=5D8HR-sNH_w
  *      Posts:
- *      1.
+ *      1. https://www.patreon.com/doublex?filters[tag]=SATB
  *----------------------------------------------------------------------------
  *    # Instructions
  *      1. If you want to edit configurations instead of parameters, you must
@@ -342,9 +344,9 @@
  *----------------------------------------------------------------------------
  *    # Changelog
  *      Parameters:
- *      - v0.14a(GMT 1400 14-Aug-2020):
+ *      - v0.14a(GMT 1400 17-Aug-2020):
  *        1. Finished the Order Module
- *        2. Lets you set the font face, text color and align,opacity and
+ *        2. Lets you set the font face, text color and align, opacity and
  *           windowskin for all news windows in this plugin
  *        3. Removed all useless text padding parameters for all new windows
  *           in this plugin
@@ -384,9 +386,9 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Configurations:
- *      - v0.14a(GMT 1400 14-Aug-2020):
+ *      - v0.14a(GMT 1400 17-Aug-2020):
  *        1. Finished the Order Module
- *        2. Lets you set the font face, text color and align,opacity and
+ *        2. Lets you set the font face, text color and align, opacity and
  *           windowskin for all news windows in this plugin
  *        3. Removed all useless text padding parameters for all new windows
  *           in this plugin
@@ -429,9 +431,9 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Implementations:
- *      - v0.14a(GMT 1400 14-Aug-2020):
+ *      - v0.14a(GMT 1400 17-Aug-2020):
  *        1. Finished the Order Module
- *        2. Lets you set the font face, text color and align,opacity and
+ *        2. Lets you set the font face, text color and align, opacity and
  *           windowskin for all news windows in this plugin
  *        3. Removed all useless text padding parameters for all new windows
  *           in this plugin
@@ -529,9 +531,9 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Unit Tests:
- *      - v0.14a(GMT 1400 14-Aug-2020):
+ *      - v0.14a(GMT 1400 17-Aug-2020):
  *        1. Finished the Order Module
- *        2. Lets you set the font face, text color and align,opacity and
+ *        2. Lets you set the font face, text color and align, opacity and
  *           windowskin for all news windows in this plugin
  *        3. Removed all useless text padding parameters for all new windows
  *           in this plugin
@@ -617,9 +619,9 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Documentations:
- *      - v0.14a(GMT 1400 14-Aug-2020):
+ *      - v0.14a(GMT 1400 17-Aug-2020):
  *        1. Finished the Order Module
- *        2. Lets you set the font face, text color and align,opacity and
+ *        2. Lets you set the font face, text color and align, opacity and
  *           windowskin for all news windows in this plugin
  *        3. Removed all useless text padding parameters for all new windows
  *           in this plugin
@@ -798,6 +800,12 @@
  *         they become usable actions that can be inputted by battlers
  *      8. Lets you set some skills to demand a set period to cool down before
  *         they become usable actions that can be inputted by battlers again
+ *      9. Adds a parameter for each sprite/window class to be called per
+ *         frame so you can control which parameter cache to be
+ *         enabled/disabled
+ *      10. Fixes the discrete order battler sprite position bugs when the
+ *          battler changes again before the current position changes are
+ *          complete
  *============================================================================*/
 /*:
  * @plugindesc To be the most flexible, performant and powerful ATB system
@@ -1522,17 +1530,16 @@
  *           effective notetag will cause the default to be ignored
  *         - E.g.:
  *           The continuousOrderSpriteIconFilename notetag
- *           <satb continuousOrderSpriteIconFilename val: Actor1> will
- *           set the sheet filename of the continuous order sprite icon of
- *           the battler involved to be Actor1
+ *           <satb continuousOrderSpriteIconFilename val: Actor1> will set the
+ *           sheet filename of the continuous order sprite icon of the battler
+ *           involved to be Actor1
  *      4. continuousOrderSpriteIconHue suffix: entry
  *         - Sets the sheet hue of the continuous order sprite icon of the
  *           battler involved
  *         - suffix can be cfg, val, var or script
- *         - (Advanced)Please refer to
- *           Continuous Order Sprite Hue Functions in the order module of the
- *           configuration plugin for using cfg or script suffixes, or the
- *           eval variant
+ *         - (Advanced)Please refer to Continuous Order Sprite Hue Functions
+ *           in the order module of the configuration plugin for using cfg or
+ *           script suffixes, or the eval variant
  *         - The result of entry can be any integer ranging from 0 to 360
  *           inclusive
  *         - Only the 1st effective notetag will be used, and having any
@@ -1630,8 +1637,8 @@
  *           the sheet file to be 48, provided that the height of each element
  *           in the sheet is indeed 48
  *      10. continuousOrderSpriteIconW suffix: entry
- *          - Sets the width of the continuous order sprite icon of the battler
- *            involved in the continuous order window
+ *          - Sets the width of the continuous order sprite icon of the
+ *            battler involved in the continuous order window
  *          - suffix can be cfg, val, var or script
  *          - (Advanced)Please refer to
  *            Continuous Order Sprite Icon Width Functions in the order module
@@ -1650,9 +1657,9 @@
  *            battler involved in the continuous order window
  *          - suffix can be cfg, val, var or script
  *          - (Advanced)Please refer to
- *            Continuous Order Sprite Icon Height Functions in the order module
- *            of the configuration plugin for using cfg or script suffixes,
- *            or the eval variant
+ *            Continuous Order Sprite Icon Height Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
  *          - The result of entry can be any natural number
  *          - Only the 1st effective notetag will be used, and having any
  *            effective notetag will cause the default to be ignored
@@ -1679,6 +1686,189 @@
  *            sets the y position of the continuous order sprite icon of the
  *            battler involved in the continuous order window to be 0 and 50
  *            if it's an actor and not respectively
+ *      13. discreteOrderSpriteTargetOpacity suffix: entry
+ *          - Sets the opacity of the discrete order sprite icon of the
+ *            battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Target Opacity Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any integer ranging from 0 to 255
+ *            inclusive
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteTargetOpacity notetag
+ *            <satb discreteOrderSpriteTargetOpacity val: 255> will set the
+ *            opacity of the discrete order sprite icon of the battler
+ *            involved to be 255
+ *      14. discreteOrderSpriteIconFolder suffix: entry
+ *          - Sets the sheet folder path of the discrete order sprite icon of
+ *            the battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Folder Functions in the order module
+ *            of the configuration plugin for using cfg or script suffixes, or
+ *            the eval variant
+ *          - The result of entry can be any String
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconFolder notetag
+ *            <satb discreteOrderSpriteIconFolder val: img/characters> will
+ *            set the sheet folder path of the discrete order sprite icon of
+ *            the battler involved to be character image folder
+ *      15. discreteOrderSpriteIconFilename suffix: entry
+ *          - Sets the sheet filename of the discrete order sprite icon of
+ *            the battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Filename Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any String
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconFilename notetag
+ *            <satb discreteOrderSpriteIconFilename val: Actor1> will set the
+ *            sheet filename of the discrete order sprite icon of the battler
+ *            involved to be Actor1
+ *      16. discreteOrderSpriteIconHue suffix: entry
+ *          - Sets the sheet hue of the discrete order sprite icon of the
+ *            battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to Discrete Order Sprite Hue Functions in
+ *            the order module of the configuration plugin for using cfg or
+ *            script suffixes, or the eval variant
+ *          - The result of entry can be any integer ranging from 0 to 360
+ *            inclusive
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconHue notetag
+ *            <satb discreteOrderSpriteIconHue val: 0> will set the sheet hue
+ *            of the discrete order sprite icon of the battler involved to be
+ *            0
+ *      17. discreteOrderSpriteIconSmooth suffix: entry
+ *          - Sets the sheet smooth of the discrete order sprite icon of the
+ *            battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to Discrete Order Sprite Smooth Functions
+ *            in the order module of the configuration plugin for using cfg or
+ *            script suffixes, or the eval variant
+ *          - The result of entry can be anything as it only checks whether
+ *            it's truthy or falsy
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconSmooth notetag
+ *            <satb discreteOrderSpriteIconSmooth val: false> will set the
+ *            sheet smooth of the discrete order sprite icon of the battler
+ *            involved to be false
+ *      18. discreteOrderSpriteIconXCoor suffix: entry
+ *          - Sets the sheet x coordinate of the discrete order sprite icon of
+ *            the battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon X Coordinate Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any number ranging from 0 to the
+ *            maximum x Coordinate supported by the icon sheet
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconXCoor notetag
+ *            <satb discreteOrderSpriteIconXCoor val: 0> will select the icon
+ *            in the 1st column from the sheet as the discrete order sprite
+ *            icon of the battler involved
+ *      19. discreteOrderSpriteIconYCoor suffix: entry
+ *          - Sets the sheet y coordinate of the discrete order sprite icon
+ *            of the battler involved
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Y Coordinate Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any number ranging from 0 to the
+ *            maximum x Coordinate supported by the icon sheet
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconYCoor notetag
+ *            <satb discreteOrderSpriteIconYCoor val: 0> will select the icon
+ *            in the 1st row from the sheet as the discrete order sprite icon
+ *            of the battler involved
+ *      20. discreteOrderSpriteIconSourceW suffix: entry
+ *          - Sets the width of the discrete order sprite icon of the battler
+ *            involved in the sheet file
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Source Width Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any width matching the icon sheet
+ *            width specifications
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconSourceW notetag
+ *            <satb discreteOrderSpriteIconSourceW val: 48> sets the width of
+ *            the discrete order sprite icon of the battler involved in the
+ *            sheet file to be 48, provided that the width of each element in
+ *            the sheet is indeed 48
+ *      21. discreteOrderSpriteIconSourceH suffix: entry
+ *          - Sets the height of the discrete order sprite icon of the battler
+ *            involved in the sheet file
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Source Height Functions in the order
+ *            module of the configuration plugin for using cfg or script
+ *            suffixes, or the eval variant
+ *          - The result of entry can be any height matching the icon sheet
+ *            height specifications
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconSourceH notetag
+ *            <satb discreteOrderSpriteIconSourceH val: 48> sets the height
+ *            of the discrete order sprite icon of the battler involved in
+ *            the sheet file to be 48, provided that the height of each
+ *            element in the sheet is indeed 48
+ *      22. discreteOrderSpriteIconW suffix: entry
+ *          - Sets the width of the discrete order sprite icon of the battler
+ *            involved in the discrete order window
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Width Functions in the order module
+ *            of the configuration plugin for using cfg or script suffixes, or
+ *            the eval variant
+ *          - The result of entry can be any natural number
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconW notetag
+ *            <satb discreteOrderSpriteIconW val: 30> sets the width of the
+ *            discrete order sprite icon of the battler involved in the
+ *            discrete order window to be 30
+ *      23. discreteOrderSpriteIconH suffix: entry
+ *          - Sets the height of the discrete order sprite icon of the battler
+ *            involved in the discrete order window
+ *          - suffix can be cfg, val, var or script
+ *          - (Advanced)Please refer to
+ *            Discrete Order Sprite Icon Height Functions in the order module
+ *            of the configuration plugin for using cfg or script suffixes, or
+ *            the eval variant
+ *          - The result of entry can be any natural number
+ *          - Only the 1st effective notetag will be used, and having any
+ *            effective notetag will cause the default to be ignored
+ *          - E.g.:
+ *            The discreteOrderSpriteIconH notetag
+ *            <satb discreteOrderSpriteIconH val: 30> sets the height of the
+ *            discrete order sprite icon of the battler involved in the
+ *            discrete order window to be 30
  *============================================================================
  *    ## Script Call Info
  *----------------------------------------------------------------------------

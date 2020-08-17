@@ -22,6 +22,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
  * Play the demo to be familiar with the essential features and the demo first
  * Enable other modules of interest one at a time to be familiar with them one by one by playing the demo
  * Enable other compatible plugins to determine whether SATB suits your needs with those plugins
+ * Only read the directly related parts of the documentation plugin and the help section of the parameters plugin when you've issues using this plugin, as they're too long to be read all at once
  */
 
 /*============================================================================
@@ -2134,7 +2135,9 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
              * @returns {Boolean} The check result
              */
             isShowContinuousOrderWin: function() {
-                return true; // Always show the continuous order window
+                // Shows the continuous order window when CTB Module's disabled
+                return !SATBManager.areModulesEnabled(["IsCTBEnabled"]);
+                //
             }, // isShowContinuousOrderWin
 
             /**
@@ -2187,7 +2190,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
                 // Returns the base game screen width - 320
                 return Graphics.width - 320;
                 //
-            },
+            }, // continuousOrderWinW
 
             /**
              * (Advanced)This pointer refers to
@@ -2786,7 +2789,9 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
              * @returns {Opacity} The continuous order battler sprite opacity
              */
             continuousOrderSpriteOpacity: function(continuousOrderSprite) {
-                return 255;
+                // Returns 255 and 160 if the battler can and can't input acts
+                return this.canMakeSATBCmds() ? 255 : 160;
+                //
             }, // continuousOrderSpriteOpacity
 
             /**
@@ -2953,7 +2958,399 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
                 // Returns 48 and 8 if the battler's actor or not respectively
                 return this.isActor() ? 48 : 8;
                 //
-            } // continuousOrderSpriteY
+            }, // continuousOrderSpriteY
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets whether the discrete order window will be shown
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Boolean} The check result
+             */
+            isShowDiscreteOrderWin: function() {
+                // Shows the discrete order window when CTB Module's enabled
+                return SATBManager.areModulesEnabled(["IsCTBEnabled"]);
+                //
+            }, // isShowDiscreteOrderWin
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the x position of the window showing the order discretely
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {+ve Num} The discrete order window x position
+             */
+            discreteOrderWinX: function() { return 320; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the y position of the window showing the order discretely
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {+ve Num} The discrete order window y position
+             */
+            discreteOrderWinY: function() { return 0; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the opacity of the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Opacity} The discrete order window opacity
+             */
+            discreteOrderOpacity: function() { return 255; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the width of the window showing the order discretely
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {+ve Num} The discrete order window width
+             */
+            discreteOrderWinW: function() {
+                // Returns the base game screen width - 320
+                return Graphics.width - 320;
+                //
+            }, // discreteOrderWinW
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the height of the window showing the order discretely
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {+ve Num} The discrete order window height
+             */
+            discreteOrderWinH: function() { return 80; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the padding of the window showing the order discretely
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Number} The discrete order window padding
+             */
+            discreteOrderPadding: function() { return 8; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the back opacity of the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Opacity} The discrete order window background opacity
+             */
+            discreteOrderBackOpacity: function() { return 192; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * Sets the file path of the discrete order windowskin
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {String} The discrete order windowskin file path
+             */
+            discreteOrderWinskinPath: function() { return "img/system/"; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * Sets the file name of the discrete order windowskin
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {String} The discrete order windowskin file name
+             */
+            discreteOrderWinskinFile: function() { return "Window"; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * Sets the hue of the discrete order windowskin
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Hue} The discrete order windowskin hue
+             */
+            discreteOrderWinskinHue: function() { return 0; },
+
+            /**
+             * (Advanced)This pointer refers to
+             * Window_SATBDiscreteOrder.prototype
+             * Sets the smooth of the discrete order windowskin
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @returns {Boolean} The discrete order windowskin smooth
+             */
+            discreteOrderWinskinSmooth: function() { return false; },
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the opacity of the discrete order battler icon sprite when
+             * it's showing
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} Showing discrete order battler sprite opacity
+             */
+            showingDiscreteOrderBattlerSpriteOpacity: function(discreteOrderSprite) {
+                // Shows the discrete order battler sprite within 60 frames
+                var target = this.targetOpacity;
+                return Math.min(target, this.opacity + target / 60.0);
+                //
+            }, // showingDiscreteOrderBattlerSpriteOpacity
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the opacity of the discrete order battler icon sprite when
+             * it's hiding
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} Hiding discrete order battler sprite opacity
+             */
+            hidingDiscreteOrderBattlerSpriteOpacity: function(discreteOrderSprite) {
+                // Hides the discrete order battler sprite within 60 frames
+                return Math.max(0, this.opacity - this.targetOpacity / 60.0);
+                //
+            }, // hidingDiscreteOrderBattlerSpriteOpacity
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the x position of the discrete order window battler sprite
+             * in the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite y position in order window
+             */
+            discreteOrderSpriteX: function(discreteOrderSprite) {
+                // Moves discrete order battler sprite x coor within 60 frames
+                var cur = this.x, target = this._targetX;
+                var rate = (target - this._lastTargetX) / 60.0;
+                if (cur < target) return Math.min(target, cur + rate);
+                if (cur > target)return Math.max(target, cur + rate);
+                return cur;
+                //
+            }, // discreteOrderSpriteX
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the y position of the discrete order window battler sprite
+             * in the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite y position in order window
+             */
+            discreteOrderSpriteY: function(discreteOrderSprite) {
+                // Moves discrete order battler sprite y coor within 60 frames
+                var baseY = 28, cur = this.x;
+                var last = this._lastTargetX, target = this._targetX;
+                var curDiff = this.x - last;
+                if (curDiff === 0) return baseY;
+                var targetDiffSq = Math.pow(this._targetX - last, 2);
+                var absY = 50 * curDiff * (target - cur) / targetDiffSq;
+                return baseY + (curDiff > 0 ? -1 : 1) * absY;
+                //
+            }, // discreteOrderSpriteY
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the opacity of the discrete order battler icon sprite
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} The discrete order battler sprite opacity
+             */
+            discreteOrderSpriteTargetOpacity: function(discreteOrderSprite) {
+                // Returns 255 and 160 if the battler can and can't input acts
+                return this.canMakeSATBCmds() ? 255 : 160;
+                //
+            }, // discreteOrderSpriteTargetOpacity
+
+            /**
+             * The this pointer refers to the battler involved
+             * Sets the file path of the discrete order battler icon sheet
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler icon sheet path
+             */
+            discreteOrderSpriteIconFolder: function(discreteOrderSprite) {
+                return "img/system/";
+            }, // discreteOrderSpriteIconFolder
+
+            /**
+             * The this pointer refers to the battler involved
+             * Sets the file name of the discrete order battler icon sheet
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler icon sheet name
+             */
+            discreteOrderSpriteIconFilename: function(discreteOrderSprite) {
+                return "Window";
+            }, // discreteOrderSpriteIconFilename
+
+            /**
+             * The this pointer refers to the battler involved
+             * Sets the hue of the discrete order battler sprite icon sheet
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite icon sheet hue
+             */
+            discreteOrderSpriteIconHue: function(discreteOrderSprite) {
+                return 0;
+            }, // discreteOrderSpriteIconHue
+
+            /**
+             * The this pointer refers to the battler involved
+             * Sets the smooth of the discrete order battler sprite icon sheet
+             * Potential Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Boolean} The discrete order battler icon sheet smooth
+             */
+            discreteOrderSpriteIconSmooth: function(discreteOrderSprite) {
+                return false;
+            }, // discreteOrderSpriteIconSmooth
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the x coodinate of the discrete order window battler
+             * sprite in the icon sheet
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite icon sheet x coordinate
+             */
+            discreteOrderSpriteIconXCoor: function(discreteOrderSprite) {
+                return 0;
+            }, // discreteOrderSpriteIconXCoor
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the y coodinate of the discrete order window battler
+             * sprite in the icon sheet
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite icon sheet y coordinate
+             */
+            discreteOrderSpriteIconYCoor: function(discreteOrderSprite) {
+                return 0;
+            }, // discreteOrderSpriteIconYCoor
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the width of the discrete order window battler sprite in
+             * the icon sheet
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite width in the icon sheet
+             */
+            discreteOrderSpriteIconSourceW: function(discreteOrderSprite) {
+                return 48;
+            }, // discreteOrderSpriteIconSourceW
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the height of the discrete order window battler sprite in
+             * the icon sheet
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite height in the icon sheet
+             */
+            discreteOrderSpriteIconSourceH: function(discreteOrderSprite) {
+                return 48;
+            }, // discreteOrderSpriteIconSourceH
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the width of the discrete order window battler sprite in
+             * the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite width in the order window
+             */
+            discreteOrderSpriteIconW: function(discreteOrderSprite) {
+                return 24;
+            }, // discreteOrderSpriteIconW
+
+            /**
+             * The this pointer refers to the battler involved
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the height of the discrete order window battler sprite in
+             * the discrete order window
+             * Hotspot/Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The battler sprite height in the order window
+             */
+            discreteOrderSpriteIconH: function(discreteOrderSprite) {
+                return 24;
+            } // discreteOrderSpriteIconH
 
         }, // order
 
@@ -6338,6 +6735,838 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.14a";
 
 
         }, // continuousOrderSpriteY
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Target Opacity Functions
+         *    - Setups DOSTOX used by discreteOrderSpriteTargetOpacity notes
+         *--------------------------------------------------------------------*/
+        /* DOSTOX names can only use alphanumeric characters
+         * The 1st character of DOSTOX can't be a number
+         * The below DOSTOX are examples added to help you set your DOSTOX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSTOX can be used on notetags other than
+         * discreteOrderSpriteTargetOpacity if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSTOX
+         */
+        discreteOrderSpriteTargetOpacity: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} The discrete order battler sprite opacity
+             */
+            DOSTO_0: function(datum, datumType, discreteOrderSprite) {
+                return 0; // Always make the sprite completely invisible
+            }, // DOSTO_0
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} The discrete order battler sprite opacity
+             */
+            DOSTO_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 2 and 1 if the battler's actor and not
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSTO_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Opacity} The discrete order battler sprite opacity
+             */
+            DOSTO_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSTO_VAR
+
+            // Adds new DOSTOX here
+
+
+        }, // discreteOrderSpriteTargetOpacity
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Folder Functions
+         *    - Setups DOSIFX used by discreteOrderSpriteIconFolder notetags
+         *--------------------------------------------------------------------*/
+        /* DOSIFX names can only use alphanumeric characters
+         * The 1st character of DOSIFX can't be a number
+         * The below DOSIFX are examples added to help you set your DOSIFX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIFX can be used on notetags other than
+         * discreteOrderSpriteIconFolder if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIFX
+         */
+        discreteOrderSpriteIconFolder: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet path
+             */
+            DOSIF_IMG_CHAR: function(datum, datumType, discreteOrderSprite) {
+                return "img/characters/"; // Always uses character image folder
+            }, // DOSIF_0
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet path
+             */
+            DOSIF_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns img/sv_actors/ and img/sv_enemies/ for actors and not
+                return this.isActor() ? "img/sv_actors/" : "img/sv_enemies/";
+                //
+            }, // DOSIF_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet path
+             */
+            DOSIF_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the value in the game variable with id x
+                return $gameVariables.value(x);
+                //
+            }, // DOSIF_VAR
+
+            // Adds new DOSIFX here
+
+
+        }, // discreteOrderSpriteIconFolder
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Filename Functions
+         *    - Setups DOSIFNX used by discreteOrderSpriteIconFilename notes
+         *--------------------------------------------------------------------*/
+        /* DOSIFNX names can only use alphanumeric characters
+         * The 1st character of DOSIFNX can't be a number
+         * The below DOSIFNX are examples added to help you set your DOSIFNX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIFNX can be used on notetags other than
+         * discreteOrderSpriteIconFilename if you really know what you're
+         * truly doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIFNX
+         */
+        discreteOrderSpriteIconFilename: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet name
+             */
+            DOSIFN_ACTOR1: function(datum, datumType, discreteOrderSprite) {
+                return "Actor1"; // Always uses the file named Actor1
+            }, // DOSIFN_ACTOR1
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet name
+             */
+            DOSIFN_ACTOR2: function(datum, datumType, discreteOrderSprite) {
+                return "Actor2"; // Always uses the file named Actor2
+            }, // DOSIFN_ACTOR2
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet name
+             */
+            DOSIFN_ACTOR3: function(datum, datumType, discreteOrderSprite) {
+                return "Actor3"; // Always uses the file named Actor3
+            }, // DOSIFN_ACTOR3
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {String} The discrete order battler sprite sheet name
+             */
+            DOSIFN_MONSTER: function(datum, datumType, discreteOrderSprite) {
+                return "Monster"; // Always uses the file named Monster
+            }, // DOSIFN_MONSTER
+
+            // Adds new DOSIFNX here
+
+
+        }, // discreteOrderSpriteIconFilename
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Hue Functions
+         *    - Setups DOSHX used by the discreteOrderSpriteIconHue notetags
+         *--------------------------------------------------------------------*/
+        /* DOSHX names can only use alphanumeric characters
+         * The 1st character of DOSHX can't be a number
+         * The below DOSHX are examples added to help you set your DOSHX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSHX can be used on notetags other than
+         * discreteOrderSpriteIconHue if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSHX
+         */
+        discreteOrderSpriteIconHue: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+            DOSH_0: function(datum, datumType, discreteOrderSprite) {
+                return 0; // Always don't change the hue
+            }, // DOSH_0
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+            DOSH_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 2 and 1 if the battler's actor and not
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSH_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+            DOSH_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSH_VAR
+
+            // Adds new DOSHX here
+
+
+        }, // discreteOrderSpriteIconHue
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Smooth Functions
+         *    - Setups DOSSX used by the discreteOrderSpriteIconSmooth notes
+         *--------------------------------------------------------------------*/
+        /* DOSSX names can only use alphanumeric characters
+         * The 1st character of DOSSX can't be a number
+         * The below DOSSX are examples added to help you set your DOSSX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSSX can be used on notetags other than
+         * discreteOrderSpriteIconSmooth if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSSX
+         */
+        discreteOrderSpriteIconSmooth: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.05a @version v0.05a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Boolean} The check result
+             */
+            DOSS_TRUE: function(datum, datumType, discreteOrderSprite) {
+                return true; // Always enable the smooth mode for battler sprite
+            }, // DOSS_TRUE
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.05a @version v0.05a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Boolean} The check result
+             */
+            DOSS_BATTLER_NAME: function(datum, datumType, discreteOrderSprite) {
+                // Enables the smooth mode for sprite of battler named Test
+                return this.name() === "Test";
+                //
+            }, // DOSS_BATTLER_NAME
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.05a @version v0.05a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Boolean} The check result
+             */
+            DOSS_SWITCH: function(datum, datumType, discreteOrderSprite) {
+                // Enables the smooth mode when switch with id x is on
+                return $gameSwitches.value(x);
+                //
+            }, // DOSS_SWITCH
+
+            // Adds new DOSSX here
+
+
+        }, // discreteOrderSpriteIconSmooth
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon X Coodinate Functions
+         *    - Setups DOSIXCX used by discreteOrderSpriteIconXCoor notetags
+         *--------------------------------------------------------------------*/
+        /* DOSIXCX names can only use alphanumeric characters
+         * The 1st character of DOSIXCX can't be a number
+         * The below DOSIXCX are examples added to help you set your DOSIXCX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIXCX can be used on notetags other than
+         * discreteOrderSpriteIconXCoor if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIXCX
+         */
+        discreteOrderSpriteIconXCoor: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+            DOSH_1: function(datum, datumType, discreteOrderSprite) {
+                return 1; // Always uses the 2nd column
+            }, // DOSH_1
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+             DOSH_4: function(datum, datumType, discreteOrderSprite) {
+                 return 4; // Always uses the 5th column
+             }, // DOSH_4
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+             DOSH_7: function(datum, datumType, discreteOrderSprite) {
+                 return 7; // Always uses the 8th column
+             }, // DOSH_7
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {Hue} The discrete order battler sprite sheet hue
+             */
+             DOSH_10: function(datum, datumType, discreteOrderSprite) {
+                 return 10; // Always uses the 11th column
+             }, // DOSH_10
+
+            // Adds new DOSIXCX here
+
+
+        }, // discreteOrderSpriteIconXCoor
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Y Coodinate Functions
+         *    - Setups DOSIYCX used by discreteOrderSpriteIconYCoor notetags
+         *--------------------------------------------------------------------*/
+        /* DOSIYCX names can only use alphanumeric characters
+         * The 1st character of DOSIYCX can't be a number
+         * The below DOSIYCX are examples added to help you set your DOSIYCX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIYCX can be used on notetags other than
+         * discreteOrderSpriteIconYCoor if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIYCX
+         */
+        discreteOrderSpriteIconYCoor: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order sprite sheet y coordinate
+             */
+            DOSIYC_0: function(datum, datumType, discreteOrderSprite) {
+                return 0; // Always uses the 1st row
+            }, // DOSIYC_0
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order sprite sheet y coordinate
+             */
+             DOSIYC_4: function(datum, datumType, discreteOrderSprite) {
+                 return 4; // Always uses the 5th row
+             }, // DOSIYC_4
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order sprite sheet y coordinate
+             */
+            DOSIYC_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSIYC_VAR
+
+            // Adds new DOSIYCX here
+
+
+        }, // discreteOrderSpriteIconYCoor
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Source Width Functions
+         *    - Setups DOSISWX used by discreteOrderSpriteIconSourceW notes
+         *--------------------------------------------------------------------*/
+        /* DOSISWX names can only use alphanumeric characters
+         * The 1st character of DOSISWX can't be a number
+         * The below DOSISWX are examples added to help you set your DOSISWX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSISWX can be used on notetags other than
+         * discreteOrderSpriteIconSourceW if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSISWX
+         */
+        discreteOrderSpriteIconSourceW: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source width
+             */
+            DOSISW_2: function(datum, datumType, discreteOrderSprite) {
+                return 2; // Always returns 2
+            }, // DOSISW_2
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source width
+             */
+            DOSISW_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 1 and 0.5 if the battler's actor and not respectively
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSISW_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source width
+             */
+            DOSISW_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSISW_VAR
+
+            // Adds new DOSISWX here
+
+
+        }, // discreteOrderSpriteIconSourceW
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Source Height Functions
+         *    - Setups DOSISHX used by discreteOrderSpriteIconSourceH notes
+         *--------------------------------------------------------------------*/
+        /* DOSISHX names can only use alphanumeric characters
+         * The 1st character of DOSISHX can't be a number
+         * The below DOSISHX are examples added to help you set your DOSISHX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSISHX can be used on notetags other than
+         * discreteOrderSpriteIconSourceH if you really know what you're truly
+         * doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSISHX
+         */
+        discreteOrderSpriteIconSourceH: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source height
+             */
+            DOSISH_2: function(datum, datumType, discreteOrderSprite) {
+                return 2; // Always returns 2
+            }, // DOSISH_2
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source height
+             */
+            DOSISH_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 1 and 0.5 if the battler's actor and not respectively
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSISH_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} Discrete order battler sprite source height
+             */
+            DOSISH_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSISH_VAR
+
+            // Adds new DOSISHX here
+
+
+        }, // discreteOrderSpriteIconSourceH
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Width Functions
+         *    - Setups DOSIWX used by discreteOrderSpriteIconW notes
+         *--------------------------------------------------------------------*/
+        /* DOSIWX names can only use alphanumeric characters
+         * The 1st character of DOSIWX can't be a number
+         * The below DOSIWX are examples added to help you set your DOSIWX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIWX can be used on notetags other than
+         * discreteOrderSpriteIconW if you really know what you're truly doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIWX
+         */
+        discreteOrderSpriteIconW: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite width
+             */
+            DOSIW_2: function(datum, datumType, discreteOrderSprite) {
+                return 2; // Always returns 2
+            }, // DOSIW_2
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite width
+             */
+            DOSIW_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 2 and 1 if the battler's actor and not respectively
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSIW_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite width
+             */
+            DOSIW_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSIW_VAR
+
+            // Adds new DOSIWX here
+
+
+        }, // discreteOrderSpriteIconW
+
+        /*--------------------------------------------------------------------
+         *    (v0.14a+)Discrete Order Sprite Icon Height Functions
+         *    - Setups DOSIHX used by discreteOrderSpriteIconH notes
+         *--------------------------------------------------------------------*/
+        /* DOSIHX names can only use alphanumeric characters
+         * The 1st character of DOSIHX can't be a number
+         * The below DOSIHX are examples added to help you set your DOSIHX
+         * You can freely use, rewrite and/or delete these examples
+         * (Advanced)DOSIHX can be used on notetags other than
+         * discreteOrderSpriteIconH if you really know what you're truly doing
+         * If you're to use them that way, you must at least ensure following:
+         * 1. The function contexts are the same across different notetags
+         * 2. The function argument lists(with the paraemter names being exactly
+         *    the same) are the same across different notetags
+         * 3. The function return types are the same across different notetags
+         * (Advanced)You're encouraged and recommended to write modular DOSIHX
+         */
+        discreteOrderSpriteIconH: {
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite height
+             */
+            DOSIH_2: function(datum, datumType, discreteOrderSprite) {
+                return 2; // Always returns 2
+            }, // DOSIH_2
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite height
+             */
+            DOSIH_ACTOR: function(datum, datumType, discreteOrderSprite) {
+                // Returns 1 and 0.5 if the battler's actor and not respectively
+                return this.isActor() ? 2 : 1;
+                //
+            }, // DOSIH_ACTOR
+
+            /**
+             * The this pointer refers to the battler involved
+             * Nullipotent
+             * @since v0.14a @version v0.14a
+             * @param {Datum} datum - The datum having this notetag
+             * @enum @param {DatumType} datumType - Refers to reference tag
+             *                                      NOTE_DATA_TYPES
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * discreteOrderSprite - The battler icon sprite
+             * @returns {+ve Num} The discrete order battler sprite height
+             */
+            DOSIH_VAR: function(datum, datumType, discreteOrderSprite) {
+                // Returns the Number value in the game variable with id x
+                return +$gameVariables.value(x);
+                //
+            }, // DOSIH_VAR
+
+            // Adds new DOSIHX here
+
+
+        }, // discreteOrderSpriteIconH
 
         /*--------------------------------------------------------------------
          *    (v0.10a+)Core ATB Rate Functions
