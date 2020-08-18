@@ -29,8 +29,10 @@ Please note that this plugin's still under developement. Currently the following
    - Lets you set some states to have their turn count updated basedon the number of frames/seconds elapsed, with additional effectstriggered upon each turn count update
 8. CTB Module(v0.13a+)
    - Lets you change toggle the battle system between ATB and CTB on the fly and even during the same battle(you can actually set a hotkey to do that in battle)
-9. Event Module(v0.06a+)
-   - Lets you set some additional events to be triggered upon important timings inthe ATB system
+9. Delay Module(v0.15a+)
+   - Lets you set the amount of delay between becoming able to input actions and actually inputting them for battlers can't have their actions inputted by the player(enemies and actors with auto battle or confusion)
+10. Event Module(v0.06a+)
+    - Lets you set some additional events to be triggered upon important timings inthe ATB system
 10. Order Module(v0.14a)+
     - Lets you show the ATB values of all battlers in the same ATB bar
     - Lets you show the battler action ordering in the CTB system style(You should only use this with the full wait mode unless you really know what you're truly doing)
@@ -111,20 +113,24 @@ Videos:
    - https://www.youtube.com/watch?v=dgx51xE5Svw
 10. (v0.06a+)DoubleX RMMV Superlative ATB(Core And Event Module Only)
     - https://www.youtube.com/watch?v=RVeEoSa-IdY
-11. (v0.10a)DoubleX RMMV Superlative ATB(Core And Rate Module Only)
-    - https://www.youtube.com/watch?v=kvrxnhagO4I
-12. (v0.07a+)DoubleX RMMV Superlative ATB(Core And Reset Module Only)
+11. (v0.07a+)DoubleX RMMV Superlative ATB(Core And Reset Module Only)
     - https://www.youtube.com/watch?v=3KRIllS_rWc
-13. (v0.08a+)DoubleX RMMV Superlative ATB(Core And Speed Module Only)
+12. (v0.08a+)DoubleX RMMV Superlative ATB(Core And Speed Module Only)
     - https://www.youtube.com/watch?v=r3g6H4r8ws0
-14. (v0.09a+)DoubleX RMMV Superlative ATB(Core And Start Module Only)
+13. (v0.09a+)DoubleX RMMV Superlative ATB(Core And Start Module Only)
     - https://www.youtube.com/watch?v=zOpBlz6G0YA
+14. (v0.10a)DoubleX RMMV Superlative ATB(Core And Rate Module Only)
+    - https://www.youtube.com/watch?v=kvrxnhagO4I
 15. (v0.11a+)DoubleX RMMV Superlative ATB(Core And Turn Module Only)
     - https://www.youtube.com/watch?v=Nv1bEQAl3ik
 16. (v0.12a+)DoubleX RMMV Superlative ATB(Core And Countdown Module Only)
     - https://www.youtube.com/watch?v=yw5UgvzTAIw
 17. (v0.13a+)DoubleX RMMV Superlative ATB(Core And CTB Module Only)
     - https://www.youtube.com/watch?v=HaUuQnOlgfs
+18. (v0.14a+)DoubleX RMMV Superlative ATB(Core And Order Module Only)
+    - https://www.youtube.com/watch?v=5D8HR-sNH_w
+19. (v0.15a+)(v0.15a+)DoubleX RMMV Superlative ATB(Core And Delay Module Only)
+    - https://www.youtube.com/watch?v=WaPU38sIV2I
 
 Posts:
 1. https://www.patreon.com/doublex?filters[tag]=SATB
