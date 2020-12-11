@@ -14,8 +14,8 @@ var $plugins =
 {"name":"DoubleX RMMV Superlative ATB Impl v015b","status":true,"description":"The implementation plugin of DoubleX RMMV Superlative ATB","parameters":{}},
 {"name":"DoubleX RMMV Superlative ATB Unit Tests v015b","status":true,"description":"The unit test plugin of DoubleX RMMV Superlative ATB","parameters":{}},
 {"name":"SEK_ChangeActor","status":true,"description":"Adds the possibility to change an actor with a not fighting one, jumping your turn.","parameters":{"Command Name":"Change","Show Animation on battler change":"true","Animation Id to show":"42","Enabled":"true","Using DoubleX RMMV Popularized ATB Core":"false"}},
-{"name":"DoubleX RMMV Superlative ATB Compatibilities v004a","status":true,"description":"The compatibility plugin of DoubleX RMMV Superlative ATB","parameters":{}},
+{"name":"DoubleX RMMV Superlative ATB Compatibilities v005a","status":true,"description":"The compatibility plugin of DoubleX RMMV Superlative ATB","parameters":{}},
 {"name":"DoubleX RMMV Superlative ATB Compatibility Tests v001a","status":true,"description":"The compatibility test plugin of DoubleX RMMV Superlative ATB","parameters":{}},
-{"name":"DoubleX RMMV Superlative ATB Docs v015b","status":true,"description":"To be the most flexible, performant and powerful ATB system\r\nframework with the greatest amount of freedom while being user-friendly","parameters":{}},
+{"name":"DoubleX RMMV Superlative ATB Docs v015c","status":true,"description":"To be the most flexible, performant and powerful ATB system\r\nframework with the greatest amount of freedom while being user-friendly","parameters":{}},
 {"name":"DoubleX RMMV Targeting Hotkeys v100a","status":false,"description":"Lets you set some hotkeys selecting actor/enemy target by index","parameters":{}}
 ];
