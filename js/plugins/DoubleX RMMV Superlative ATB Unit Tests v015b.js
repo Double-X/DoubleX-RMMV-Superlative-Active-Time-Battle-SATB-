@@ -939,7 +939,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         "usableSkills",
         "items",
         "usableItems",
-        "latestSkillItem",
+        "latestSkillItems",
         "armors",
         "weapons",
         "class",
@@ -953,7 +953,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         "usableSkills",
         "items",
         "usableItems",
-        "latestSkillItem",
+        "latestSkillItems",
         "armors",
         "weapons",
         "class",
@@ -1000,11 +1000,11 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
     SATBUT.isSameDataType = function(datumType, dataType) {
         if (datumType === dataType) return true;
         if (datumType === "states" && dataType === "thisState") return true;
-        // It's very unlikely for latestSkillItem to have the wrong data
+        // It's very unlikely for latestSkillItems to have the wrong data
         if (datumType === "skills" && (dataType === "usableSkills" ||
-                dataType === "latestSkillItem")) return true;
+                dataType === "latestSkillItems")) return true;
         return datumType === "items" &&
-                (dataType === "usableItems" || dataType === "latestSkillItem");
+                (dataType === "usableItems" || dataType === "latestSkillItems");
         //
     }; // SATBUT.isSameDataType
 
@@ -2810,7 +2810,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
     /**
      * The this pointer is Game_BattlerBase.prototype
      * Nullipotent
-     * @since v0.05b @version v0.05b
+     * @since v0.05b @version v0.16a
      * @returns {{*}} The battler context to be shown in the test fail messages
      */
     _UT.context = function() {
@@ -2827,7 +2827,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             isSATBCooldown: this.isSATBCooldown(),
             satbActTimes: this.satbActTimes(),
             currentAction: this.currentAction(),
-            latestSATBItem_: this.latestSATBItem_,
+            latestSATBItems_: this.latestSATBItems_,
             canInputSATB: this.isActor() && $gameParty.canInputSATB(this),
             canActSATB: BattleManager.canActSATB(this)
         };
@@ -3082,10 +3082,10 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
     /**
      * The this pointer is Game_Battler.prototype
      * No-op
-     * @since v0.05a @version v0.05a
+     * @since v0.05a @version v0.16a
      */
     _UT._checkLatestItem = function() {
-        if (this.latestSATBItem_) return;
+        if (this.latestSATBItems_.length > 0) return;
         SATBUT.showFailMsg(this.name(), "GB.new._checkLatestItem",
                 "A battler becoming actable should have an action to be " +
                 "exeucted!", GBB.context.call(this));
@@ -3744,11 +3744,11 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
     /**
      * The this pointer is Game_SATBPhaseTypes.prototype
      * Hotspot/No-op
-     * @since v0.05a @version v0.05a
+     * @since v0.05a @version v0.16a
      */
     _UT._checkNoLatestItem = function() {
-        if (!this._battler.latestSATBItem_) return;
-        SATBUT.showFailMsg(this._battler.latestSATBItem_,
+        if (this._battler.latestSATBItems_.length <= 0) return;
+        SATBUT.showFailMsg(this._battler.latestSATBItems_,
                 "GSATBPT.new._checkNoLatestItem " + this._battler.name(),
                 "A battler shouldn't have a skill/item when not charging nor" +
                 " cooling down!", GBB.context.call(this._battler));
@@ -3815,10 +3815,10 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
     /**
      * The this pointer is Game_SATBPhaseTypes.prototype
      * Hotspot/No-op
-     * @since v0.05a @version v0.05a
+     * @since v0.05a @version v0.16a
      */
     _UT._checkLatestItem = function() {
-        if (this._battler.latestSATBItem_) return;
+        if (this._battler.latestSATBItems_.length > 0) return;
         SATBUT.showFailMsg(this._battler.name(),
                 "GSATBPT.new._checkLatestItem", "A battler should have a " +
                 "skill/item when charging or cooling down!",
