@@ -197,7 +197,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
                 //
                 // Checks if the battler ATB's charging or coolng down
                 if (!this._battler.isSATBFill()) {
-                    var items = this._battler.latestSATBItems_;
+                    var items = this._battler.latestSATBItems;
                     var itemCount = items.length;
                     if (itemCount > 1) {
                         // cur ATB value/max ATB value : virtual act slot action count actions
@@ -473,7 +473,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
                 //
                 // Checks if the battler ATB's charging or coolng down
                 if (!this._battler.isSATBFill()) {
-                    var items = this._battler.latestSATBItems_;
+                    var items = this._battler.latestSATBItems;
                     var itemCount = items.length;
                     if (itemCount > 1) {
                         // cur ATB value/max ATB value : virtual act slot action count actions
@@ -2096,9 +2096,11 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
             /**
              * The this pointer refers to the battler involved
              * Sets what extra to happen right after starting to force charging
-             * @since v0.06a @version v0.06a
+             * @since v0.06a @version v0.16a
              */
-            didStartForceCharge: function() { /* Does nothing extra */ },
+            didStartForceCharge: function() {
+                SoundManager.playOk(); // Plays the default system ok sound
+            }, // didStartForceCharge
 
             /**
              * The this pointer refers to the battler involved
@@ -3566,7 +3568,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
                 // Updates the speed for each battler who can execute actions
                 this._actionBattlers.forEach(function(battler) {
                     // The skill/item to be executed for the battler involved
-                    battler.latestSATBItems_.forEach(function(item) {
+                    battler.latestSATBItems.forEach(function(item) {
                         // Applies the speed increment but caps the speed to 2000
                         item.speed = Math.min(item.speed + speedIncrement, 2000);
                         //
@@ -3585,7 +3587,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              */
             actSpeed: function() {
                 // Uses the original skill/item invocation speed
-                return this.latestSATBItems_.reduce(function(speed, item) {
+                return this.latestSATBItems.reduce(function(speed, item) {
                     return speed + item.speed;
                 }, 0);
                 //
@@ -5256,11 +5258,11 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
                 if (proportion > 1) {
                     // Changes the action to be executed to be Neo Spark in demo
                     this.currentAction().setSkill(14);
-                    this.latestSATBItems_ = this._satb.acts.newLatestItems_();
+                    this.latestSATBItems = this._satb.acts.newLatestItems_();
                             SATB.Game_Battler.new._latestItems_.call(this);
                     //
                 } else if (proportion < 1) {
-                    this.latestSATBItems_.forEach(function(item) {
+                    this.latestSATBItems.forEach(function(item) {
                         // Pays the skill/item cost one more time as extra penalty
                         this.paySkillCost(item.item);
                         //
@@ -5521,7 +5523,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              *                                      NOTE_DATA_TYPES
              */
             WCC_PAY_SKILL_COST: function(datum, datumType) {
-                this.latestSATBItems_.forEach(function(item) {
+                this.latestSATBItems.forEach(function(item) {
                     // Pays the skill/item cost one more time as extra penalty
                     this.paySkillCost(item.item);
                     //
@@ -5649,7 +5651,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              *                                      NOTE_DATA_TYPES
              */
             WCCD_PAY_SKILL_COST: function(datum, datumType) {
-                this.latestSATBItems_.forEach(function(item) {
+                this.latestSATBItems.forEach(function(item) {
                     // Pays the skill/item cost one more time as extra penalty
                     this.paySkillCost(item.item);
                     //

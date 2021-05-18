@@ -1140,7 +1140,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // _SATB._SORT_BATTLER_SPEEDS_DESCENDINGLY
     _SATB._UPDATE = function(mem) { mem.updateSATB(); }; // v0.10a+
     _SATB._UPDATE_ACT_SPEED = function(speedIncrement, battler) { // v0.14a+
-        battler.latestSATBItems_.forEach(function(item) {
+        battler.latestSATBItems.forEach(function(item) {
             // 2000 is the action speed cap in the default RMMV editor
             item.speed = Math.min(item.speed + speedIncrement, 2000);
             //
@@ -4982,9 +4982,8 @@ function Window_SATBTurnClock() { // v0.11a+
     "use strict";
 
     SATB.Game_Battler = { orig: {}, new: {} };
-    var SATBM = SATB.SATBManager, GBB = SATB.Game_BattlerBase.new;
+    var GBB = SATB.Game_BattlerBase.new, $ = Game_Battler.prototype;
     var _GB = SATB.Game_Battler.orig, _SATB = SATB.Game_Battler.new;
-    var $ = Game_Battler.prototype;
 
     // v0.16a+; Hotspot
     _SATB._ACT_SPEED = function(speed, item) { return speed + item.speed; };
@@ -5018,6 +5017,7 @@ function Window_SATBTurnClock() { // v0.11a+
     // All these functions are battler script calls
     _SATB.NOTE_FORWARDED_FUNCS = {
         // They're not shown in the doc as it's too raw
+        latestSATBItemNoteResult_: "latestItemResult_", // v0.16a+
         satbNoteResult_: "result_",
         runSATBNote: "run", // v0.06a+
         //
@@ -5087,7 +5087,7 @@ function Window_SATBTurnClock() { // v0.11a+
     /*------------------------------------------------------------------------
      *    New public variables
      *------------------------------------------------------------------------*/
-    // {[{Number, Skill|Item}?]} latestSATBItems_: Latest inputted skills/items
+    // {[{Number, Skill|Item}]} latestSATBItems: Latest inputted skills/items
 
     /*------------------------------------------------------------------------
      *    New private variables
@@ -5397,13 +5397,22 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Nullipotent
+     * @interface @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.hasLatestSATBItems = function() {
+        return this.latestSATBItems.length > 0;
+    }; // $.hasLatestSATBItems
+
+    /**
+     * Hotspot/Nullipotent
      * @interface @since v0.08a @version v0.16a
      * @returns {Number} The speed of the action to be executed
      */
     $.satbActSpeed = function() {
         if (SATBManager.areModulesEnabled(["IsSpeedEnabled"])) {
             return this.satbNoteResult_("actSpeed");
-        } else return this.latestSATBItems_.reduce(_SATB._ACT_SPEED, 0);
+        } else return this.latestSATBItems.reduce(_SATB._ACT_SPEED, 0);
     }; // $.satbActSpeed
 
     /**
@@ -5480,9 +5489,9 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $.didFinishSATBInput = function() {
         _SATB._updateActStateTurns.call(this);
-        this.latestSATBItems_ = this._satb.acts.newLatestItems_();
+        this.latestSATBItems = this._satb.acts.newLatestItems_();
         if (_SATB._isPayBeforeExecCharge.call(this)) {
-            this.latestSATBItems_.forEach(function(item) {
+            this.latestSATBItems.forEach(function(item) {
                 _GB.useItem.call(this, item.item);
             }, this);
         }
@@ -5522,7 +5531,7 @@ function Window_SATBTurnClock() { // v0.11a+
         // This must be placed before onStartCooldown or reset val would wrong
         _SATB._onReset.call(this);
         //
-        // The ordering must be this or latestSATBItems_ would be emptied
+        // The ordering must be this or latestSATBItems would be emptied
         this._satb.phaseTypes.onStartCooldown();
         this.eraseVirtualSATBActSlot();
         this.refresh(); // To detect ATB phase changes
@@ -5626,7 +5635,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $.onStartSATBFill = function() {
         this._satb.phaseTypes.onStartFill();
-        this.latestSATBItems_ = [];
+        this.latestSATBItems = [];
         this.refresh(); // To detect ATB phase changes
         this.runSATBNote("didStartATBFill");
     }; // $.onStartSATBFill
@@ -5846,8 +5855,8 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     _SATB._isItemNote = function(modules, notes) {
         if (!SATBManager.areModulesEnabled(modules)) return false;
-        if (this.latestSATBItems_.length <= 0) return false;
-        var items = this.latestSATBItems_.map(_SATB._LATEST_SKILL_ITEM);
+        if (!this.hasLatestSATBItems()) return false;
+        var items = this.latestSATBItems.map(_SATB._LATEST_SKILL_ITEM);
         return this._satb.notes.hasAnyNote(notes, items);
     }; // _SATB._isItemNote
 
@@ -6151,11 +6160,10 @@ function Window_SATBTurnClock() { // v0.11a+
      * @param {Game_SATBCache} cache - The helper caching notetag list/result
      */
     $.initialize = function(battler, cache) {
-        this._battler = battler;
+        this._battler = battler, this._cache = cache;
         // The latest items should be emptied as well to avoid invalid states
-        battler.latestSATBItems_ = [];
+        battler.latestSATBItems = [];
         // refresh can't be called or the game crash with uninitialized battler
-        this._cache = cache;
         this._actTimes = this._maxActTimes = this._lastMinActCost = 0;
     }; // $.initialize
 
@@ -6189,12 +6197,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @returns {Nonnegative Int} The number of used virtual action slots
      */
     $.usedActTimes = function() {
-        var items = this._battler.latestSATBItems_;
-        this._battler.latestSATBItems_ = this._battler._actions.filterMap(
+        var acts = this._battler._actions.filterMap(
                 _SATB._IS_INPUTTED_ACT, _SATB._INPUTTED_ITEM);
-        var usedActTimes = this._battler.satbNoteResult_("actCost");
-        this._battler.latestSATBItems_ = items;
-        return usedActTimes;
+        return this._battler.latestSATBItemNoteResult_("actCost", acts);
     }; // $.usedActTimes
 
     /**
@@ -6213,15 +6218,7 @@ function Window_SATBTurnClock() { // v0.11a+
             this._battler._actions.length = this.actTimes();
             //
         } else if (actMode === "discrete") {
-            // The current number of action slots shouldn't exceed its maximum
-            this._actTimes = Math.min(actTimes, this.maxActTimes());
-            //
-            // Number of virtual action slots must be in sync with the atb value
-            var newATB = this.actTimes() * this._battler.coreMaxSATB();
-            if (this._battler.coreSATB() !== newATB) {
-                this._battler.setCoreSATB(newATB);
-            }
-            //
+            this._correctDiscreteActTimes(actTimes);
         }
         // Ensures that the ATB value will become full
         if (!hadActs && hasActs) return this._battler.fillUpCoreSATB();
@@ -6276,10 +6273,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @returns {Boolean} The check result
      */
     $.hasEnoughActTimes = function(item) {
-        var items = this._battler.latestSATBItems_;
-        this._battler.latestSATBItems_ = [{ item: item }];
-        var actCost = this._battler.satbNoteResult_("actCost");
-        this._battler.latestSATBItems_ = items;
+        var actCost = this._battler.latestSATBItemNoteResult_("actCost", [
+            { item: item }
+        ]);
         if (this.satbActMode() !== "bundle") return actCost <= this.actTimes();
         return actCost <= this.actTimes() - this.usedActTimes();
     }; // $.hasEnoughActTimes
@@ -6293,6 +6289,22 @@ function Window_SATBTurnClock() { // v0.11a+
         return this._battler._actions.mapFilter(
                 _SATB._NEW_LATEST_ITEM, Boolean);
     }; // $.newLatestItems_
+
+    /**
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     * @param {Nonnegative Int} actTimes - The new number of virtual action slot
+     */
+    $._correctDiscreteActTimes = function(actTimes) {
+        // The current number of action slots shouldn't exceed its maximum
+        this._actTimes = Math.min(actTimes, this.maxActTimes());
+        //
+        // Number of virtual action slots must be in sync with the atb value
+        var newATB = this.actTimes() * this._battler.coreMaxSATB();
+        if (this._battler.coreSATB() === newATB) return;
+        this._battler.setCoreSATB(newATB);
+        //
+    }; // $._correctDiscreteActTimes
 
     /**
      * Hotspot/Nullipotent
@@ -6328,14 +6340,13 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $._newMinPartActCost = function(part) {
         var partListData = this._cache.partListData(part, this._battler);
-        var items = this._battler.latestSATBItems_;
         // The battler shouln't be able to act if there's no usable skills/items
         var newMinPartActCost = partListData.map(function(item) {
-            this._battler.latestSATBItems_ = [{ item: item }];
-            return this._battler.satbNoteResult_("actCost");
+            return this._battler.latestSATBItemNoteResult_("actCost", [
+                  { item: item }
+            ]);
         }, this).sort(_SATB._MIN_SORT)[0] || Number.POSITIVE_INFINITY;
         // The inner function should be inline as it can't be used anywhere else
-        this._battler.latestSATBItems_ = items;
         return newMinPartActCost;
     }; // $._newMinPartActCost
 
@@ -6790,20 +6801,20 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Script Call/Hotspot/Idempotent
-     * @interface @since v0.15a @version v0.15a
+     * @interface @since v0.15a @version v0.16a
      * @param {Nonnegative Num} multiplier - Delay counter locking battler input
      */
     $.multiplyDelaySecCounter = function(multiplier) {
-        this._delaySecCounter *= multiplier;
+        this.setDelaySecCounter(this.delaySecCounter() * multiplier);
     }; // multiplyDelaySecCounter
 
     /**
      * Script Call/Hotspot/Idempotent
-     * @interface @since v0.15a @version v0.15a
+     * @interface @since v0.15a @version v0.16a
      * @param {Nonnegative Num} increment - Delay counter locking battler inputs
      */
     $.addDelaySecCounter = function(increment) {
-        this._delaySecCounter += increment;
+        this.setDelaySecCounter(this.delaySecCounter() + increment);
     }; // addDelaySecCounter
 
     /**
@@ -6858,8 +6869,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $.setChargeATB = function(val) {
         // A valid ATB charge must have a valid skill/item to be charged
-        if (this._battler.latestSATBItems_.length <= 0) return;
-        if (!this.isCharge()) return;
+        if (!this._battler.hasLatestSATBItems() || !this.isCharge()) return;
         //
         // Refer to reference tag NEGATIVE_CHARGE_ATB_VAL_CANCEL_CHARGE
         if (val < 0) return this.clearChargeATB();
@@ -6877,8 +6887,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $.setCooldownATB = function(val) {
         // A valid ATB cooldown must have a valid skill/item to be cooled down
-        if (this._battler.latestSATBItems_.length <= 0) return;
-        if (!this.isCooldown()) return;
+        if (!this._battler.hasLatestSATBItems() || !this.isCooldown()) return;
         //
         // The cooldown fill direction's opposite to normal and charge ATB
         var reversedVal = this._battler.cooldownMaxSATB() - val;
@@ -6917,9 +6926,8 @@ function Window_SATBTurnClock() { // v0.11a+
         var decrement = -_SATB._SMALLEST_ATB_VAL_INCREMENT * addMultiplier;
         var actMode = this._battler.satbActMode();
         if (actMode === "discrete" || actMode === "continuous") {
-            return this._setCoreATBJustNotEnough(decrement);
-        }
-        this.addCoreATB(decrement);
+            this._setCoreATBJustNotEnough(decrement);
+        } else this.addCoreATB(decrement);
     }; // $.addSmallestCoreSATBDecrement
 
     /**
@@ -6980,12 +6988,11 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent Without Events
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.04a @version v0.16a
      */
     $.onStartForceCharge = function() {
         if (!SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
         if (!this.isCharge() || !this._battler.canForceChargeSATB()) return;
-        SoundManager.playOk();
         this._forcedChargeBeyondMax = 0;
         this._forceChargeState = _SATB._FORCE_CHARGE;
         this._battler.runSATBNote("didStartForceCharge");
@@ -7001,7 +7008,9 @@ function Window_SATBTurnClock() { // v0.11a+
         if (!this.isCharge()) return;
         if (this._forceChargeState !== _SATB._FORCE_CHARGE) return;
         //
+        /** @todo Considers Adding didEndForceCharge so this becomes optional */
         SoundManager.playOk();
+        //
         // Refer to reference tag MID_DISABLE_FORCE_CHARGE_BACK_TO_NORM
         var canForceCharge = this._battler.canForceChargeSATB();
         this._forceChargeState = canForceCharge ? _SATB._FORCE_ACT : "";
@@ -7081,15 +7090,15 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot
-     * @since v0.15a @version v0.15a
+     * @since v0.15a @version v0.16a
      * @todo Thinks of if SceneManager._deltaTime is as correct as Date.now()
      */
     $._updateDelaySecCounter = function() {
-        if (this._delaySecCounter <= 0) return;
+        if (this.delaySecCounter() <= 0) return;
         if (SATBManager.areModulesEnabled(["IsDelayEnabled"])) {
-            this._delaySecCounter -= SceneManager._deltaTime;
-        } else this._delaySecCounter = 0;
-        if (this._delaySecCounter <= 0) this._onDelayCounterEnd();
+            this.addDelaySecCounter(-SceneManager._deltaTime);
+        } else this.setDelaySecCounter(0);
+        if (this.delaySecCounter() <= 0) this._onDelayCounterEnd();
     }; // $._updateDelaySecCounter
 
     /**
@@ -7231,8 +7240,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $._coreATBThreshold = function() {
         // The action mode must be discrete or continuous to be here
-        var actMode = this._battler.satbActMode();
-        if (actMode === "discrete") return this.coreMax();
+        if (this._battler.satbActMode() === "discrete") return this.coreMax();
         return this._battler.minSATBActCost();
         //
     }; // $._coreATBThreshold
@@ -7282,7 +7290,7 @@ function Window_SATBTurnClock() { // v0.11a+
     $._isBecomeEnoughNotEnough = function(val, phase, max) {
         var isContinuous = this._battler.satbActMode() === "continuous";
         if (phase !== _SATB._PHASE_NORM || !isContinuous) {
-            return this._isBecomeFullNotFull(val, phase, max)
+            return this._isBecomeFullNotFull(val, phase, max);
         }
         var isEnough = this._battler.minSATBActCost() <= val;
         var lastMinActCost = this._battler._satb.acts.lastMinActCost();
@@ -7330,14 +7338,14 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent Without Events
-     * @since v0.00a @version v0.15a
+     * @since v0.00a @version v0.16a
      */
     $._onCoreATBBecomeFull = function() {
         if (SATBManager.areModulesEnabled(["IsDelayEnabled"])) {
-            this._delaySecCounter = this._battler.satbNoteResult_("delay");
-        } else this._delaySecCounter = 0;
+            this.setDelaySecCounter(this._battler.satbNoteResult_("delay"));
+        } else this.setDelaySecCounter(0);
         // It's okay for unmovable battlers to have full atb which will be reset
-        if (this._delaySecCounter <= 0 && this._battler.canMove()) {
+        if (this.delaySecCounter() <= 0 && this._battler.canMove()) {
             this._battler.makeActions();
         }
         //
@@ -7398,11 +7406,11 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent Without Events
-     * @since v0.00a @version v0.15a
+     * @since v0.00a @version v0.16a
      */
     $._onCoreATBBecomeNotFull = function() {
         // Ensures toggling auto inputs will correctly reset the delay counter
-        this._delaySecCounter = 0;
+        this.setDelaySecCounter(0);
         //
         this._battler.clearActions();
         this._battler.runSATBNote("didCoreATBBecomeNotFull");
@@ -7535,6 +7543,22 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {NoteType} note - The note to have its end result retrieved
+     * @param {[{Number, Skill|Item}]} items - The items involved in the result
+     * @param {{*}?} argObj_ - The arguments needed for the notetags involved
+     * @returns {*?} The chained result from all effective notetags involved
+     */
+    $.latestItemResult_ = function(note, items, argObj_) {
+        var oldItems = this._battler.latestSATBItems;
+        this._battler.latestSATBItems = items;
+        var result = this._result_(note, argObj_);
+        this._battler.latestSATBItems = oldItems;
+        return result;
+    }; // $.latestItemResult_
+
+    /**
+     * Hotspot/Idempotent
      * @interface @since v0.00a @version v0.16a
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
@@ -7569,16 +7593,16 @@ function Window_SATBTurnClock() { // v0.11a+
      * @todo Investigates the minor but still nontrivial memory leaks
      */
     $._actResult = function(note, argObj_) {
-        // It's just to play safe
-        var items = this._battler.latestSATBItems_.clone();
+        // It's just to play safe so latestItemResult_ shouldn't be used here
+        var items = this._battler.latestSATBItems.clone();
         //
         // This function should be inlined as it can't be used anywhere else
         var results = items.map(function(item) {
-            this._battler.latestSATBItems_ = [item];
-            return this._result(note, argObj_);
+            this._battler.latestSATBItems = [item];
+            return this._result_(note, argObj_);
         }, this);
         //
-        this._battler.latestSATBItems_ = items;
+        this._battler.latestSATBItems = items;
         var actResult = results.reduce(_SATB._ACT_RESULT, 0);
         // Refers to reference tag NON_CONTINUOUS_INTEGER_ACT_COST
         if (this._battler.satbActMode() === "continuous") return actResult;
@@ -8006,7 +8030,7 @@ function Window_SATBTurnClock() { // v0.11a+
         }, // states
         thisState: function(battler, argObj) { return [argObj.state]; },
         latestSkillItems: function(battler) {
-            return battler.latestSATBItems_.map(_SATB._LATEST_SKILL_ITEM);
+            return battler.latestSATBItems.map(_SATB._LATEST_SKILL_ITEM);
         }, // latestSkillItems
         // They're not used anyway but including them here's just to play safe
         priority: function() { return []; },

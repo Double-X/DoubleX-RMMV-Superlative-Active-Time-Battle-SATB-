@@ -194,7 +194,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets the text showing the battler ATB values
  * It'll be the contents of a function returning a String
- * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems_;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
+ * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
  *
  * @param atbBarXOffset
  * @parent IsBarEnabled
@@ -399,7 +399,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets the text showing the battler ATB values
  * It'll be the contents of a function returning a String
- * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems_;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
+ * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
  *
  * @param statusATBBarXOffset
  * @parent IsBarEnabled
@@ -2072,7 +2072,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Runs additional events when ATB charge starts being forced
  * It'll be the contents of a function returning nothing
- * @default " "
+ * @default "SoundManager.playOk();"
  *
  * @param _didStartForceChargeNoteChainingRule
  * @parent IsEventEnabled
@@ -3553,14 +3553,14 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets how to update the action speed for each battler
  * It'll be contents of a function returning a Number
- * @default "var speedIncrement = 2000.0 / this._actionBattlers.length;\nthis._actionBattlers.forEach(function(battler) {\n    battler.latestSATBItems_.forEach(function(item) {\n        item.speed = Math.min(item.speed + speedIncrement, 2000);\n    });\n});\n"
+ * @default "var speedIncrement = 2000.0 / this._actionBattlers.length;\nthis._actionBattlers.forEach(function(battler) {\n    battler.latestSATBItems.forEach(function(item) {\n        item.speed = Math.min(item.speed + speedIncrement, 2000);\n    });\n});\n"
  *
  * @param actSpeed
  * @parent IsSpeedEnabled
  * @type note
  * @desc Sets the speed of the inputted action for each battler
  * It'll be contents of a function returning a Number
- * @default "return this.latestSATBItems_.reduce(function(speed, item) {\n    return speed + item.speed;\n}, 0);"
+ * @default "return this.latestSATBItems.reduce(function(speed, item) {\n    return speed + item.speed;\n}, 0);"
  *
  * @param _actSpeedNoteChainingRule
  * @parent IsSpeedEnabled
@@ -7017,7 +7017,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *         Setting updateActSpeeds as
  *         var speedIncrement = 2000.0 / this._actionBattlers.length;
  *         this._actionBattlers.forEach(function(battler) {
- *             battler.latestSATBItems_.forEach(function(item) {
+ *             battler.latestSATBItems.forEach(function(item) {
  *                 item.speed = Math.min(item.speed + speedIncrement, 2000);
  *             });
  *         });
@@ -7027,7 +7027,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *         speed to never be able to execute those actions
  *      3. actSpeed
  *         Setting actSpeed as
- *         return this.latestSATBItems_.reduce(function(speed, item) {
+ *         return this.latestSATBItems.reduce(function(speed, item) {
  *              return speed + item.speed;
  *         }, 0);; will set the action speed for the battler involved to be
  *         the original skill/item invocation speed

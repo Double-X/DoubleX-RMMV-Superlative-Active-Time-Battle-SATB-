@@ -2827,7 +2827,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             isSATBCooldown: this.isSATBCooldown(),
             satbActTimes: this.satbActTimes(),
             currentAction: this.currentAction(),
-            latestSATBItems_: this.latestSATBItems_,
+            latestSATBItems: this.latestSATBItems,
             canInputSATB: this.isActor() && $gameParty.canInputSATB(this),
             canActSATB: BattleManager.canActSATB(this)
         };
@@ -3085,7 +3085,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.05a @version v0.16a
      */
     _UT._checkLatestItem = function() {
-        if (this.latestSATBItems_.length > 0) return;
+        if (this.latestSATBItems.length > 0) return;
         SATBUT.showFailMsg(this.name(), "GB.new._checkLatestItem",
                 "A battler becoming actable should have an action to be " +
                 "exeucted!", GBB.context.call(this));
@@ -3747,8 +3747,8 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.05a @version v0.16a
      */
     _UT._checkNoLatestItem = function() {
-        if (this._battler.latestSATBItems_.length <= 0) return;
-        SATBUT.showFailMsg(this._battler.latestSATBItems_,
+        if (this._battler.latestSATBItems.length <= 0) return;
+        SATBUT.showFailMsg(this._battler.latestSATBItems,
                 "GSATBPT.new._checkNoLatestItem " + this._battler.name(),
                 "A battler shouldn't have a skill/item when not charging nor" +
                 " cooling down!", GBB.context.call(this._battler));
@@ -3818,7 +3818,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
      * @since v0.05a @version v0.16a
      */
     _UT._checkLatestItem = function() {
-        if (this._battler.latestSATBItems_.length > 0) return;
+        if (this._battler.latestSATBItems.length > 0) return;
         SATBUT.showFailMsg(this._battler.name(),
                 "GSATBPT.new._checkLatestItem", "A battler should have a " +
                 "skill/item when charging or cooling down!",

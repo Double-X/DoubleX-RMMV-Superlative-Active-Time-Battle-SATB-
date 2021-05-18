@@ -350,8 +350,8 @@
  *      Parameters:
  *      - v0.16a(GMT 1500 6-Apr-2020):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems_, which is an
- *           array of the old latestSATBItem_
+ *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *      - v0.15b(GMT 1400 3-Dec-2020):
@@ -405,8 +405,8 @@
  *      Configurations:
  *      - v0.16a(GMT 1500 6-Apr-2020):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems_, which is an
- *           array of the old latestSATBItem_
+ *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *      - v0.15a(GMT 0700 18-Aug-2020):
  *        1. Finished the Delay Module
  *        2. Added didDelayCounterEnd
@@ -457,8 +457,8 @@
  *      Implementations:
  *      - v0.16a(GMT 1500 6-Apr-2020):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems_, which is an
- *           array of the old latestSATBItem_
+ *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *        4. Fixed the bug of not updating the x positions of the battler
@@ -580,8 +580,8 @@
  *        1. Finished the core module
  *      Unit Tests:
  *      - v0.16a(GMT 1500 6-Apr-2020):
- *        1. latestSATBItem_ has changed to latestSATBItems_, which is an
- *           array of the old latestSATBItem_
+ *        1. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *        2. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *      - v0.15b(GMT 0400 7-Dec-2020):
@@ -684,8 +684,8 @@
  *      Documentations:
  *      - v0.16a(GMT 1500 6-Apr-2020):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems_, which is an
- *           array of the old latestSATBItem_
+ *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *        4. Fixed the bug of not updating the x positions of the battler
