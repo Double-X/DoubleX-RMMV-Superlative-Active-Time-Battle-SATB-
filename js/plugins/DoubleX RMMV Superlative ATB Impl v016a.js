@@ -2153,8 +2153,7 @@ function Window_SATBTurnClock() { // v0.11a+
             // Such invalid case will be reported in the unit test plugin
             case "coreBaseFillATBFrame": {
                 return this.addCoreTurnClockFrame(this._clockSpeeds.frame);
-            }
-            case "coreBaseFillATBSec": {
+            } case "coreBaseFillATBSec": {
                 /** @todo Thinks of if it's as correct as Date.now() */
                 var incrementS = SceneManager._deltaTime;
                 //
@@ -2167,7 +2166,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot
-     * @since v0.04a @version v0.11a
+     * @since v0.04a @version v0.16a
      * @param {Int} increment - The action ATB turn clock increment
      * @param {Boolean} isInt - Whether the ATB turn clock unit is an Integer
      * @param {String} clockUnit - The ATB turn clock unit(act/frame/sec)
@@ -2179,24 +2178,22 @@ function Window_SATBTurnClock() { // v0.11a+
         clock[clockUnit] += increment;
         if (isInt) clock[clockUnit] = Math.floor(clock[clockUnit]);
         if (clock[clockUnit] < clockMax) {
-            return SATBManager.procScene_("updateSATBWins");
-        }
-        this._onMaxCoreTurnClock(clockUnit, clockMax, overflowFunc);
+            SATBManager.procScene_("updateSATBWins");
+        } else this._onMaxCoreTurnClock(clockUnit, clockMax, overflowFunc);
     }; // SATBTurnManager._updateCoreTurnClock
 
     /**
      * Potential Hotspot
-     * @since v0.04a @version v0.11a
+     * @since v0.04a @version v0.16a
      * @param {String} clockUnit - The ATB turn clock unit(act/frame/sec)
      * @param {Number} clockMax - The ATB turn clock maximum value
      * @param {(Number)} overflowFunc - Function to run when turn clock overflow
      */
     SATBTurnManager._onMaxCoreTurnClock = function(clockUnit, clockMax, overflowFunc) {
+      // It's possible to change ATB turn clock unit during the same battle
         if (this.coreTurnClockUnit() !== clockUnit) {
             return SATBManager.procScene_("updateSATBWins");
-        }
-        // It's possible to change ATB turn clock unit during the same battle
-        if (this._canCoreTurnClockOverflow()) {
+        } else if (this._canCoreTurnClockOverflow()) {
             // The other maximum ATB turn clock units must be calculated here
             overflowFunc.call(this, clockMax);
             //
@@ -2280,106 +2277,69 @@ function Window_SATBTurnClock() { // v0.11a+
 
     var _SATB = SATB.SATBManager = {};
 
-    _SATB._SORT_INPUTABLE_INDICES = function(sign, a, b) { // v0.14a+
-        return (a - b) * sign;
-    }; // _SATB._SORT_INPUTABLE_INDICES
+    _SATB._COUNTDOWN_MODULE = function() { // v0.16a+
+        return {
+            modules: ["IsCountdownEnabled", "IsEventEnabled"],
+            paramFunc: "STATE_ID_FUNC",
+            noteFunc: "STATE_ID_NOTE_FUNC"
+        };
+    }; // _SATB._ZERO_ARG_NOTE_MODULE
+
+    _SATB._ZERO_ARG_NOTE_MODULE = function(modules) { // v0.16a+
+        return {
+            modules: modules,
+            paramFunc: "ZERO_ARG_FUNC",
+            noteFunc: "NOTE_FUNC"
+        };
+    }; // _SATB._ZERO_ARG_NOTE_MODULE
 
     _SATB.RUN_MODULES = { // v0.06a+
-        didFinishInput: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didBecomeActable: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didSetActTimes: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didSetMaxActTimes: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didStartATBFill: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        willCancelCharge: {
-            modules: ["IsChargeEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didStartForceCharge: {
-            modules: ["IsChargeEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        willCancelCooldown: {
-            modules: ["IsCooldownEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didCoreATBBecomeFull: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didCoreATBBecomeNotFull: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didChargeATBBecomeNotFull: {
-            modules: ["IsChargeEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didAddInputableActor: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
+        didFinishInput: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didBecomeActable: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didSetActTimes: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didSetMaxActTimes: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didStartATBFill: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        willCancelCharge: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsChargeEnabled",
+            "IsEventEnabled"
+        ]),
+        didStartForceCharge: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsChargeEnabled",
+            "IsEventEnabled"
+        ]),
+        willCancelCooldown: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsCooldownEnabled",
+            "IsEventEnabled"
+        ]),
+        didCoreATBBecomeFull: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didCoreATBBecomeNotFull: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsEventEnabled"
+        ]),
+        didChargeATBBecomeNotFull: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsChargeEnabled",
+            "IsEventEnabled"
+        ]),
+        didAddInputableActor: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
         // v0.13a+
-        didFillCoreATB: {
-            modules: ["IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didFillChargeATB: {
-            modules: ["IsChargeEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
-        didFillCooldownATB: {
-            modules: ["IsCooldownEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        },
+        didFillCoreATB: _SATB._ZERO_ARG_NOTE_MODULE(["IsEventEnabled"]),
+        didFillChargeATB: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsChargeEnabled",
+            "IsEventEnabled"
+        ]),
+        didFillCooldownATB: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsCooldownEnabled",
+            "IsEventEnabled"
+        ]),
         //
         // v0.12a+
-        didDecreaseCountdownStateTurn: {
-            modules: ["IsCountdownEnabled", "IsEventEnabled"],
-            paramFunc: "STATE_ID_FUNC",
-            noteFunc: "STATE_ID_NOTE_FUNC"
-        },
-        didIncreaseCountdownStateTurn: {
-            modules: ["IsCountdownEnabled", "IsEventEnabled"],
-            paramFunc: "STATE_ID_FUNC",
-            noteFunc: "STATE_ID_NOTE_FUNC"
-        },
+        didDecreaseCountdownStateTurn: _SATB._COUNTDOWN_MODULE(),
+        didIncreaseCountdownStateTurn: _SATB._COUNTDOWN_MODULE(),
         //
         // v0.15a+
-        didDelayCounterEnd: {
-            modules: ["IsDelayEnabled", "IsEventEnabled"],
-            paramFunc: "ZERO_ARG_FUNC",
-            noteFunc: "NOTE_FUNC"
-        }
+        didDelayCounterEnd: _SATB._ZERO_ARG_NOTE_MODULE([
+            "IsDelayEnabled",
+            "IsEventEnabled"
+        ]),
         //
     }; // _SATB.RUN_MODULES
 
@@ -2390,6 +2350,10 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // _SATB.IS_VALID_RESULT
 
     _SATB._REFRESH_MEM = function(mem) { mem.refresh(); };
+
+    _SATB._SORT_INPUTABLE_INDICES = function(sign, a, b) { // v0.14a+
+        return (a - b) * sign;
+    }; // _SATB._SORT_INPUTABLE_INDICES
 
     /**
      * Script Call/Hotspot/Nullipotent
@@ -2607,6 +2571,15 @@ function Window_SATBTurnClock() { // v0.11a+
         var c = "'use strict';\n" + content;
         return new Function("datum", "datumType", "stateId", c);
     }; // _SATB.STATE_ID_NOTE_FUNC
+    _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC = function(note) { // v0.16a+
+        return SATBManager.updateNoteChainingRule.bind(SATBManager, note);
+    }; // _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC
+    _SATB._UPDATE_NOTE_DEFAULT_FUNC = function(note) { // v0.16a+
+        return SATBManager.updateNoteDefault.bind(SATBManager, note);
+    }; // _SATB._UPDATE_NOTE_DEFAULT_FUNC
+    _SATB._UPDATE_NOTE_PRIORITIES = function(note) { // v0.16a+
+        return SATBManager.updateNotePriorities.bind(SATBManager, note);
+    }; // _SATB._UPDATE_NOTE_PRIORITIES
     _SATB.ZERO_ARG_FUNC = function(content) {
         return new Function("'use strict';\n" + content);
     }; // _SATB.ZERO_ARG_FUNC
@@ -2667,9 +2640,7 @@ function Window_SATBTurnClock() { // v0.11a+
     _SATB._TRY_JSON_PARAM = function(param, val) {
         if (!val) return val;
         // It's possible for users to input raw parameter values directly
-        try {
-            return _SATB._JSON_PARAM(JSON.parse(val));
-        } catch (err) {
+        try { return _SATB._JSON_PARAM(JSON.parse(val)); } catch (err) {
             console.warn([
                 "The value of the parameter " + param + " is",
                 val,
@@ -3131,18 +3102,15 @@ function Window_SATBTurnClock() { // v0.11a+
         coreTurnATBTime: SATBManager.invalidateParamCache,
         coreTurnATBAct: SATBManager.invalidateParamCache,
         canCoreTurnClockOverflow: SATBManager.invalidateParamCache,
-        coreMaxATBVal:
-                SATBManager.updateNoteDefault.bind(SATBManager, "coreMax"),
-        _coreMaxATBValNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "coreMax"),
-        _coreMaxATBValNotePriorities:
-                SATBManager.updateNotePriorities.bind(SATBManager, "coreMax"),
-        _coreActStateNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "coreActState"),
+        coreMaxATBVal: _SATB._UPDATE_NOTE_DEFAULT_FUNC("coreMax"),
+        _coreMaxATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("coreMax"),
+        _coreMaxATBValNotePriorities: _SATB._UPDATE_NOTE_PRIORITIES("coreMax"),
+        _coreActStateNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("coreActState"),
         //
         // (v0.04a+)Bar Module
-        isShowATBBar: SATBManager.updateNoteDefault.bind(
-                SATBManager, "isBarVisible"),
+        isShowATBBar: _SATB._UPDATE_NOTE_DEFAULT_FUNC("isBarVisible"),
         atbBarText: SATBManager.invalidateParamCache,
         atbBarXOffset: SATBManager.invalidateParamCache,
         atbBarYOffset: SATBManager.invalidateParamCache,
@@ -3165,12 +3133,12 @@ function Window_SATBTurnClock() { // v0.11a+
         atbBarColor1: SATBManager.invalidateParamCache,
         atbBarColor2: SATBManager.invalidateParamCache,
         atbBarBackColor: SATBManager.invalidateParamCache,
-        _isBarVisibleNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "isBarVisible"),
-        _isBarVisibleNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "isBarVisible"),
-        isShowStatusATBBar: SATBManager.updateNoteDefault.bind(
-                SATBManager, "isStatusBarVisible"), // v0.06a+
+        _isBarVisibleNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("isBarVisible"),
+        _isBarVisibleNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("isBarVisible"),
+        isShowStatusATBBar: // v0.06a+
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("isStatusBarVisible"),
         statusATBBarText: SATBManager.invalidateParamCache, // v0.14a+
         statusATBBarXOffset: SATBManager.invalidateParamCache, // v0.14a+
         statusATBBarYOffset: SATBManager.invalidateParamCache, // v0.14a+
@@ -3193,10 +3161,10 @@ function Window_SATBTurnClock() { // v0.11a+
         statusATBBarColor1: SATBManager.invalidateParamCache, // v0.14a+
         statusATBBarColor2: SATBManager.invalidateParamCache, // v0.14a+
         statusATBBarBackColor: SATBManager.invalidateParamCache, // v0.14a+
-        _isStatusBarVisibleNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "isStatusBarVisible"), // v0.06a+
-        _isStatusBarVisibleNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "isStatusBarVisible"), // v0.06a+
+        _isStatusBarVisibleNoteChainingRule: // v0.06a+
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("isStatusBarVisible"),
+        _isStatusBarVisibleNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("isStatusBarVisible"), // v0.06a+
         //
         // (v0.04a+)Wait Module
         forceRunATBKey: SATBManager.invalidateParamCache,
@@ -3265,60 +3233,52 @@ function Window_SATBTurnClock() { // v0.11a+
         forceATBStopCmdTextYOffset: SATBManager.invalidateParamCache,
         //
         // (v0.16a+)Action Module
-        _actCostNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "actCost"),
-        _actCostNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "actCost"),
-        actMode: SATBManager.updateNoteDefault.bind(SATBManager, "actMode"),
-        _actModeNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "actMode"),
-        _actModeNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "actMode"),
+        _actCostNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("actCost"),
+        _actCostNotePriorities: _SATB._UPDATE_NOTE_PRIORITIES("actCost"),
+        actMode: _SATB._UPDATE_NOTE_DEFAULT_FUNC("actMode"),
+        _actModeNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("actMode"),
+        _actModeNotePriorities: _SATB._UPDATE_NOTE_PRIORITIES("actMode"),
         //
         // (v0.04a+)Charge Module
-        chargeMaxATBVal:
-                SATBManager.updateNoteDefault.bind(SATBManager, "chargeMax"),
-        _chargeMaxATBValNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "chargeMax"),
-        _chargeMaxATBValNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "chargeMax"),
-        isPayBeforeExecCharge: SATBManager.updateNoteDefault.bind(
-                SATBManager, "isPayBeforeExecCharge"),
+        chargeMaxATBVal: _SATB._UPDATE_NOTE_DEFAULT_FUNC("chargeMax"),
+        _chargeMaxATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("chargeMax"),
+        _chargeMaxATBValNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("chargeMax"),
+        isPayBeforeExecCharge:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("isPayBeforeExecCharge"),
         _isPayBeforeExecChargeNoteChainingRule:
-                SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "isPayBeforeExecCharge"),
-        _isPayBeforeExecChargeNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "isPayBeforeExecCharge"),
-        canCancelCharge: SATBManager.updateNoteDefault.bind(
-                SATBManager, "canCancelCharge"),
-        _canCancelChargeNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "canCancelCharge"),
-        _canCancelChargeNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "canCancelCharge"),
-        canForceCharge: SATBManager.updateNoteDefault.bind(
-                SATBManager, "canForceCharge"),
-        _canForceChargeNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "canForceCharge"),
-        _canForceChargeNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "canForceCharge"),
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("isPayBeforeExecCharge"),
+        _isPayBeforeExecChargeNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("isPayBeforeExecCharge"),
+        canCancelCharge: _SATB._UPDATE_NOTE_DEFAULT_FUNC("canCancelCharge"),
+        _canCancelChargeNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("canCancelCharge"),
+        _canCancelChargeNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("canCancelCharge"),
+        canForceCharge: _SATB._UPDATE_NOTE_DEFAULT_FUNC("canForceCharge"),
+        _canForceChargeNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("canForceCharge"),
+        _canForceChargeNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("canForceCharge"),
         //
         // (v0.05a+)Cooldown Module
-        cooldownMaxATBVal:
-                SATBManager.updateNoteDefault.bind(SATBManager, "cooldownMax"),
-        _cooldownMaxATBValNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "cooldownMax"),
-        _cooldownMaxATBValNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "cooldownMax"),
-        canCancelCooldown: SATBManager.updateNoteDefault.bind(
-                SATBManager, "canCancelCooldown"),
-        _canCancelCooldownNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "canCancelCooldown"),
-        _canCancelCooldownNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "canCancelCooldown"),
+        cooldownMaxATBVal: _SATB._UPDATE_NOTE_DEFAULT_FUNC("cooldownMax"),
+        _cooldownMaxATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("cooldownMax"),
+        _cooldownMaxATBValNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("cooldownMax"),
+        canCancelCooldown: _SATB._UPDATE_NOTE_DEFAULT_FUNC("canCancelCooldown"),
+        _canCancelCooldownNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("canCancelCooldown"),
+        _canCancelCooldownNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("canCancelCooldown"),
         //
         // (v0.12a+)Countdown Module
-        _countdownNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "countdown"),
+        _countdownNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("countdown"),
         //
         // (v0.14a+)CTB Module
         isShowCTBWin: SATBManager.invalidateParamCache,
@@ -3343,9 +3303,9 @@ function Window_SATBTurnClock() { // v0.11a+
         ctbWinTextYOffset: SATBManager.invalidateParamCache,
         //
         // (v0.15a+) Delay Module
-        delaySecs: SATBManager.updateNoteDefault.bind(SATBManager, "delay"),
-        _delayNotePriorities:
-                SATBManager.updateNotePriorities.bind(SATBManager, "delay"),
+        delaySecs: _SATB._UPDATE_NOTE_DEFAULT_FUNC("delay"),
+        _delayNoteChainingRule: _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("delay"),
+        _delayNotePriorities: _SATB._UPDATE_NOTE_PRIORITIES("delay"),
         //
         // (v0.14a+) Order Module
         isShowContinuousOrderWin: SATBManager.invalidateParamCache,
@@ -3396,30 +3356,30 @@ function Window_SATBTurnClock() { // v0.11a+
         continuousOrderChargeTextX: SATBManager.invalidateParamCache,
         continuousOrderChargeTextY: SATBManager.invalidateParamCache,
         continuousOrderChargeTextAlign: SATBManager.invalidateParamCache,
-        continuousOrderSpriteOpacity: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteOpacity"),
-        continuousOrderSpriteIconFolder: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconFolder"),
-        continuousOrderSpriteIconFilename: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconFilename"),
-        continuousOrderSpriteIconHue: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconHue"),
-        continuousOrderSpriteIconSmooth: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconSmooth"),
-        continuousOrderSpriteIconXCoor: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconXCoor"),
-        continuousOrderSpriteIconYCoor: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconYCoor"),
-        continuousOrderSpriteIconSourceW: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconSourceW"),
-        continuousOrderSpriteIconSourceH: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconSourceH"),
-        continuousOrderSpriteIconW: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconW"),
-        continuousOrderSpriteIconH: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteIconH"),
-        continuousOrderSpriteY: SATBManager.updateNoteDefault.bind(
-                SATBManager, "continuousOrderSpriteY"),
+        continuousOrderSpriteOpacity:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("continuousOrderSpriteOpacity"),
+        continuousOrderSpriteIconFolder: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconFolder"),
+        continuousOrderSpriteIconFilename: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconFilename"),
+        continuousOrderSpriteIconHue:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("continuousOrderSpriteIconHue"),
+        continuousOrderSpriteIconSmooth: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconSmooth"),
+        continuousOrderSpriteIconXCoor: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconXCoor"),
+        continuousOrderSpriteIconYCoor: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconYCoor"),
+        continuousOrderSpriteIconSourceW: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconSourceW"),
+        continuousOrderSpriteIconSourceH: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "continuousOrderSpriteIconSourceH"),
+        continuousOrderSpriteIconW:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("continuousOrderSpriteIconW"),
+        continuousOrderSpriteIconH:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("continuousOrderSpriteIconH"),
+        continuousOrderSpriteY:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("continuousOrderSpriteY"),
         isShowDiscreteOrderWin: SATBManager.invalidateParamCache,
         discreteOrderWinX: SATBManager.invalidateParamCache,
         discreteOrderWinY: SATBManager.invalidateParamCache,
@@ -3438,83 +3398,77 @@ function Window_SATBTurnClock() { // v0.11a+
                 SATBManager.invalidateParamCache,
         discreteOrderSpriteX: SATBManager.invalidateParamCache,
         discreteOrderSpriteY: SATBManager.invalidateParamCache,
-        discreteOrderSpriteTargetOpacity: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteTargetOpacity"),
-        discreteOrderSpriteIconFolder: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconFolder"),
-        discreteOrderSpriteIconFilename: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconFilename"),
-        discreteOrderSpriteIconHue: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconHue"),
-        discreteOrderSpriteIconSmooth: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconSmooth"),
-        discreteOrderSpriteIconXCoor: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconXCoor"),
-        discreteOrderSpriteIconYCoor: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconYCoor"),
-        discreteOrderSpriteIconSourceW: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconSourceW"),
-        discreteOrderSpriteIconSourceH: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconSourceH"),
-        discreteOrderSpriteIconW: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconW"),
-        discreteOrderSpriteIconH: SATBManager.updateNoteDefault.bind(
-                SATBManager, "discreteOrderSpriteIconH"),
+        discreteOrderSpriteTargetOpacity: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteTargetOpacity"),
+        discreteOrderSpriteIconFolder: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteIconFolder"),
+        discreteOrderSpriteIconFilename: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteIconFilename"),
+        discreteOrderSpriteIconHue:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("discreteOrderSpriteIconHue"),
+        discreteOrderSpriteIconSmooth: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteIconSmooth"),
+        discreteOrderSpriteIconXCoor:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("discreteOrderSpriteIconXCoor"),
+        discreteOrderSpriteIconYCoor:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("discreteOrderSpriteIconYCoor"),
+        discreteOrderSpriteIconSourceW: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteIconSourceW"),
+        discreteOrderSpriteIconSourceH: _SATB._UPDATE_NOTE_DEFAULT_FUNC(
+                "discreteOrderSpriteIconSourceH"),
+        discreteOrderSpriteIconW:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("discreteOrderSpriteIconW"),
+        discreteOrderSpriteIconH:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("discreteOrderSpriteIconH"),
         //
         // (v0.10a+) Rate Module
-        coreATBRate:
-                SATBManager.updateNoteDefault.bind(SATBManager, "coreATBRate"),
-        _coreATBRateNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "coreATBRate"),
-        _coreATBRateNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "coreATBRate"),
-        chargeATBRate: SATBManager.updateNoteDefault.bind(
-                SATBManager, "chargeATBRate"),
-        _chargeATBRateNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "chargeATBRate"),
-        _chargeATBRateNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "chargeATBRate"),
-        cooldownATBRate: SATBManager.updateNoteDefault.bind(
-                SATBManager, "cooldownATBRate"),
-        _cooldownATBRateNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "cooldownATBRate"),
-        _cooldownATBRateNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "cooldownATBRate"),
+        coreATBRate: _SATB._UPDATE_NOTE_DEFAULT_FUNC("coreATBRate"),
+        _coreATBRateNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("coreATBRate"),
+        _coreATBRateNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("coreATBRate"),
+        chargeATBRate: _SATB._UPDATE_NOTE_DEFAULT_FUNC("chargeATBRate"),
+        _chargeATBRateNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("chargeATBRate"),
+        _chargeATBRateNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("chargeATBRate"),
+        cooldownATBRate: _SATB._UPDATE_NOTE_DEFAULT_FUNC("cooldownATBRate"),
+        _cooldownATBRateNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("cooldownATBRate"),
+        _cooldownATBRateNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("cooldownATBRate"),
         //
         // (v0.07a+) Reset Module
-        resetATBVal:
-                SATBManager.updateNoteDefault.bind(SATBManager, "resetATBVal"),
-        _resetATBValNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "resetATBVal"),
+        resetATBVal: _SATB._UPDATE_NOTE_DEFAULT_FUNC("resetATBVal"),
+        _resetATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("resetATBVal"),
         _resetATBValNotePriorities: SATBManager.updateNotePriorities.bind(
                 SATBManager, "resetATBVal"),
         //
         // (v0.08a+) Speed Module
-        actSpeed: SATBManager.updateNoteDefault.bind(SATBManager, "actSpeed"),
-        _actSpeedNoteChainingRule: SATBManager.updateNoteChainingRule.bind(
-                SATBManager, "actSpeed"),
-        _actSpeedNotePriorities:
-                SATBManager.updateNotePriorities.bind(SATBManager, "actSpeed"),
+        actSpeed: _SATB._UPDATE_NOTE_DEFAULT_FUNC("actSpeed"),
+        _actSpeedNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("actSpeed"),
+        _actSpeedNotePriorities: _SATB._UPDATE_NOTE_PRIORITIES("actSpeed"),
         //
         // (v0.09a+) Start Module
-        normStartATBVal: SATBManager.updateNoteDefault.bind(
-                SATBManager, "normStartATBVal"),
-        _normStartATBValNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "normStartATBVal"),
-        _normStartATBValNotePriorities: SATBManager.updateNotePriorities.bind(
-                SATBManager, "normStartATBVal"),
-        preemptStartATBVal: SATBManager.updateNoteDefault.bind(
-                SATBManager, "preemptStartATBVal"),
-        _preemptStartATBValNoteChainingRule: SATBManager.updateNoteChainingRule.
-                bind(SATBManager, "preemptStartATBVal"),
-        _preemptStartATBValNotePriorities: SATBManager.updateNotePriorities.
-                bind(SATBManager, "preemptStartATBVal"),
-        surpriseStartATBVal: SATBManager.updateNoteDefault.bind(
-                SATBManager, "surpriseStartATBVal"),
-        _surpriseStartATBValNoteChainingRule: SATBManager.
-                updateNoteChainingRule.bind(SATBManager, "surpriseStartATBVal"),
-        _surpriseStartATBValNotePriorities: SATBManager.updateNotePriorities.
-              bind(SATBManager, "surpriseStartATBVal"),
+        normStartATBVal: _SATB._UPDATE_NOTE_DEFAULT_FUNC("normStartATBVal"),
+        _normStartATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("normStartATBVal"),
+        _normStartATBValNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("normStartATBVal"),
+        preemptStartATBVal:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("preemptStartATBVal"),
+        _preemptStartATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("preemptStartATBVal"),
+        _preemptStartATBValNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("preemptStartATBVal"),
+        surpriseStartATBVal:
+                _SATB._UPDATE_NOTE_DEFAULT_FUNC("surpriseStartATBVal"),
+        _surpriseStartATBValNoteChainingRule:
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC("surpriseStartATBVal"),
+        _surpriseStartATBValNotePriorities:
+                _SATB._UPDATE_NOTE_PRIORITIES("surpriseStartATBVal"),
         //
         // (v0.14a+) Turn Module
         isShowBattleTurnClockWin: SATBManager.invalidateParamCache,
@@ -3541,12 +3495,11 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // _SATB._PARAM_UPDATES
     Object.keys(SATBM.RUN_MODULES).forEach(function(note) { // v0.06a+
         // These hardcode the param names but reduce works on adding events
-        _SATB._PARAM_UPDATES[note] =
-                SATBManager.updateNoteDefault.bind(SATBManager, note);
+        _SATB._PARAM_UPDATES[note] = _SATB._UPDATE_NOTE_DEFAULT_FUNC(note);
         _SATB._PARAM_UPDATES["_" + note + "NoteChainingRule"] =
-                SATBManager.updateNoteChainingRule.bind(SATBManager, note);
+                _SATB._UPDATE_NOTE_CHAINING_RULE_FUNC(note);
         _SATB._PARAM_UPDATES["_" + note + "NotePriorities"] =
-                SATBManager.updateNotePriorities.bind(SATBManager, note);
+                _SATB._UPDATE_NOTE_PRIORITIES(note);
         //
     });
     //
@@ -3557,7 +3510,7 @@ function Window_SATBTurnClock() { // v0.11a+
         "_isNoteCached",
         "_isAlwaysRecacheAllSwitchVars"
         //
-    ];
+    ]; // _SATB._BOOL_PARAMS
     _SATB._JSON_PARAMS = [
         // Core Module
         "IsCoreEnabled",
@@ -4702,7 +4655,7 @@ function Window_SATBTurnClock() { // v0.11a+
         /**
          * The this pointer is klass.prototype
          * Idempotent
-         * @since v0.00a @version v0.04a
+         * @since v0.00a @version v0.16a
          * @param {id} id - The id of the game switch/variable
          */
         _SATB._raiseMemChangeFactors = function(id) {
@@ -4711,10 +4664,9 @@ function Window_SATBTurnClock() { // v0.11a+
             //
             if ($gameSystem.satbParam("_isAlwaysRecacheAllSwitchVars")) {
                 // refresh raises these factors and also instantly update values
-                return SATBManager.refreshAllSATBMems();
+                SATBManager.refreshAllSATBMems();
                 //
-            }
-            _SATB._raiseMappedMemChangeFactors.call(this, id);
+            } else _SATB._raiseMappedMemChangeFactors.call(this, id);
         }; // _SATB._raiseMemChangeFactors
 
         /**
@@ -5206,28 +5158,26 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @abstract @interface @since v0.00a @version v0.09a
+     * @abstract @interface @since v0.00a @version v0.16a
      */
     $.setPreemptStartSATB = function() {
         if (!SATBManager.areModulesEnabled(["IsStartEnabled"])) {
             // So this plugin still works for battler not being actor nor enemy
             return this.setNormStartSATB();
             //
-        }
-        this.setStartSATB(this.satbNoteResult_("preemptStartATBVal"));
+        } else this.setStartSATB(this.satbNoteResult_("preemptStartATBVal"));
     }; // $.setPreemptStartSATB
 
     /**
      * Idempotent
-     * @abstract @interface @since v0.00a @version v0.09a
+     * @abstract @interface @since v0.00a @version v0.16a
      */
     $.setSurpriseStartSATB = function() {
         if (!SATBManager.areModulesEnabled(["IsStartEnabled"])) {
             // So this plugin still works for battler not being actor nor enemy
             return this.setNormStartSATB();
             //
-        }
-        this.setStartSATB(this.satbNoteResult_("surpriseStartATBVal"));
+        } else this.setStartSATB(this.satbNoteResult_("surpriseStartATBVal"));
     }; // $.setSurpriseStartSATB
 
     // (v0.16a+)Refers to the Game_SATBActs counterparts
@@ -5456,13 +5406,12 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @interface @since v0.00a @version v0.09a
+     * @interface @since v0.00a @version v0.16a
      */
     $.setNormStartSATB = function() {
         if (SATBManager.areModulesEnabled(["IsStartEnabled"])) {
-            return this.setStartSATB(this.satbNoteResult_("normStartATBVal"));
-        }
-        this.initCoreSATBActs(0);
+            this.setStartSATB(this.satbNoteResult_("normStartATBVal"));
+        } else this.initCoreSATBActs(0);
     }; // $.setNormStartSATB
 
     /**
@@ -5991,13 +5940,12 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @interface @since v0.00a @version v0.09a
+     * @interface @since v0.00a @version v0.16a
      */
     $.setPreemptStartSATB = function() {
         if (SATBManager.areModulesEnabled(["IsStartEnabled"])) {
-            return $$.setPreemptStartSATB.call(this);
-        }
-        this.setStartSATB(this.coreMaxSATB());
+            $$.setPreemptStartSATB.call(this);
+        } else this.setStartSATB(this.coreMaxSATB());
     }; // $.setPreemptStartSATB
 
     /**
@@ -6082,13 +6030,12 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @interface @since v0.00a @version v0.09a
+     * @interface @since v0.00a @version v0.16a
      */
     $.setSurpriseStartSATB = function() {
         if (SATBManager.areModulesEnabled(["IsStartEnabled"])) {
-            return $$.setSurpriseStartSATB.call(this);
-        }
-        this.setStartSATB(this.coreMaxSATB());
+            $$.setSurpriseStartSATB.call(this);
+        } else this.setStartSATB(this.coreMaxSATB());
     }; // $.setSurpriseStartSATB
 
     /**
@@ -6580,14 +6527,13 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      *  Script Call/Hotspot/Nullipotent
-     * @interface @since v0.04a @version v0.10a
+     * @interface @since v0.04a @version v0.16a
      * @returns {Number} The ATB fill rate without charge nor cooldown
      */
     $.coreRate = function() {
           if (SATBManager.areModulesEnabled(["IsRateEnabled"])) {
               return this._battler.satbNoteResult_("coreATBRate");
-          }
-          return this._defaultFillRate();
+          } else return this._defaultFillRate();
     }; // $.coreRate
 
     /**
@@ -7083,8 +7029,8 @@ function Window_SATBTurnClock() { // v0.11a+
     $._fillCoreATB = function() {
         // Discrete and continuous modes need to restore the original ATB values
         if (isNaN(this._lastEnoughCoreATB)) {
-            return this.addCoreATB(this.coreRate());
-        } else return this.setCoreATB(this._lastEnoughCoreATB);
+            this.addCoreATB(this.coreRate());
+        } else this.setCoreATB(this._lastEnoughCoreATB);
         //
     }; // $._fillCoreATB
 
@@ -7354,14 +7300,13 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @since v0.04a @version v0.04a
+     * @since v0.04a @version v0.16a
      */
     $._onChargeATBBecomeFull = function() {
+        // It's to prevent errors from force charge state without Charge Module
         if (this._forceChargeState !== _SATB._FORCE_CHARGE) {
             return this._battler.onBecomeSATBActable();
-        }
-        // It's to prevent errors from force charge state without Charge Module
-        if (SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
+        } else if (SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
         //
         this._battler.onBecomeSATBActable();
     }; // $._onChargeATBBecomeFull
@@ -8306,7 +8251,6 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $._raiseMarkedNoteChangeFactors = function(note) {
         this.raiseChangeFactors(note, this._raisedNoteChangeFactors(note));
-        //
     }; // $._raiseMarkedNoteChangeFactors
 
     /**
@@ -8413,6 +8357,17 @@ function Window_SATBTurnClock() { // v0.11a+
         };
         //
     }; // _SATB._COND_UNIT_INTERVAL_PAIR_FUNC
+    _SATB._DEFAULT_RESULT_NO_ARG = function(note) { // v0.16a+
+        return function() {
+            return _SATB._DEFAULT_BATTLER_RESULT.call(this, note);
+        };
+    }; // _SATB._DEFAULT_RESULT_NO_ARG
+    _SATB._DEFAULT_SPRITE_RESULT_ARG = function(note) { // v0.16a+
+        return function(argObj_) {
+            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
+                    this, note, argObj_);
+        };
+    }; // _SATB._DEFAULT_SPRITE_RESULT_ARG
     _SATB._IS_VALID_COND_NUM_PAIR = function(note, pair_) {
     // v0.12a+; Potential Hotspot
         if (!pair_ || !pair_.entry1 || !pair_.entry2) return false;
@@ -8459,152 +8414,86 @@ function Window_SATBTurnClock() { // v0.11a+
         // Core Module
         coreMax: function() { return this._battler.baseCoreMaxSATB(); },
         //
-        isBarVisible: function() { // (v0.04a+)Bar Module
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "isShowATBBar");
-        }, // isBarVisible
-        isStatusBarVisible: function() { // (v0.06a+)Bar Module
-            return _SATB._DEFAULT_BATTLER_RESULT.call(
-                    this, "isShowStatusATBBar");
-        }, // isStatusBarVisible
+        // (v0.04a+)Bar Module
+        isBarVisible: _SATB._DEFAULT_RESULT_NO_ARG("isShowATBBar"),
+        //
+        // (v0.06a+)Bar Module
+        isStatusBarVisible: _SATB._DEFAULT_RESULT_NO_ARG("isShowStatusATBBar"),
+        //
         // (v0.04a+)Action Module
         actCost: function() {
             return 1; // Refers to reference tag DEFAULT_ACT_COST_1
         }, // actCost
-        actMode: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "actMode");
-        }, // actMode
+        actMode: _SATB._DEFAULT_RESULT_NO_ARG("actMode"),
         //
         // (v0.04a+)Charge Module
         chargeMax: function() { return this._battler.baseChargeMaxSATB(); },
-        isPayBeforeExecCharge: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(
-                    this, "isPayBeforeExecCharge");
-        }, // isPayBeforeExecCharge
-        canCancelCharge: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "canCancelCharge");
-        }, // canCancelCharge
-        canForceCharge: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "canForceCharge");
-        }, // canForceCharge
+        isPayBeforeExecCharge:
+                _SATB._DEFAULT_RESULT_NO_ARG("isPayBeforeExecCharge"),
+        canCancelCharge: _SATB._DEFAULT_RESULT_NO_ARG("canCancelCharge"),
+        canForceCharge: _SATB._DEFAULT_RESULT_NO_ARG("canForceCharge"),
         //
         // (v0.05a+)Cooldown Module
         cooldownMax: function() {
             return this._battler.baseCooldownMaxSATB();
         }, // cooldownMax
-        canCancelCooldown: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(
-                    this, "canCancelCooldown");
-        }, // canCancelCooldown
+        canCancelCooldown: _SATB._DEFAULT_RESULT_NO_ARG("canCancelCooldown"),
         //
         // (v0.15a+)Delay Module
-        delay: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "delaySecs");
-        }, // delay
+        delay: _SATB._DEFAULT_RESULT_NO_ARG("delaySecs"),
         //
         // (v0.14a+)Order Module
-        continuousOrderSpriteOpacity: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteOpacity", argObj_);
-        }, // continuousOrderSpriteOpacity
-        continuousOrderSpriteIconFolder: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconFolder", argObj_);
-        }, // continuousOrderSpriteIconFolder
-        continuousOrderSpriteIconFilename: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconFilename", argObj_);
-        }, // continuousOrderSpriteIconFilename
-        continuousOrderSpriteIconHue: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconHue", argObj_);
-        }, // continuousOrderSpriteIconHue
-        continuousOrderSpriteIconSmooth: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconSmooth", argObj_);
-        }, // continuousOrderSpriteIconSmooth
-        continuousOrderSpriteIconXCoor: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconXCoor", argObj_);
-        }, // continuousOrderSpriteIconXCoor
-        continuousOrderSpriteIconYCoor: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconYCoor", argObj_);
-        }, // continuousOrderSpriteIconYCoor
-        continuousOrderSpriteIconSourceW: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconSourceW", argObj_);
-        }, // continuousOrderSpriteIconSourceW
-        continuousOrderSpriteIconSourceH: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconSourceH", argObj_);
-        }, // continuousOrderSpriteIconSourceH
-        continuousOrderSpriteIconW: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconW", argObj_);
-        }, // continuousOrderSpriteIconW
-        continuousOrderSpriteIconH: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteIconH", argObj_);
-        }, // continuousOrderSpriteIconH
-        continuousOrderSpriteY: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "continuousOrderSpriteY", argObj_);
-        }, // continuousOrderSpriteY
-        discreteOrderSpriteTargetOpacity: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteTargetOpacity", argObj_);
-        }, // discreteOrderSpriteTargetOpacity
-        discreteOrderSpriteIconFolder: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconFolder", argObj_);
-        }, // discreteOrderSpriteIconFolder
-        discreteOrderSpriteIconFilename: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconFilename", argObj_);
-        }, // discreteOrderSpriteIconFilename
-        discreteOrderSpriteIconHue: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconHue", argObj_);
-        }, // discreteOrderSpriteIconHue
-        discreteOrderSpriteIconSmooth: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconSmooth", argObj_);
-        }, // discreteOrderSpriteIconSmooth
-        discreteOrderSpriteIconXCoor: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconXCoor", argObj_);
-        }, // discreteOrderSpriteIconXCoor
-        discreteOrderSpriteIconYCoor: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconYCoor", argObj_);
-        }, // discreteOrderSpriteIconYCoor
-        discreteOrderSpriteIconSourceW: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconSourceW", argObj_);
-        }, // discreteOrderSpriteIconSourceW
-        discreteOrderSpriteIconSourceH: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconSourceH", argObj_);
-        }, // discreteOrderSpriteIconSourceH
-        discreteOrderSpriteIconW: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconW", argObj_);
-        }, // discreteOrderSpriteIconW
-        discreteOrderSpriteIconH: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_SPRITE_RESULT.call(
-                    this, "discreteOrderSpriteIconH", argObj_);
-        }, // discreteOrderSpriteIconH
+        continuousOrderSpriteOpacity: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteOpacity"),
+        continuousOrderSpriteIconFolder: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconFolder"),
+        continuousOrderSpriteIconFilename: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconFilename"),
+        continuousOrderSpriteIconHue: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconHue"),
+        continuousOrderSpriteIconSmooth: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconSmooth"),
+        continuousOrderSpriteIconXCoor: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconXCoor"),
+        continuousOrderSpriteIconYCoor: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconYCoor"),
+        continuousOrderSpriteIconSourceW: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconSourceW"),
+        continuousOrderSpriteIconSourceH: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "continuousOrderSpriteIconSourceH"),
+        continuousOrderSpriteIconW:
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("continuousOrderSpriteIconW"),
+        continuousOrderSpriteIconH:
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("continuousOrderSpriteIconH"),
+        continuousOrderSpriteY:
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("continuousOrderSpriteY"),
+        discreteOrderSpriteTargetOpacity: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteTargetOpacity"),
+        discreteOrderSpriteIconFolder: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconFolder"),
+        discreteOrderSpriteIconFilename: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconFilename"),
+        discreteOrderSpriteIconHue:
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconHue"),
+        discreteOrderSpriteIconSmooth: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconSmooth"),
+        discreteOrderSpriteIconXCoor: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconXCoor"),
+        discreteOrderSpriteIconYCoor: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconYCoor"),
+        discreteOrderSpriteIconSourceW: _SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconSourceW"),
+        discreteOrderSpriteIconSourceH: SATB._DEFAULT_SPRITE_RESULT_ARG(
+                "discreteOrderSpriteIconSourceH"),
+        discreteOrderSpriteIconW:
+                SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconW"),
+        discreteOrderSpriteIconH:
+                SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconH"),
         //
         // (v0.10a+)Rate Module
-        coreATBRate: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "coreATBRate");
-        }, // coreATBRate
-        chargeATBRate: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "chargeATBRate");
-        }, // chargeATBRate
-        cooldownATBRate: function(argObj_) {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "cooldownATBRate");
-        }, // cooldownATBRate
+        coreATBRate: _SATB._DEFAULT_RESULT_NO_ARG("coreATBRate"),
+        chargeATBRate: _SATB._DEFAULT_RESULT_NO_ARG("chargeATBRate"),
+        cooldownATBRate: _SATB._DEFAULT_RESULT_NO_ARG("cooldownATBRate"),
         //
         // (v0.07a+)Reset Module
         resetATBVal: function(argObj_) {
@@ -8613,22 +8502,13 @@ function Window_SATBTurnClock() { // v0.11a+
         }, // resetATBVal
         //
         // (v0.08a+)Speed Module
-        actSpeed: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "actSpeed");
-        }, // actSpeed
+        actSpeed: _SATB._DEFAULT_RESULT_NO_ARG("actSpeed"),
         //
         // (v0.09a+)Start Module
-        normStartATBVal: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(this, "normStartATBVal");
-        }, // normStartATBVal
-        preemptStartATBVal: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(
-                    this, "preemptStartATBVal");
-        }, // preemptStartATBVal
-        surpriseStartATBVal: function() {
-            return _SATB._DEFAULT_BATTLER_RESULT.call(
-                    this, "surpriseStartATBVal");
-        } // surpriseStartATBVal
+        normStartATBVal: _SATB._DEFAULT_RESULT_NO_ARG("normStartATBVal"),
+        preemptStartATBVal: _SATB._DEFAULT_RESULT_NO_ARG("preemptStartATBVal"),
+        surpriseStartATBVal:
+                _SATB._DEFAULT_RESULT_NO_ARG("surpriseStartATBVal"),
         //
     }; // _SATB._DEFAULT_RESULTS
     Object.keys(SATBM.RUN_MODULES).forEach(function(note) { // v0.06a+
@@ -9681,7 +9561,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Potential Hotspot/Nullipotent
-     * @interface @since v0.00a @version v0.04a
+     * @interface @since v0.00a @version v0.16a
      * @param {[<T>]} list - The effective notetag results to be chained
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
@@ -9696,14 +9576,13 @@ function Window_SATBTurnClock() { // v0.11a+
         var resultFunc = _SATB._RESULT_CHAINING_RULES[chainingRule][valOp];
         if (list.length <= 0 || _SATB._IS_NOTE_USE_DEFAULT[note]) {
             return resultFunc.call(this, list, note, argObj_, initVal_);
-        }
-        return resultFunc.call(this, list, note, argObj_);
+        } else return resultFunc.call(this, list, note, argObj_);
         //
     }; // $.chainedAssociativeResult_
 
     /**
      * Potential Hotspot/Nullipotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.04a @version v0.16a
      * @param {[PairFunc]} list - The effective notetag list to be chained
      * @param {NoteType} note - The note to have its end result retrieved
      * @param {{*}?} argObj_ - The arguments needed for the notetags involved
@@ -9718,8 +9597,7 @@ function Window_SATBTurnClock() { // v0.11a+
         var resultFunc = _SATB._RESULT_CHAINING_RULES[chainingRule][op];
         if (list.length <= 0 || _SATB._IS_NOTE_USE_DEFAULT[note]) {
             return resultFunc.call(this, list, note, argObj_, initVal_);
-        }
-        return resultFunc.call(this, list, note, argObj_);
+        } else return resultFunc.call(this, list, note, argObj_);
         //
     }; // $.chainedNonAssociativeResult_
 
@@ -9953,42 +9831,38 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.04a @version v0.16a
      * @param {Index} i - The index of the actor to cancel the ATB charge
      */
     $.onTryCancelActorChargeSATB = function(i) {
-        var actor_ = this.members()[i];
-        if (actor_) actor_.onCancelSATBCharge();
+        _SATB._onTryInvokeActorCmd.call(this, i, "onCancelSATBCharge");
     }; // $.onTryCancelActorChargeSATB
 
     /**
      * Idempotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.04a @version v0.16a
      * @param {Index} i - The index of the actor to start forcing the ATB charge
      */
     $.onTryStartForceActorChargeSATB = function(i) {
-        var actor_ = this.members()[i];
-        if (actor_) actor_.onStartForceSATBCharge();
+        _SATB._onTryInvokeActorCmd.call(this, i, "onStartForceSATBCharge");
     }; // _SATB._onTryStartForceActorCharge
 
     /**
      * Idempotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.04a @version v0.16a
      * @param {Index} i - The index of the actor to end forcing the ATB charge
      */
     $.onTryEndForceActorChargeSATB = function(i) {
-        var actor_ = this.members()[i];
-        if (actor_) actor_.onEndForceSATBCharge();
+        _SATB._onTryInvokeActorCmd.call(this, i, "onEndForceSATBCharge");
     }; // $.onTryEndForceActorChargeSATB
 
     /**
      * Idempotent
-     * @interface @since v0.05a @version v0.05a
+     * @interface @since v0.05a @version v0.16a
      * @param {Index} i - The index of the actor to cancel the ATB cooldown
      */
     $.onTryCancelActorCooldownSATB = function(i) {
-        var actor_ = this.members()[i];
-        if (actor_) actor_.onCancelSATBCooldown();
+        _SATB._onTryInvokeActorCmd.call(this, i, "onCancelSATBCooldown");
     }; // $.onTryCancelActorCooldownSATB
 
     /**
@@ -10060,6 +9934,18 @@ function Window_SATBTurnClock() { // v0.11a+
         SATBManager.procScene_("onAddSATBActor", addedActors);
     }; // _SATB._removeThenAddActors
 
+    /**
+     * The this pointer is Game_Party.prototype
+     * Idempotent
+     * @interface @since v0.05a @version v0.16a
+     * @param {Index} i - The index of the actor to cancel the ATB cooldown
+     * @param {String} cmd - The name of the method to be triggered by actor
+     */
+    _SATB._onTryInvokeActorCmd = function(i, cmd) {
+        var actor_ = this.members()[i];
+        if (actor_) actor_[cmd]();
+    }; // _SATB._onTryInvokeActorCmd
+
 })(DoubleX_RMMV.SATB); // Game_Party.prototype
 
 /*----------------------------------------------------------------------------
@@ -10083,9 +9969,8 @@ function Window_SATBTurnClock() { // v0.11a+
                 return _SATB._FILTERED_TARGET_IDS(targets, targetGroup);
             } case _SATB._TARGET_INDEX: {
                 return _SATB._FILTERED_TARGET_INDICES(targets, targetGroup);
-            }
+            } default: return [];
         }
-        return [];
         //
     }; // _SATB._FILTERED_TARGETS
     _SATB._FILTERED_TARGET_IDS = function(targets, targetGroup) {
@@ -10692,47 +10577,28 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Nullipotent
-     * @since v0.14a @version v0.14a
+     * @since v0.14a @version v0.16a
      * @returns {Nonnegative Num} The battler icon x position in order window
      */
     $._baseX = function() {
-        if (this._battler.isSATBCooldown()) return this._cooldownX();
-        if (this._battler.isSATBFill()) return this._coreX();
-        if (this._battler.isSATBCharge()) return this._chargeX();
+        if (this._battler.isSATBCooldown()) return this._phaseX("cooldown");
+        if (this._battler.isSATBFill()) return this._phaseX("core");
+        if (this._battler.isSATBCharge()) return this._phaseX("charge");
+        throw new Error(
+                "A battler must be either filling, charging or cooling down!");
     }; // $._baseX
 
     /**
      * Hotspot/Nullipotent
-     * @since v0.14a @version v0.14a
+     * @since v0.16a @version v0.16a
+     * @enum @param {String} phase - core/charge/cooldown
      * @returns {Nonnegative Num} The battler icon x position in order window
      */
-    $._cooldownX = function() {
-        var barX = this._spriteXFuncs.cooldownBarX();
-        var barW = this._spriteXFuncs.cooldownBarW();
-        return barX + barW * (1 - this._battler.cooldownSATBProportion());
-    }; // $._cooldownX
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.14a @version v0.14a
-     * @returns {Nonnegative Num} The battler icon x position in order window
-     */
-    $._coreX = function() {
-        var barX = this._spriteXFuncs.coreBarX();
-        var barW = this._spriteXFuncs.coreBarW();
-        return barX + barW * this._battler.coreSATBProportion();
-    }; // $._coreX
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.14a @version v0.14a
-     * @returns {Nonnegative Num} The battler icon x position in order window
-     */
-    $._chargeX = function() {
-        var barX = this._spriteXFuncs.chargeBarX();
-        var barW = this._spriteXFuncs.chargeBarW();
-        return barX + barW * this._battler.chargeSATBProportion();
-    }; // $._chargeX
+    $._phaseX = function(phase) {
+        var barX = this._spriteXFuncs[phase + "BarX"]();
+        var barW = this._spriteXFuncs[phase + "BarW"]();
+        return barX + barW * this._battler[phase + "SATBProportion"]();
+    }; // $._phaseX
 
     /**
      * Hotspot/Idempotent
@@ -10838,15 +10704,14 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @since v0.14a @version v0.14a
+     * @since v0.14a @version v0.16a
      */
     $._updateOpacity = function() {
         this._updateVal("targetOpacity");
         if (this._phase === _SATB._PHASE_INIT) return this._updateInitOpacity();
         if (this._phase === _SATB._PHASE_CLEAR) {
-            return this._updateClearOpacity();
-        }
-        this.opacity = this.targetOpacity;
+            this._updateClearOpacity();
+        } else this.opacity = this.targetOpacity;
     }; // $._updateOpacity
 
     /**
@@ -10930,7 +10795,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @since v0.14a @version v0.14a
+     * @since v0.14a @version v0.16a
      * @returns {Boolean} The check result
      */
     $._isSameIconSheet = function() {
@@ -10943,7 +10808,7 @@ function Window_SATBTurnClock() { // v0.11a+
         var isSameIconSmooth =
                 this._isSameCachedVal("_lastIconSmooth", "_iconSmooth");
         //
-        if (!isSameIconFolder || !isSameIconFilename) return;
+        if (!isSameIconFolder || !isSameIconFilename) return false;
         return isSameIconHue && isSameIconSmooth;
     }; // $._isSameIconSheet
 
@@ -11134,15 +10999,14 @@ function Window_SATBTurnClock() { // v0.11a+
     _SATB._CALL_HANDLER = function(method) { method(); };
 
     /**
-     * @interface @since v0.05a @version v0.05a
+     * @interface @since v0.05a @version v0.16a
      * @param {KeyMap} symbol - The symbol of the key to be handled
      * @param {[()]} methods - The list of methods to be attached to the symbol
      */
     $.addHandlers = $.addHandlers || function(symbol, methods) {
         if (this.isHandled(symbol)) {
-            return this._handlers[symbol].fastMerge(methods);
-        }
-        this._handlers[symbol] = methods.clone();
+            this._handlers[symbol].fastMerge(methods);
+        } else this._handlers[symbol] = methods.clone();
     }; // $.addHandlers
 
     /**
@@ -11618,13 +11482,12 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Idempotent
-     * @interface @since v0.05b @version v0.14a
+     * @interface @since v0.05b @version v0.16a
      */
     $.refreshWin = function() {
         if (!SATBManager.areModulesEnabled(["IsBarEnabled"])) {
             return this._updateProp("visible", false);
-        }
-        if ($gameSystem.satbParam("_isNoteCached")) {
+        } else if ($gameSystem.satbParam("_isNoteCached")) {
             this._updateProp("visible", this._isVisible());
         }
         this._invalidateCachedParams();
@@ -12919,7 +12782,11 @@ function Window_SATBTurnClock() { // v0.11a+
      * @interface @since v0.02a @version v0.02a
      * @returns {Boolean} The check result
      */
-    $.isForceRun = function() { return this._forceState === _SATB._FORCE_RUN; };
+    $.isForceRun = function() {
+        // There's no need to turn _forceState into a state object yet
+        return this._forceState === _SATB._FORCE_RUN;
+        //
+    }; // $.isForceRun
 
     /**
      * Hotspot/Nullipotent
@@ -12927,7 +12794,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @returns {Boolean} The check result
      */
     $.isForceStop = function() {
+        // There's no need to turn _forceState into a state object yet
         return this._forceState === _SATB._FORCE_STOP;
+        //
     }; // $.isForceStop
 
     /**
@@ -12969,11 +12838,13 @@ function Window_SATBTurnClock() { // v0.11a+
      * @todo Extracts this switch into an object instead to increase flexibility
      */
     $._textParam = function() {
+        // There's no need to turn _forceState into a state object yet
         switch (this._forceState) {
             case _SATB._FORCE_RUN: return "forceRunATBStatText";
             case _SATB._FORCE_STOP: return "forceStopATBStatText";
             default: return "noForceATBText";
         }
+        //
     }; // $._textParam
 
     /**
@@ -12982,9 +12853,11 @@ function Window_SATBTurnClock() { // v0.11a+
      * @enum @param {ATBForceState} terminalState - _FORCE_RUN/_FORCE_STOP
      */
     $._onForceStateChange = function(checkStateFunc, terminalState) {
+        // There's no need to turn _forceState into a state object yet
         var forceState = this._forceState;
         this._forceState = this[checkStateFunc]() ? "" : terminalState;
         if (forceState !== this._forceState) this.refresh();
+        //
     }; // $._onForceStateChange
 
 })(DoubleX_RMMV.SATB); // Window_SATBForceStatus.prototype
@@ -13559,7 +13432,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @since v0.14a @version v0.14a
+     * @since v0.14a @version v0.16a
      * @enum @param {String} phase - Elements in _SATB._CACHED_PHASES
      * @enum @param {[String]} suffixes - Elements in _SATB._CACHED_SUFFIXES
      * @returns {Boolean} The check result
@@ -13570,7 +13443,7 @@ function Window_SATBTurnClock() { // v0.11a+
         return suffixes.mapSome(function(suffix) {
             return this._isCacheUpdated(
                     "_last" + phase + suffix, this[funcPre + suffix]());
-        }, function(isCachedUpdated) { return isCachedUpdated; }, this);
+        }, Boolean, this);
         //
     }; // $._isAnyCacheUpdated
 
@@ -13770,7 +13643,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @interface @override @since v0.14a @version v0.14a
+     * @interface @override @since v0.14a @version v0.16a
      */
     $.update = function() {
         if (!SATBManager.areModulesEnabled(["IsOrderEnabled"])) {
@@ -13778,9 +13651,8 @@ function Window_SATBTurnClock() { // v0.11a+
         }
         $$.update.call(this);
         if ($gameSystem.satbParam("_isParamFuncCached")) {
-            return this._updateBattlerOrders();
-        }
-        this._updateWithoutCache();
+            this._updateBattlerOrders();
+        } else this._updateWithoutCache();
     }; // $.update
 
     /**
@@ -14416,13 +14288,12 @@ function Window_SATBTurnClock() { // v0.11a+
 
     _SB.commandEscape = $.commandEscape;
     _SATB.commandEscape = $.commandEscape = function() {
-    // v0.00a - v0.00a; Extended
-        // Added to ensure party escape attempt won't trigger when battle's busy
+    // v0.00a - v0.16a; Extended
+        // Edited to ensure party escape attempt won't invoke when battle's busy
         if (!BattleManager.canSATBEsc(this)) {
-            return this.startPartyCommandSelection();
-        }
+            this.startPartyCommandSelection();
+        } else _SB.commandEscape.apply(this, arguments);
         // It's just to play safe even though it should be impossible to happen
-        _SB.commandEscape.apply(this, arguments);
     }; // $.commandEscape
 
     _SB.selectNextCommand = $.selectNextCommand;
@@ -14481,31 +14352,20 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Compatibility/Idempotent
-     * @interface @since v0.00a @version v0.05b
-     * @todo Breaks this excessive large method into several smaller methods
+     * @interface @since v0.00a @version v0.16a
      */
     $.refreshSATBInputWins = function() {
         if (!SATBManager.isEnabled()) return;
         _SATB._refreshWins.call(this);
         // It's possible for the target list/availability to be changed
         if (this._actorWindow.visible) {
-            return _SATB._REFRESH_DESELECT_TARGET_WIN(
+            _SATB._REFRESH_DESELECT_TARGET_WIN(
                     this._actorWindow, this._enemyWindow);
         } else if (this._enemyWindow.visible) {
-            return _SATB._REFRESH_DESELECT_TARGET_WIN(
+            _SATB._REFRESH_DESELECT_TARGET_WIN(
                     this._enemyWindow, this._actorWindow);
-        }
+        } else _SATB._refreshInputWins.call(this);
         // Invisible selection wins are active only when they can't be shown
-        // It's to ensure that the stale targets aren't displayed as selected
-        _SATB._deselectTargetWins.call(this);
-        // Invisible selection wins are active only when they can't be shown
-        // It's possible for the skill/item usability/cost to be changed
-        if (this._skillWindow.visible) return this._skillWindow.refresh();
-        if (this._itemWindow.visible) return this._itemWindow.refresh();
-        // Invisible selection wins are active only when they can't be shown
-        // It's possible for the command list/availability to be changed
-        _SATB._refreshActiveActorCmdWin.call(this);
-        //
     }; // $.refreshSATBInputWins
 
     /**
@@ -14978,17 +14838,16 @@ function Window_SATBTurnClock() { // v0.11a+
     /**
      * The this pointer is Scene_Battle.prototype
      * Potential Hotspot/Idempotent
-     * @since v0.01a @version v0.01a
+     * @since v0.01a @version v0.16a
      * @param {Index} i - The index of the actor to be selected to input actions
      */
     _SATB._onTrySelectActorIndexByHotkey = function(i) {
         var newActor_ = $gameParty.members()[i];
         // Playing buzzer sound also works for cancelling the actor charge ATB
         if ($gameParty.isUnselectedSATBInputableActor(newActor_)) {
-            return _SATB._onSelectActorIndexByHotkey.call(this, i);
-        }
+            _SATB._onSelectActorIndexByHotkey.call(this, i);
+        } else SoundManager.playBuzzer();
         //
-        SoundManager.playBuzzer();
     }; // _SATB._onTrySelectActorIndexByHotkey
 
     /**
@@ -15017,16 +14876,15 @@ function Window_SATBTurnClock() { // v0.11a+
     /**
      * The this pointer is Scene_Battle.prototype
      * Compatibility
-     * @since v0.00a @version v0.00a
+     * @since v0.00a @version v0.16a
      */
     _SATB._selectNextCmd = function() {
         BattleManager.selectNextCommand();
         // So actor cmd win will be immediately setup for next inputable actor
         if (BattleManager.isInputting() && BattleManager.actor()) {
-            return this.startActorCommandSelection();
-        }
+            this.startActorCommandSelection();
+        } else this.endCommandSelection();
         // Using BattleManager.isInputting() as well is just to play safe
-        this.endCommandSelection();
     }; // _SATB._selectNextCmd
 
     /**
@@ -15050,8 +14908,27 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * The this pointer is Scene_Battle.prototype
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     * @todo Come up with a better method name
+     */
+    _SATB._refreshInputWins = function() {
+        // It's to ensure that the stale targets aren't displayed as selected
+        _SATB._deselectTargetWins.call(this);
+        // Invisible selection wins are active only when they can't be shown
+        // It's possible for the skill/item usability/cost to be changed
+        if (this._skillWindow.visible) return this._skillWindow.refresh();
+        if (this._itemWindow.visible) return this._itemWindow.refresh();
+        // Invisible selection wins are active only when they can't be shown
+        // It's possible for the command list/availability to be changed
+        _SATB._refreshActiveActorCmdWin.call(this);
+        //
+    }; // _SATB._refreshInputWins
+
+    /**
+     * The this pointer is Scene_Battle.prototype
      * Potential Hotspot/Idempotent
-     * @since v0.00a @version v0.05b
+     * @since v0.00a @version v0.16a
      * @todo Breaks this excessive large method into several smaller methods
      */
     _SATB._updateActorSelect = function() {
@@ -15070,12 +14947,9 @@ function Window_SATBTurnClock() { // v0.11a+
         if (_SATB._isWinWithNoInputtingActorActive.call(this)) {
             return _SATB._updateActivePartyCmdWin.call(
                     this, hasNoInputableActor);
-        }
-        //
+        } else if (hasNoInputableActor) return;
         // Setups new inputable actors to input actions if there's such actors
-        if (hasNoInputableActor) return;
         _SATB._onSelectActor.call(this, inputableIndices[0]);
-        // It's pointless to extract these codes into a new method
     }; // _SATB._updateActorSelect
 
     /**
