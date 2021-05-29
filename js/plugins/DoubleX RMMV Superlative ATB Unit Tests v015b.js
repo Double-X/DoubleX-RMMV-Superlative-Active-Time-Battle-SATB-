@@ -3519,19 +3519,19 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         //
     }; // $.setCooldownATB
 
-    _GSATBPT.addSmallestCoreSATBDecrement = $.addSmallestCoreSATBDecrement;
-    $.addSmallestCoreSATBDecrement = function() {
+    _GSATBPT.addSmallestCoreATBDecrement = $.addSmallestCoreATBDecrement;
+    $.addSmallestCoreATBDecrement = function() {
     // v0.00a - v0.05b; Extended
         // Added to log this key timing with its important contexts
-        SATBUT.log("pre _GSATBPT.addSmallestCoreSATBDecrement",
+        SATBUT.log("pre _GSATBPT.addSmallestCoreATBDecrement",
                 GBB.context.call(this._battler));
         //
-        _GSATBPT.addSmallestCoreSATBDecrement.apply(this, arguments);
+        _GSATBPT.addSmallestCoreATBDecrement.apply(this, arguments);
         // Added to ensure the current ATB value's indeed smaller than the max
         _UT._checkAddSmallestCoreSATBDecrement.call(this);
         // This is far from being tautological due to the IEEE-754 precisions
-    }; // $.addSmallestCoreSATBDecrement
-    _UT.addSmallestCoreSATBDecrement = $.addSmallestCoreSATBDecrement;
+    }; // $.addSmallestCoreATBDecrement
+    _UT.addSmallestCoreATBDecrement = $.addSmallestCoreATBDecrement;
 
     _GSATBPT.onStartCharge = $.onStartCharge;
     _UT.onStartCharge = $.onStartCharge = function() {

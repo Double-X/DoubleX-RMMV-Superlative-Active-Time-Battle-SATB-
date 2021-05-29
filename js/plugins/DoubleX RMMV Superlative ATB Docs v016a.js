@@ -1724,6 +1724,10 @@
  *           suffixes, or the eval variant
  *         - The result of entry can be anything as only whether it's truthy
  *           matters
+ *         - If a skill/item's charged becomes not forceable during force
+ *           charge, the force charge will be cancelled and becomes back to a
+ *           normal charge
+ *           (Reference tag: MID_DISABLE_FORCE_CHARGE_BACK_TO_NORM)
  *         - E.g.:
  *           If _canForceChargeNoteChainingRule is set as last, and there
  *           are multiple effective canForceCharge suffix: entry notetags,

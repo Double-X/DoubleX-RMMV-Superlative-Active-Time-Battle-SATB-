@@ -108,10 +108,30 @@ function SATBManager() { // v0.04a+
     "use strict";
     throw new Error("SATBManager is a static class!");
 } // SATBManager
+function Game_SATBActs() { // v0.16a+
+    "use strict";
+    this.initialize.apply(this, arguments);
+} // Game_SATBPhaseTypes
 function Game_SATBPhaseTypes() {
     "use strict";
     this.initialize.apply(this, arguments);
 } // Game_SATBPhaseTypes
+function Game_SATBBasePhase() { // v0.16a+
+    "use strict";
+    this.initialize.apply(this, arguments);
+} // Game_SATBBasePhase
+function Game_SATBPhaseCooldown() { // v0.16a+
+    "use strict";
+    this.initialize.apply(this, arguments);
+} // Game_SATBPhaseCooldown
+function Game_SATBPhaseCharge() { // v0.16a+
+    "use strict";
+    this.initialize.apply(this, arguments);
+} // Game_SATBPhaseCharge
+function Game_SATBPhaseFill() { // v0.16a+
+    "use strict";
+    this.initialize.apply(this, arguments);
+} // Game_SATBPhaseFill
 function Game_SATBNotes() {
     "use strict";
     this.initialize.apply(this, arguments);
@@ -192,7 +212,7 @@ function Window_SATBTurnClock() { // v0.11a+
  *----------------------------------------------------------------------------*/
 /**
  * @enum @type {String} ATBForceState - stop, norm, run(v0.02a+)
- * @enum @type {String} ATBPhase - norm, charge, cooldown(v0.04a+)
+ * @enum @type {String} ATBPhase - fill, charge, cooldown(v0.04a+)
  * @enum @type {String} ChainRule - first, last, +, -, *, /, %, =, some, every
  * @enum @type {String} ClockUnit - act, frame, sec(v0.04a+)
  * @type {{*}} Datum - The database datum
@@ -4810,7 +4830,7 @@ function Window_SATBTurnClock() { // v0.11a+
         if (BattleManager._subject === this) return;
         /** @todo Replace this with a more fathomable, proper and safe fix */
         // Ensures the actions are remade without changing the current ATB value
-        this._satb.phaseTypes.addSmallestCoreSATBDecrement();
+        this._satb.phaseTypes.addSmallestCoreATBDecrement();
         // $.onToggleAutoInputSATBActs is a useful event listener callback
     }; // $.onToggleAutoInputSATBActs
 
@@ -5495,7 +5515,7 @@ function Window_SATBTurnClock() { // v0.11a+
         if (!SATBManager.isEnabled()) return;
         this.addSATBActTimes(-this.satbNoteResult_("actCost"));
         if (!this.canMakeSATBCmds()) return this.clearCoreSATB();
-        this._satb.phaseTypes.addSmallestCoreSATBDecrement();
+        this._satb.phaseTypes.addSmallestCoreATBDecrement();
     }; // $.eraseVirtualSATBActSlot
 
     /**
@@ -6103,7 +6123,7 @@ function Window_SATBTurnClock() { // v0.11a+
     /**
      * Idempotent
      * @constructor @since v0.00a @version v0.16a
-     * @param {Game_Battler} battler - The battler with effective notetag list
+     * @param {Game_Battler} battler - The battler involved in the action logics
      * @param {Game_SATBCache} cache - The helper caching notetag list/result
      */
     $.initialize = function(battler, cache) {
@@ -6125,14 +6145,14 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.clear
 
     /**
-     * Script Call/Idempotent
+     * Script Call/Nullipotent
      * @interface @since v0.03a @version v0.03a
      * @returns {Nonnegative Int} The current number of virtual action slots
      */
     $.actTimes = function() { return this._actTimes; };
 
     /**
-     * Script Call/Idempotent
+     * Script Call/Nullipotent
      * @interface @since v0.16a @version v0.16a
      * @returns {Nonnegative Int} The maximum number of virtual action slots
      */
@@ -6148,45 +6168,6 @@ function Window_SATBTurnClock() { // v0.11a+
                 _SATB._IS_INPUTTED_ACT, _SATB._INPUTTED_ITEM);
         return this._battler.latestSATBItemNoteResult_("actCost", acts);
     }; // $.usedActTimes
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.15b @version v0.16a
-     * @param {Nonnegative Int} actTimes - The new number of virtual action slot
-     */
-    $.setActTimes = function(actTimes) {
-        var hadActs = this.actTimes() > 0, hasActs = actTimes > 0;
-        // It doesn't make sense to have negative virtual action slots
-        this._actTimes = Math.max(actTimes, 0);
-        //
-        var actMode = this._battler.satbActMode();
-        if (actMode === "bundle") {
-            // Number of real action slots must be consistent in the bundle mode
-            this._battler._actions.length = this.actTimes();
-            //
-        } else if (actMode === "discrete") {
-            this._correctDiscreteActTimes(actTimes);
-        }
-        // Ensures that the ATB value will become full
-        if (!hadActs && hasActs) return this._battler.fillUpCoreSATB();
-        //
-        if (!hadActs || hasActs) return;
-        // Ensures that the ATB value will become not full
-        this._battler._satb.phaseTypes.addSmallestCoreSATBDecrement();
-        //
-    }; // $.setActTimes
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.16a @version v0.16a
-     * @param {Nonnegative Int} maxActTimes - New max no of virtual action slot
-     */
-    $.setMaxActTimes = function(maxActTimes) {
-        this._maxActTimes = maxActTimes;
-        if (this._battler.satbActMode() !== "discrete") return;
-        if (maxActTimes >= this.actTimes()) return;
-        this._battler.setSATBActTimes(maxActTimes);
-    }; // $.setMaxActTimes
 
     /**
      * Script Call/Nullipotent
@@ -6228,7 +6209,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.hasEnoughActTimes
 
     /**
-     * Idempotent
+     * Nullipotent
      * @interface @since v0.05b @version v0.16a
      * @returns {[{Int, Datum}]} The latest inputted skills/items of the battler
      */
@@ -6238,23 +6219,46 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.newLatestItems_
 
     /**
-     * Idempotent
-     * @since v0.16a @version v0.16a
+     * Script Call/Idempotent
+     * @interface @since v0.15b @version v0.16a
      * @param {Nonnegative Int} actTimes - The new number of virtual action slot
      */
-    $._correctDiscreteActTimes = function(actTimes) {
-        // The current number of action slots shouldn't exceed its maximum
-        this._actTimes = Math.min(actTimes, this.maxActTimes());
+    $.setActTimes = function(actTimes) {
+        var hadActs = this.actTimes() > 0, hasActs = actTimes > 0;
+        // It doesn't make sense to have negative virtual action slots
+        this._actTimes = Math.max(actTimes, 0);
         //
-        // Number of virtual action slots must be in sync with the atb value
-        var newATB = this.actTimes() * this._battler.coreMaxSATB();
-        if (this._battler.coreSATB() === newATB) return;
-        this._battler.setCoreSATB(newATB);
+        var actMode = this._battler.satbActMode();
+        if (actMode === "bundle") {
+            // Number of real action slots must be consistent in the bundle mode
+            this._battler._actions.length = this.actTimes();
+            //
+        } else if (actMode === "discrete") {
+            this._correctDiscreteActTimes(actTimes);
+        }
+        // Ensures that the ATB value will become full
+        if (!hadActs && hasActs) return this._battler.fillUpCoreSATB();
         //
-    }; // $._correctDiscreteActTimes
+        if (!hadActs || hasActs) return;
+        // Ensures that the ATB value will become not full
+        this._battler._satb.phaseTypes.addSmallestCoreATBDecrement();
+        //
+    }; // $.setActTimes
 
     /**
-     * Hotspot/Nullipotent
+     * Script Call/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Nonnegative Int} maxActTimes - New max no of virtual action slot
+     */
+    $.setMaxActTimes = function(maxActTimes) {
+        this._maxActTimes = maxActTimes;
+        if (this._battler.satbActMode() !== "discrete") return;
+        if (maxActTimes >= this.actTimes()) return;
+        this._battler.setSATBActTimes(maxActTimes);
+    }; // $.setMaxActTimes
+
+    /**
+     * Hotspot/Idempotent
      * @since v0.16a @version v0.16a
      * @returns {Number} The new minimum action cost of all usable skills/items
      */
@@ -6265,7 +6269,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._newMinActCost
 
     /**
-     * Hotspot/Nullipotent
+     * Hotspot/Idempotent
      * @since v0.16a @version v0.16a
      * @enum @param {String} part - The skill/item part involved
      * @returns {Number} The minimum action cost of the skill/item part
@@ -6297,6 +6301,22 @@ function Window_SATBTurnClock() { // v0.11a+
         return newMinPartActCost;
     }; // $._newMinPartActCost
 
+    /**
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     * @param {Nonnegative Int} actTimes - The new number of virtual action slot
+     */
+    $._correctDiscreteActTimes = function(actTimes) {
+        // The current number of action slots shouldn't exceed its maximum
+        this._actTimes = Math.min(actTimes, this.maxActTimes());
+        //
+        // Number of virtual action slots must be in sync with the atb value
+        var newATB = this.actTimes() * this._battler.coreMaxSATB();
+        if (this._battler.coreSATB() === newATB) return;
+        this._battler.setCoreSATB(newATB);
+        //
+    }; // $._correctDiscreteActTimes
+
 })(DoubleX_RMMV.SATB); // Game_SATBActs.prototype
 
 /*----------------------------------------------------------------------------
@@ -6308,53 +6328,83 @@ function Window_SATBTurnClock() { // v0.11a+
 
     "use strict";
 
+    var _SATB = SATB.Game_SATBPhaseCharge = {};
     var $ = Game_SATBPhaseTypes.prototype;
-    var _SATB = SATB.Game_SATBPhaseTypes = {};
 
-    _SATB._ATBS = function() { // v0.04a+
-        return _SATB.PHASES.reduce(_SATB._REDUCED_ATB_CONTAINER, {});
-    }; // _SATB._ATBS
-    _SATB._REDUCED_ATB_CONTAINER = function(container, phase) { // v0.04a+
-        container[phase] = 0;
-        return container;
-    }; // _SATB._REDUCED_ATB_CONTAINER
-
-    // v0.04a+
-    _SATB._FORCE_CHARGE = "force", _SATB._FORCE_ACT = "act";
-    _SATB._PHASE_NORM = "norm";
-    _SATB._PHASE_CHARGE = "charge", _SATB._PHASE_COOLDOWN = "cooldown";
-    //
-    // Refer to reference tag SMALLEST_ATB_VAL_INCREMENT
-    _SATB._SMALLEST_ATB_VAL_INCREMENT = Math.pow(2, -32);
-    // Using Number.EPSILON would be too dangerous here
-
-    // v0.04a+
-    _SATB.PHASES = [
-        _SATB._PHASE_NORM,
-        _SATB._PHASE_CHARGE,
-        _SATB._PHASE_COOLDOWN
-    ]; // _SATB.PHASES
+    // v0.16a+
+    _SATB.COND_PHASE_CHARGE_FORWARDED_FUNCS = {
+        setChargeATB: "setATB",
+        onCancelCharge: "onCancel",
+        onStartForceCharge: "onStartForce",
+        onEndForceCharge: "onEndForce"
+    }; // _SATB.COND_PHASE_CHARGE_FORWARDED_FUNCS
+    _SATB.COND_PHASE_COOLDOWN_FORWARDED_FUNCS = {
+        setCooldownATB: "setATB",
+        onCancelCooldown: "onCancel"
+    }; // _SATB.COND_PHASE_COOLDOWN_FORWARDED_FUNCS
+    _SATB.CUR_PHASE_FORWARDED_FUNCS = {
+        curATB: "curATB",
+        curMax: "maxATB",
+        curATBProportion: "atbProportion",
+        curRate: "atbRate",
+        addCurATBProportion: "addATBProportion",
+        addCurATB: "addATB",
+        multiplyCurATB: "multiplyATB",
+        fillUpCurATB: "fillUpATB",
+        setCurATBProportion: "setATBProportion",
+        setCurATB: "setATB",
+        fillCurATB: "fillATB"
+    }; // _SATB.CUR_PHASE_FORWARDED_FUNCS
+    _SATB.PHASE_CHARGE_FORWARDED_FUNCS = {
+        chargeATB: "curATB",
+        chargeATBProportion: "atbProportion",
+        chargeRate: "atbRate",
+        addChargeATBProportion: "addATBProportion",
+        addChargeATB: "addATB",
+        multiplyChargeATB: "multiplyATB",
+        fillUpChargeATB: "fillUpATB",
+        setChargeATBProportion: "setATBProportion",
+        setChargeATB: "setATB"
+    }; // _SATB.PHASE_CHARGE_FORWARDED_FUNCS
+    _SATB.PHASE_COOLDOWN_FORWARDED_FUNCS = {
+        cooldownATB: "curATB",
+        cooldownATBProportion: "atbProportion",
+        cooldownRate: "atbRate",
+        addCooldownATBProportion: "addATBProportion",
+        addCooldownATB: "addATB",
+        multiplyCooldownATB: "multiplyATB",
+        fillUpCooldownATB: "fillUpATB",
+        setCooldownATBProportion: "setATBProportion"
+    }; // _SATB.PHASE_COOLDOWN_FORWARDED_FUNCS
+    _SATB.PHASE_FILL_FORWARDED_FUNCS = {
+        coreATB: "curATB",
+        coreATBProportion: "atbProportion",
+        coreRate: "atbRate",
+        delaySecCounter: "delaySecCounter",
+        addCoreATBProportion: "addATBProportion",
+        addCoreATB: "addATB",
+        multiplyCoreATB: "multiplyATB",
+        fillUpCoreATB: "fillUpATB",
+        setCoreATBProportion: "setATBProportion",
+        multiplyDelaySecCounter: "multiplyDelaySecCounter",
+        addDelaySecCounter: "addDelaySecCounter",
+        setDelaySecCounter: "setDelaySecCounter",
+        clearCoreATB: "clearATB",
+        setCoreATB: "setATB",
+        addSmallestCoreATBDecrement: "addSmallestATBDecrement",
+        resetATBVal: "resetATBVal",
+        setResetATBVal: "setResetATBVal"
+    }; // _SATB.PHASE_FILL_FORWARDED_FUNCS
     //
 
     /*------------------------------------------------------------------------
      *    New private variables
      *------------------------------------------------------------------------*/
-    // (v0.04a+){ForceChargeState}_forceChargeState: Whether the action's forced
-    //                                               to charge or execute
     // {Game_Battler} _battler: The battler owning the effective notetag list
-    // (v0.15a){Nonnegative Num} _delaySecCounter: The counter locking battler
-    //                                             action inputs(watchdog timer)
-    // (0.v16a){Nonnegative Num} _extraATB: The amount of ATB beyond 100% of max
-    // (v0.04a+){Number} _forcedChargeBeyondMax: The amount of forced charge ATB
-    //                                           beyond the maximum
-    // (v0.04a+){{Number}} _atbs: The current ATB value of the battler of all
-    //                            phases
-    // (v0.04a+){{Number}} _lastATBs: The last current ATB value of the battler
-    //                                of all phases
-    // (v0.04a+){{Number}} _lastMaxes: The last maximum ATB value of the battler
-    // (v0.07a+){Number} _resetATBVal: The accumulated battler reset ATB value
-    // (v0.16a+){Number} _lastEnoughCoreATB: Discrete and continuous mode only
-    // (v0.04a+){ATBPhase} _phase: The current ATB phase
+    // (v0.16a+){Game_SATBBasePhase} _curPhase: The current ATB phase of battler
+    // (v0.16a+){Game_SATBPhaseCharge} _phaseCharge: The battler charge phase
+    // (v0.16a+){Game_SATBPhaseCooldown} _phaseCooldown: Battler cooldown phase
+    // (v0.16a+){Game_SATBPhaseFill} _phaseFill: The battler ATB fill phase
 
     /**
      * Idempotent
@@ -6362,21 +6412,221 @@ function Window_SATBTurnClock() { // v0.11a+
      * @param {Game_Battler} battler - The battler with effective notetag list
      */
     $.initialize = function(battler) {
-        this._battler = battler, this._phase = _SATB._PHASE_NORM;
-        // They must use separate containers to catch their supposed differences
-        this._atbs = _SATB._ATBS(), this._lastATBs = _SATB._ATBS();
-        //
-        this._extraATB = this._forcedChargeBeyondMax = this._resetATBVal = 0;
-        this._lastEnoughCoreATB = Number.NaN;
-        this._lastMaxes = {};
-        this._lastMaxes[_SATB._PHASE_NORM] = battler.coreMaxSATB();
-        this._lastMaxes[_SATB._PHASE_CHARGE] = battler.chargeMaxSATB();
-        this._lastMaxes[_SATB._PHASE_COOLDOWN] = battler.cooldownMaxSATB();
+        this._battler = battler;
+        this._phaseCharge = new Game_SATBPhaseCharge(battler);
+        this._phaseCooldown = new Game_SATBPhaseCooldown(battler);
+        this._phaseFill = new Game_SATBPhaseFill(battler);
+        this._curPhase = this._phaseFill;
     }; // $.initialize
 
     /**
      * Destructor/Idempotent
-     * @interface @since v0.00a @version v0.04a
+     * @interface @since v0.00a @version v0.16a
+     */
+    $.clear = function() {
+        // Avoids memory leaks as they've the battler as their dependencies
+        this._phaseCharge.clear();
+        this._phaseCooldown.clear();
+        this._phaseFill.clear();
+        delete this._battler;
+        delete this._curPhase;
+        delete this._phaseCharge;
+        delete this._phaseCooldown;
+        delete this._phaseFill;
+        //
+    }; // $.clear
+
+    // (v0.16a+)Refers to the Game_SATBPhaseCharge counterparts
+    Object.keys(_SATB.COND_PHASE_CHARGE_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.NOTE_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            if (!this.isCharge()) return;
+            return this._phaseCharge[f].apply(this._phaseCharge, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    // (v0.16a+)Refers to the Game_SATBPhaseCooldown counterparts
+    Object.keys(_SATB.COND_PHASE_COOLDOWN_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.PHASE_TYPE_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            if (!this.isCooldown()) return;
+            return this._phaseCooldown[f].apply(this._phaseCooldown, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    // (v0.16a+)Refers to the Game_SATBBasePhase and subclasses counterparts
+    Object.keys(_SATB.CUR_PHASE_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.ACT_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            return this._curPhase[f].apply(this._curPhase, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    // (v0.16a+)Refers to the Game_SATBPhaseCharge counterparts
+    Object.keys(_SATB.PHASE_CHARGE_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.NOTE_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            return this._phaseCharge[f].apply(this._phaseCharge, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    // (v0.16a+)Refers to the Game_SATBPhaseCooldown counterparts
+    Object.keys(_SATB.PHASE_COOLDOWN_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.PHASE_TYPE_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            return this._phaseCooldown[f].apply(this._phaseCooldown, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    // (v0.16a+)Refers to the Game_SATBPhaseFill counterparts
+    Object.keys(_SATB.PHASE_FILL_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB.PHASE_FILL_FORWARDED_FUNCS[func];
+        // It's ok to skip the arguments in the signature as there's arguments
+        $[func] = function() {
+            return this._phaseFill[f].apply(this._phaseFill, arguments);
+        }; // $[func]
+        //
+    });
+    //
+
+    /**
+     * Script Call/Nullipotent
+     * @interface @since v0.05a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isFill = function() { return this._curPhase === this._phaseFill; };
+
+    /**
+     * Script Call/Nullipotent
+     * @interface @since v0.04a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isCharge = function() { return this._curPhase === this._phaseCharge; };
+
+    /**
+     * Script Call/Nullipotent
+     * @interface @since v0.05a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isCooldown = function() {
+        return this._curPhase === this._phaseCooldown;
+    }; // $.isCooldown
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.04a @version v0.04a
+     */
+    $.clearChargeATB = function() { this.addSmallestCoreATBDecrement(); };
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @since v0.04a @version v0.16a
+     */
+    $.checkUpdatedMaxes = function() {
+        // The fill phase must be checked first as it might clear ATB values
+        this._phaseFill.checkUpdatedMax(
+                this._phaseFill.curATB(), this._phaseFill.maxATB());
+        //
+        // The raw current ATB value must be used or cooldown wouldn't work
+        if (!this.isFill()) this._curPhase.checkUpdatedMax(
+                this._curPhase.curATB(), this._curPhase.maxATB());
+        //
+    }; // $.checkUpdatedMaxes
+
+    /**
+     * Idempotent
+     * @interface @since v0.04a @version v0.16a
+     */
+    $.onStartCharge = function() {
+        if (!this.isFill()) return; // A charge can't start without normal ATB
+        // The phase should first be changed to charge before setting charge
+        this._curPhase = this._phaseCharge;
+        this._phaseCharge.onStart();
+        //
+    }; // $.onStartCharge
+
+    /**
+     * Idempotent
+     * @interface @since v0.04a @version v0.16a
+     */
+    $.onEndCharge = function() {
+        this._phaseCharge.onEnd();
+        // Otherwise the ATB cooldown would be immediately cancelled wrongly
+        if (this.isCharge()) this._battler.onStartSATBFill();
+        // The phase should first be changed to fill before setting fill value
+    }; // $.onEndCharge
+
+    /**
+     * Idempotent
+     * @interface @since v0.05a @version v0.16a
+     */
+    $.onStartCooldown = function() {
+        if (!this.isCharge()) return; // A cooldown can't start without charge
+        // The phase should first be changed to cooldown before setting cooldown
+        this._curPhase = this._phaseCooldown;
+        this._phaseCooldown.setATB(this._phaseCooldown.maxATB());
+        //
+    }; // $.onStartCooldown
+
+    /**
+     * Idempotent
+     * @interface @since v0.05b @version v0.16a
+     */
+    $.onStartFill = function() {
+        this._curPhase = this._phaseFill;
+        this._phaseFill.useResetATBVal();
+    }; // $.onStartFill
+
+})(DoubleX_RMMV.SATB); // Game_SATBPhaseTypes.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.16a+)New class: Game_SATBBasePhase
+ *      - Be the base class of all the fill, charge and cooldown ATB phases
+ *----------------------------------------------------------------------------*/
+
+(function() {
+
+    "use strict";
+
+    var $ = Game_SATBBasePhase.prototype;
+
+    /*------------------------------------------------------------------------
+     *    New private variables
+     *------------------------------------------------------------------------*/
+    // {Game_Battler} _battler: The battler involved in this ATB phase
+    // {Number} _atb: The current ATB value of the battler of this phase
+    // {Number} _lastATB: The last current ATB value of battler of this phase
+    // {Number} _lastMax: The last maximum ATB value of battler of this phase
+
+    /**
+     * Idempotent
+     * @constructor @since v0.00a @version v0.16a
+     * @param {Game_Battler} battler - The battler involved in this ATB phase
+     */
+    $.initialize = function(battler) {
+        this._battler = battler;
+        this._atb = this._lastATB = 0;
+        this._lastMax = this.maxATB();
+    }; // $.initialize
+
+    /**
+     * Destructor/Idempotent
+     * @interface @since v0.16a @version v0.16a
      */
     $.clear = function() {
         // Avoids memory leaks as they've the battler as their dependencies
@@ -6385,658 +6635,790 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.clear
 
     /**
-     * Script Call/Hotspot/Nullipotent
-     * @interface @since v0.05a @version v0.05a
-     * @returns {Number} The current ATB value of the battler
-     * @todo Extracts this switch into an object instead to increase flexibility
+     * Nullipotent
+     * @abstract @interface @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The current ATB value of this phase
      */
     $.curATB = function() {
-        switch (this._phase) {
-            case _SATB._PHASE_NORM: return this.coreATB();
-            case _SATB._PHASE_CHARGE: return this.chargeATB();
-            case _SATB._PHASE_COOLDOWN: return this.cooldownATB();
-        }
+        throw new Error("Game_SATBBasePhase.prototype.curATB is abstract!");
     }; // $.curATB
 
     /**
-     * Script Call/Hotspot/Nullipotent
-     * @interface @since v0.00a @version v0.16a
-     * @returns {Number} The current ATB value of the battler
+     * Nullipotent
+     * @abstract @interface @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
      */
-    $.coreATB = function() {
-        if (this._battler.satbActMode() === "discrete") {
-            return this._atbs[_SATB._PHASE_NORM] + this._extraATB;
-        } else return this._atbs[_SATB._PHASE_NORM];
-    }; // $.coreATB
+    $.maxATB = function() {
+        throw new Error("Game_SATBBasePhase.prototype.maxATB is abstract!");
+    }; // $.maxATB
 
     /**
-     * Script Call/Hotspot/Nullipotent
-     * @interface @since v0.04a @version v0.04a
-     * @returns {Number} The current charge ATB value of the battler
+     * Hotspot
+     * @abstract @interface @since v0.16a @version v0.16a
      */
-    $.chargeATB = function() {
-        // Refer to reference tag MID_DISABLE_FORCE_CHARGE_BACK_TO_NORM
-        if (!this._forceChargeState) return this._atbs[_SATB._PHASE_CHARGE];
-        //
-        var beyondMaxCharge = Math.max(this._forcedChargeBeyondMax, 0);
-        return this._atbs[_SATB._PHASE_CHARGE] + beyondMaxCharge;
-    }; // $.chargeATB
+    $.fillATB = function() {
+        throw new Error("Game_SATBBasePhase.prototype.fillATB is abstract!");
+    }; // $.fillATB
 
     /**
-     * Script Call/Hotspot/Nullipotent
-     * @interface @since v0.05a @version v0.05a
-     * @returns {Number} The current cooldown ATB value of the battler
-     * @todo Erases this performance tradeoff while still keeping the class nice
-     */
-    $.cooldownATB = function() {
-        // The cooldown fill direction's opposite to normal and charge ATB
-        var max = this._battler.cooldownMaxSATB();
-        return max - this._atbs[_SATB._PHASE_COOLDOWN];
-        // Reversing here's to simplify the cooldown logic in everywhere else
-    }; // $.cooldownATB
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     * @returns {+ve Num} The current maximum ATB value of the battler
-     */
-    $.curMax = function() { return this._maxATB(this._phase); };
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.16a
-     * @returns {+ve Num} The current ATB fill proportion of the battler
+     * Nullipotent
+     * @interface @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
      */
     $.curATBProportion = function() {
         // * 1.0 is just to ensure that integer division won't be used
-        var proportion = this.curATB() * 1.0 / this.curMax();
-        //
-        // It's possible for the raw proportion to exceed 1 in the discrete mode
-        if (proportion <= 1) return proportion;
-        var remainder = proportion - Math.trunc(proportion);
-        return remainder <= 0 ? 1 : remainder;
+        return this.curATB() * 1.0 / this.maxATB();
         //
     }; // $.curATBProportion
 
     /**
-     * Script Call/Idempotent
-     * @interface @since v0.00a @version v0.04a
-     * @returns {+ve Num} The ATB fill proportion of the battler
-     */
-    $.coreATBProportion = function() {
-        // * 1.0 is just to ensure that integer division won't be used
-        return this.coreATB() * 1.0 / this._battler.coreMaxSATB();
-        //
-    }; // $.coreATBProportion
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     * @returns {+ve Num} The charge ATB fill proportion of the battler
-     */
-    $.chargeATBProportion = function() {
-        // * 1.0 is just to ensure that integer division won't be used
-        return this.chargeATB() * 1.0 / this._battler.chargeMaxSATB();
-        //
-    }; // $.chargeATBProportion
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.05a @version v0.05a
-     * @returns {+ve Num} The cooldown ATB fill proportion of the battler
-     */
-    $.cooldownATBProportion = function() {
-        // * 1.0 is just to ensure that integer division won't be used
-        return this.cooldownATB() * 1.0 / this._battler.cooldownMaxSATB();
-        //
-    }; // $.cooldownATBProportion
-
-    /**
-     * Script Call/Nullipotent
-     * @interface @since v0.05a @version v0.05a
+     * Nullipotent
+     * @interface @since v0.16a @version v0.16a
      * @returns {Boolean} The check result
      */
-    $.isFill = function() { return this._phase === _SATB._PHASE_NORM; };
+    $.isFill = function() { return false; };
 
     /**
-     * Script Call/Nullipotent
-     * @interface @since v0.04a @version v0.04a
+     * Nullipotent
+     * @interface @since v0.16a @version v0.16a
      * @returns {Boolean} The check result
      */
-    $.isCharge = function() { return this._phase === _SATB._PHASE_CHARGE; };
+    $.isCharge = function() { return false; };
 
     /**
-     * Script Call/Nullipotent
-     * @interface @since v0.05a @version v0.05a
+     * Nullipotent
+     * @interface @since v0.16a @version v0.16a
      * @returns {Boolean} The check result
      */
-    $.isCooldown = function() { return this._phase === _SATB._PHASE_COOLDOWN; };
+    $.isCooldown = function() { return false; };
 
     /**
-     *  Script Call/Hotspot/Nullipotent
-     * @interface @since v0.04a @version v0.10a
-     * @returns {Number} The current ATB fill rate
+     * Hotspot/Nullipotent
+     * @interface @since v0.16a @version v0.16a
+     * @returns {Number} The current ATB gain rate of this phase
      */
-    $.curRate = function() {
-        switch (this._phase) {
-            case _SATB._PHASE_NORM: return this.coreRate();
-            case _SATB._PHASE_CHARGE: return this.chargeRate();
-            case _SATB._PHASE_COOLDOWN: return this.cooldownRate();
-        }
-    }; // $.curRate
+    $.atbRate = function() {
+        // The base max should be used or changing max won't change fill rate
+        var baseFillRate = BattleManager.coreBaseSATBFillRate();
+        var baseMax = this._battler.baseCoreMaxSATB();
+        var avgAgi = BattleManager.satbAvgAgi;
+        return baseFillRate * this._battler.agi * baseMax * 1.0 / avgAgi;
+        //
+    }; // $.atbRate
 
     /**
-     *  Script Call/Hotspot/Nullipotent
-     * @interface @since v0.04a @version v0.16a
-     * @returns {Number} The ATB fill rate without charge nor cooldown
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} increment - Increment of current ATB value proportion
      */
-    $.coreRate = function() {
-          if (SATBManager.areModulesEnabled(["IsRateEnabled"])) {
-              return this._battler.satbNoteResult_("coreATBRate");
-          } else return this._defaultFillRate();
-    }; // $.coreRate
+    $.addATBProportion = function(increment) {
+        this.setATB(increment * this.maxATB());
+    }; // $.addATBProportion
 
     /**
-     *  Script Call/Hotspot/Nullipotent
-     * @interface @since v0.10a @version v0.10a
-     * @returns {Number} The ATB charge rate
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} increment - Increment of current ATB value of the battler
      */
-    $.chargeRate = function() {
+    $.addATB = function(increment) { this.setATB(this.curATB() + increment); };
+
+    /**
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} multiplier - Multiplier of current ATB value of battler
+     */
+    $.multiplyATB = function(multiplier) {
+        this.setATB(this.curATB() * multiplier);
+    }; // $.multiplyATB
+
+    /**
+     * Idempotent
+     * @interface @since v0.16a @version v0.16a
+     */
+    $.fillUpATB = function() { this.setATB(this.maxATB()); };
+
+    /**
+     * Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} proportion - New current ATB value proportion of battler
+     */
+    $.setATBProportion = function(proportion) {
+        this.setATB(proportion * this.maxATB());
+    }; // $.setATBProportion
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     */
+    $.setATB = function(val) {
+        // A valid max must be +ve and updating max will check max anyway
+        var max = this._lastMax || this.maxATB();
+        //
+        if (this._isAlreadyMaxATB(val, max)) return;
+        // It must be here or checkUpdatedMaxes would use wrong _atbs val
+        this._atb = Math.min(val, max);
+        // _atbs must be capped by maxATB here to maximize performance gain
+        this.checkUpdatedMax(val, max);
+        // It must be here or checkUpdatedMaxes would use wrong _lastATBs
+        this._lastATB = this._atb;
+        //
+    }; // $.setATB
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     */
+    $.checkUpdatedMax = function(val, max) {
+        // It must be placed here or refreshBar would miss _onATBBecomeFull
+        this._checkIsBecomeEnoughNotEnough(val, max);
+        //
+        this._lastMax = max;
+        // It's the only place covering all cases changing current/max ATB value
+        BattleManager.onSATBBarRefresh([this._battler]);
+        //
+    }; // $.checkUpdatedMax
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     */
+    $._isAlreadyMaxATB = function(val, max) {
+        /** @todo Makes sure it's always correct even when it's tested so */
+        return val >= max && this._atb === max && this._lastATB === max;
+        //
+    }; // $._isAlreadyMaxATB
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     */
+    $._checkIsBecomeEnoughNotEnough = function(val, max) {
+        var result = this._isBecomeEnoughNotEnough(val, max);
+        // Refers to reference tag DECREASED_MAX_CORE_ATB_INPUTABLE
+        if (result.isBecomeEnough) return this._onATBBecomeEnough(max);
+        // And DECREASED_MAX_CHARGE_ATB_ACTABLE
+        // Refers to reference tag INCREASED_MAX_CORE_ATB_NOT_INPUTABLE
+        if (result.isBecomeNotEnough) this._onATBBecomeNotEnough();
+        // And INCREASED_MAX_CHARGE_ATB_NOT_ACTABLE
+    }; // $._checkIsBecomeEnoughNotEnough
+
+    /**
+     * Hotspot/Nullipotent
+     * @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     * @returns {{Boolean}} The check result of becoming enough or not enough
+     */
+    $._isBecomeEnoughNotEnough = function(val, max) {
+        var isFull = max <= val, wasFull = this._lastMax <= this._lastATB;
+        return {
+            isBecomeEnough: !wasFull && isFull,
+            isBecomeNotEnough: wasFull && !isFull
+        };
+    }; // $._isBecomeEnoughNotEnough
+
+    /**
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     */
+    $._onATBBecomeEnough = function(max) { this._lastATB = this._atb = max; };
+
+    /**
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     */
+    $._onATBBecomeNotEnough = function() {};
+
+})(); // Game_SATBBasePhase.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.16a+)New class: Game_SATBPhaseCharge
+ *      - Implements the ATB charge business logics for all battlers
+ *----------------------------------------------------------------------------*/
+
+(function(SATB) {
+
+    "use strict";
+
+    var _SATB = SATB.Game_SATBPhaseCharge = {};
+    var $$ = Game_SATBBasePhase.prototype;
+
+    Game_SATBPhaseCharge.prototype = Object.create($$);
+
+    var $ = Game_SATBPhaseCharge.prototype;
+
+    $.constructor = Game_SATBPhaseCharge;
+
+    _SATB._FORCE_CHARGE = "force", _SATB._FORCE_ACT = "act";
+
+    /*------------------------------------------------------------------------
+     *    New private variables
+     *------------------------------------------------------------------------*/
+    // {ForceChargeState} _forceState: Whether action's forced to charge/execute
+    // {Number} _forcedBeyondMax: The amount of forced charge ATB beyond maximum
+
+    /**
+     * Idempotent
+     * @constructor @override @since v0.00a @version v0.16a
+     * @param {Game_Battler} battler - The battler involved in this ATB phase
+     */
+    $.initialize = function(battler) {
+        $$.initialize.call(this, battler);
+        this._resetForceStates();
+    }; // $.initialize
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The current ATB value of this phase
+     */
+    $.curATB = function() {
+        // Refer to reference tag MID_DISABLE_FORCE_CHARGE_BACK_TO_NORM
+        if (!this._forceState) return this._atb;
+        //
+        return this._atb + Math.max(this._forcedBeyondMax, 0);
+    }; // $.curATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
+     */
+    $.maxATB = function() { return this._battler.chargeMaxSATB(); };
+
+    /**
+     * Hotspot
+     * @interface @override @since v0.16a @version v0.16a
+     */
+    $.fillATB = function() {
+        this._fillATB();
+        this._battler.runSATBNote("didFillChargeATB");
+    }; // $.fillATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isCharge = function() { return true; };
+
+    /**
+     * Hotspot/Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Number} The current ATB gain rate of this phase
+     */
+    $.atbRate = function() {
         if (SATBManager.areModulesEnabled([
             "IsRateEnabled",
             "IsChargeEnabled"
         ])) return this._battler.satbNoteResult_("chargeATBRate");
-        return this._defaultFillRate();
-    }; // $.chargeRate
-
-    /**
-     *  Script Call/Hotspot/Nullipotent
-     * @interface @since v0.10a @version v0.10a
-     * @returns {Number} The ATB cooldown rate
-     */
-    $.cooldownRate = function() {
-        if (SATBManager.areModulesEnabled([
-            "IsRateEnabled",
-            "IsCooldownEnabled"
-        ])) return this._battler.satbNoteResult_("cooldownATBRate");
-        return this._defaultFillRate();
-    }; // $.cooldownRate
-
-    /**
-     * Script Call/Nullipotent
-     * @interface @since v0.15a @version v0.15a
-     * @returns {Nonnegative Num} Delay counter locking battler action inputs
-     */
-    $.delaySecCounter = function() { return this._delaySecCounter; };
-
-    /**
-     * Script Call
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} increment - Increment of current ATB value proportion
-     */
-    $.addCurATBProportion = function(increment) {
-        this.addCurATB(increment * this.curMax());
-    }; // $.addCurATBProportion
-
-    /**
-     * Script Call
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} increment - Increment of current ATB value of the battler
-     */
-    $.addCurATB = function(increment) {
-        this.setCurATB(this.curATB() + increment);
-    }; // $.addCurATB
-
-    /**
-     * Script Call
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} multiplier - Multiplier of current ATB value of battler
-     */
-    $.multiplyCurATB = function(multiplier) {
-        this.setCurATB(this.curATB() * multiplier);
-    }; // $.multiplyCurATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     */
-    $.fillUpCurATB = function() { this.setCurATB(this.curMax()); };
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} proportion - New current ATB value proportion of battler
-     */
-    $.setCurATBProportion = function(proportion) {
-        this.setCurATB(proportion * this.curMax());
-    }; // $.setCurATBProportion
-
-    /**
-     * Script Call
-     * @interface @since v0.00a @version v0.04a
-     * @param {Number} increment - Increment of current ATB value proportion
-     */
-    $.addCoreATBProportion = function(increment) {
-        this.addCoreATB(increment * this._battler.coreMaxSATB());
-    }; // $.addCoreATBProportion
-
-    /**
-     * Script Call/Hotspot
-     * @interface @since v0.00a @version v0.00a
-     * @param {Number} increment - Increment of current ATB value of the battler
-     */
-    $.addCoreATB = function(increment) {
-        this.setCoreATB(this.coreATB() + increment);
-    }; // $.addCoreATB
-
-    /**
-     * Script Call
-     * @interface @since v0.00a @version v0.00a
-     * @param {Number} multiplier - Multiplier of current ATB value of battler
-     */
-    $.multiplyCoreATB = function(multiplier) {
-        this.setCoreATB(this.coreATB() * multiplier);
-    }; // $.multiplyCoreATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.00a @version v0.04a
-     */
-    $.fillUpCoreATB = function() {
-        // Extra atb shouldn't be filled as max act slots might not be reached
-        this.setCoreATB(this._battler.coreMaxSATB());
-        //
-    }; // $.fillUpCoreATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.00a @version v0.04a
-     * @param {Number} proportion - New current ATB value proportion of battler
-     */
-    $.setCoreATBProportion = function(proportion) {
-        this.setCoreATB(proportion * this._battler.coreMaxSATB());
-    }; // $.setCoreATBProportion
-
-    /**
-     * Script Call
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} increment - Increment of current ATB value proportion
-     */
-    $.addChargeATBProportion = function(increment) {
-        this.addChargeATB(increment * this._battler.chargeMaxSATB());
-    }; // $.addChargeATBProportion
-
-    /**
-     * Script Call/Hotspot
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} increment - Increment of current ATB value of the battler
-     */
-    $.addChargeATB = function(increment) {
-        this.setChargeATB(this.chargeATB() + increment);
-    }; // $.addChargeATB
-
-    /**
-     * Script Call
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} multiplier - Multiplier of current ATB value of battler
-     */
-    $.multiplyChargeATB = function(multiplier) {
-        this.setChargeATB(this.chargeATB() * multiplier);
-    }; // $.multiplyChargeATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     */
-    $.fillUpChargeATB = function() {
-        this.setChargeATB(this._battler.chargeMaxSATB());
-    }; // $.fillUpChargeATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     * @param {Number} proportion - New current ATB value proportion of battler
-     */
-    $.setChargeATBProportion = function(proportion) {
-        this.setChargeATB(proportion * this._battler.chargeMaxSATB());
-    }; // $.setChargeATBProportion
-
-    /**
-     * Script Call
-     * @interface @since v0.05a @version v0.05a
-     * @param {Number} increment - Increment of current ATB value proportion
-     */
-    $.addCooldownATBProportion = function(increment) {
-        this.addCooldownATB(increment * this._battler.cooldownMaxSATB());
-    }; // $.addCooldownATBProportion
-
-    /**
-     * Script Call/Hotspot
-     * @interface @since v0.05a @version v0.05a
-     * @param {Number} increment - Increment of current ATB value of the battler
-     */
-    $.addCooldownATB = function(increment) {
-        this.setCooldownATB(this.cooldownATB() + increment);
-    }; // $.addCooldownATB
-
-    /**
-     * Script Call
-     * @interface @since v0.05a @version v0.05a
-     * @param {Number} multiplier - Multiplier of current ATB value of battler
-     */
-    $.multiplyCooldownATB = function(multiplier) {
-        this.setCooldownATB(this.cooldownATB() * multiplier);
-    }; // $.multiplyCooldownATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.05a @version v0.05a
-     */
-    $.fillUpCooldownATB = function() {
-        this.setCooldownATB(this._battler.cooldownMaxSATB());
-    }; // $.fillUpCooldownATB
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.05a @version v0.05a
-     * @param {Number} proportion - New current ATB value proportion of battler
-     */
-    $.setCooldownATBProportion = function(proportion) {
-        this.setCooldownATB(proportion * this._battler.cooldownMaxSATB());
-    }; // $.setCooldownATBProportion
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.15a @version v0.16a
-     * @param {Nonnegative Num} multiplier - Delay counter locking battler input
-     */
-    $.multiplyDelaySecCounter = function(multiplier) {
-        this.setDelaySecCounter(this.delaySecCounter() * multiplier);
-    }; // multiplyDelaySecCounter
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.15a @version v0.16a
-     * @param {Nonnegative Num} increment - Delay counter locking battler inputs
-     */
-    $.addDelaySecCounter = function(increment) {
-        this.setDelaySecCounter(this.delaySecCounter() + increment);
-    }; // addDelaySecCounter
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.00a @version v0.05b
-     */
-    $.clearCoreATB = function() { if (this.coreATB() > 0) this.setCoreATB(0); };
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.04a
-     */
-    $.clearChargeATB = function() { this.addSmallestCoreSATBDecrement(); };
-
-    /**
-     * Script Call/Idempotent
-     * @interface @since v0.04a @version v0.05a
-     * @param {Number} val - The new current ATB value of the battler
-     * @todo Extracts this switch into an object instead to increase flexibility
-     */
-    $.setCurATB = function(val) {
-        switch (this._phase) {
-            case _SATB._PHASE_NORM: return this.setCoreATB(val);
-            case _SATB._PHASE_CHARGE: return this.setChargeATB(val);
-            case _SATB._PHASE_COOLDOWN: return this.setCooldownATB(val);
-        }
-    }; // $.setCurATB
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.00a @version v0.16a
-     * @param {Number} val - The new current ATB value of the battler
-     */
-    $.setCoreATB = function(val) {
-        // It means original ATB's already restored for discrete and continuous
-        this._lastEnoughCoreATB = Number.NaN;
-        //
-        this._setATB(val, _SATB._PHASE_NORM);
-        // val - this.coreATB will never be negative so there's no need to cap
-        this._extraATB = val - this.coreATB();
-        //
-        if (this._battler.satbActMode() !== "discrete") return;
-        var newActTimes = 1 + this._extraATB / this._battler.coreMaxSATB();
-        if (newActTimes === this._battler.satbActTimes()) return;
-        this._battler.setSATBActTimes(newActTimes);
-    }; // $.setCoreATB
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.04a @version v0.16a
-     * @param {Number} val - The new current charge ATB value of the battler
-     */
-    $.setChargeATB = function(val) {
-        // A valid ATB charge must have a valid skill/item to be charged
-        if (!this._battler.hasLatestSATBItems() || !this.isCharge()) return;
-        //
-        // Refer to reference tag NEGATIVE_CHARGE_ATB_VAL_CANCEL_CHARGE
-        if (val < 0) return this.clearChargeATB();
-        //
-        this._setATB(val, _SATB._PHASE_CHARGE);
-        if (this._forceChargeState !== _SATB._FORCE_CHARGE) return;
-        this._forcedChargeBeyondMax = val - this._battler.chargeMaxSATB();
-    }; // $.setChargeATB
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.05a @version v0.16a
-     * @param {Number} val - The new current cooldown ATB value of the battler
-     * @todo Erases this performance tradeoff while still keeping the class nice
-     */
-    $.setCooldownATB = function(val) {
-        // A valid ATB cooldown must have a valid skill/item to be cooled down
-        if (!this._battler.hasLatestSATBItems() || !this.isCooldown()) return;
-        //
-        // The cooldown fill direction's opposite to normal and charge ATB
-        var reversedVal = this._battler.cooldownMaxSATB() - val;
-        this._setATB(reversedVal, _SATB._PHASE_COOLDOWN);
-        // Reversing here's to simplify the cooldown logic in everywhere else
-    }; // $.setCooldownATB
-
-    /**
-     * Script Call/Hotspot/Idempotent
-     * @interface @since v0.15a @version v0.15a
-     * @param {Nonnegative Num} delay - Delay counter locking battler inputs
-     */
-    $.setDelaySecCounter = function(delay) { this._delaySecCounter = delay; };
-
-    /**
-     * Hotspot
-     * @interface @since v0.04a @version v0.13a
-     * @todo Extracts this switch into an object instead to increase flexibility
-     */
-    $.fillATB = function() {
-        switch (this._phase) {
-            case _SATB._PHASE_NORM: return this._onFillCoreATB();
-            case _SATB._PHASE_CHARGE: return this._onFillChargeATB();
-            case _SATB._PHASE_COOLDOWN: return this._onFillCooldownATB();
-        }
-    }; // $.fillATB
-
-    /**
-     * This method's practically idempotent but not theoretically so
-     * @interface @since v0.00a @version v0.16a
-     */
-    $.addSmallestCoreSATBDecrement = function() {
-        // Otherwise the increment would be too small for huge max ATB values
-        var addMultiplier = Math.min(this._battler.coreMaxSATB(), 1);
-        // It's derived from extensive testing
-        var decrement = -_SATB._SMALLEST_ATB_VAL_INCREMENT * addMultiplier;
-        var actMode = this._battler.satbActMode();
-        if (actMode === "discrete" || actMode === "continuous") {
-            this._setCoreATBJustNotEnough(decrement);
-        } else this.addCoreATB(decrement);
-    }; // $.addSmallestCoreSATBDecrement
+        return $$.atbRate.call(this);
+    }; // $.atbRate
 
     /**
      * Hotspot/Idempotent
-     * @interface @since v0.04a @version v0.05b
+     * @interface @override @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @todo Erases this performance tradeoff while still keeping the class nice
      */
-    $.checkUpdatedMaxes = function() {
-        // The norm phase must be checked first as it might clear ATB values
-        this._checkUpdatedMax(
-                this.coreATB(), _SATB._PHASE_NORM, this._battler.coreMaxSATB());
+    $.setATB = function(val) {
+        // A valid ATB charge must have a valid skill/item to be charged
+        if (!this._battler.hasLatestSATBItems()) return;
         //
-        if (this.isFill()) return;
-        var phase = this._phase;
-        // The raw current ATB value must be used or cooldown wouldn't work
-        this._checkUpdatedMax(
-                this._atbs[phase], phase, this._battler.curMaxSATB());
+        // Refer to reference tag NEGATIVE_CHARGE_ATB_VAL_CANCEL_CHARGE
+        if (val < 0) return this._battler.clearChargeSATB();
         //
-    }; // $.checkUpdatedMaxes
+        $$.setATB.call(this, val);
+        if (this._forceState !== _SATB._FORCE_CHARGE) return;
+        this._forcedBeyondMax = val - this.maxATB();
+    }; // $.setATB
 
     /**
      * Idempotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.16a @version v0.16a
      */
-    $.onStartCharge = function() {
-        if (!this.isFill()) return; // A charge can't start without normal ATB
-        // The ordering must be this or setChargeATB won't work due to _phase
-        this._phase = _SATB._PHASE_CHARGE;
-        this._resetForceChargeStates();
-        this.setChargeATB(0);
-        //
-    }; // $.onStartCharge
+    $.onStart = function() {
+        this._resetForceStates();
+        this.setATB(0);
+    }; // $.onStart
 
     /**
      * Idempotent
-     * @interface @since v0.04a @version v0.04a
+     * @interface @since v0.16a @version v0.16a
      */
-    $.onEndCharge = function() {
+    $.onEnd = function() {
         // Not setting it as 0 would lead to infinite loops that's hard to break
-        this.setChargeATB(this._lastATBs[_SATB._PHASE_CHARGE] = 0);
+        this._lastATB = 0;
+        this.setATB(this._lastATB);
         // _onChargeATBBecomeNotFull shouldn't be called again anyway
-        this._resetForceChargeStates(); // It's just to play safe
-        // Otherwise the ATB cooldown would be immediately cancelled wrongly
-        if (this.isCharge()) this._battler.onStartSATBFill();
-        // The ordering must be this or setChargeATB won't work due to _phase
-    }; // $.onEndCharge
+        this._resetForceStates(); // It's just to play safe
+    }; // $.onEnd
 
     /**
      * Idempotent Without Events
-     * @interface @since v0.04a @version v0.06a
+     * @interface @since v0.16a @version v0.16a
      * @todo Considers adding a sound effect as an extra feedback
      */
-    $.onCancelCharge = function() {
+    $.onCancel = function() {
         if (!SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
-        if (!this.isCharge() || !this._battler.canCancelChargeSATB()) return;
+        if (!this._battler.canCancelChargeSATB()) return;
         this._battler.runSATBNote("willCancelCharge");
-        this.clearChargeATB();
-    }; // $.onCancelCharge
+        this._battler.clearChargeSATB();
+    }; // $.onCancel
 
     /**
      * Idempotent Without Events
      * @interface @since v0.04a @version v0.16a
      */
-    $.onStartForceCharge = function() {
+    $.onStartForce = function() {
         if (!SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
-        if (!this.isCharge() || !this._battler.canForceChargeSATB()) return;
-        this._forcedChargeBeyondMax = 0;
-        this._forceChargeState = _SATB._FORCE_CHARGE;
+        if (!this._battler.canForceChargeSATB()) return;
+        this._forcedBeyondMax = 0;
+        this._forceState = _SATB._FORCE_CHARGE;
         this._battler.runSATBNote("didStartForceCharge");
-    }; // $.onStartForceCharge
+    }; // $.onStartForce
 
     /**
      * Idempotent
      * @interface @since v0.04a @version v0.15b
      */
-    $.onEndForceCharge = function() {
+    $.onEndForce = function() {
         if (!SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
-        // They ensures disabling forcing during force won't make invalid states
-        if (!this.isCharge()) return;
-        if (this._forceChargeState !== _SATB._FORCE_CHARGE) return;
+        // They ensure disabling forcing during force won't make invalid states
+        if (this._forceState !== _SATB._FORCE_CHARGE) return;
         //
         /** @todo Considers Adding didEndForceCharge so this becomes optional */
         SoundManager.playOk();
         //
         // Refer to reference tag MID_DISABLE_FORCE_CHARGE_BACK_TO_NORM
         var canForceCharge = this._battler.canForceChargeSATB();
-        this._forceChargeState = canForceCharge ? _SATB._FORCE_ACT : "";
+        this._forceState = canForceCharge ? _SATB._FORCE_ACT : "";
         //
         this._battler.onBecomeSATBActable();
-    }; // $.onEndForceCharge
+    }; // $.onEndForce
 
     /**
      * Idempotent
-     * @interface @since v0.05a @version v0.05a
+     * @override @since v0.16a @version v0.16a
+     * @param {+ve Num} max - The maximum ATB value of this phase
      */
-    $.onStartCooldown = function() {
-        if (!this.isCharge()) return; // A cooldown can't start without charge
-        // The ordering must be this or setChargeATB won't work due to _phase
-        this._phase = _SATB._PHASE_COOLDOWN;
-        this.setCooldownATB(this._battler.cooldownMaxSATB());
+    $._onATBBecomeEnough = function(max) {
+        $$._onATBBecomeEnough.call(this, max);
+        // It's to prevent errors from force charge state without Charge Module
+        if (this._forceState !== _SATB._FORCE_CHARGE) {
+            return this._battler.onBecomeSATBActable();
+        } else if (SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
         //
-    }; // $.onStartCooldown
+        this._battler.onBecomeSATBActable();
+    }; // $._onATBBecomeEnough
+
+    /**
+     * Idempotent
+     * @override @since v0.16a @version v0.16a
+     */
+    $._onATBBecomeNotEnough = function() {
+        $$._onATBBecomeNotEnough.call(this); // It's just to play safe
+        this._forcedBeyondMax = 0; // It's just to play safe
+        BattleManager.eraseSATBActBattler(this._battler);
+        this._battler.runSATBNote("didChargeATBBecomeNotFull");
+    }; // $._onATBBecomeNotEnough
+
+    /**
+     * Hotspot
+     * @since v0.16a @version v0.16a
+     */
+    $._fillATB = function() {
+        // Refer to reference tag NON_CHARGING_SKILL_ITEM_INSTANT_CHARGE
+        if (!this._battler.isSATBChargeItem()) return this.fillUpATB();
+        //
+        if (this._forceState === _SATB._FORCE_ACT) return;
+        this.addATB(this.atbRate());
+        if (this._forceState !== _SATB._FORCE_CHARGE) return;
+        if (this.atbProportion() <= 1) return;
+        // Otherwise force charge ATB beyond max won't update the bar instantly
+        BattleManager.onSATBBarRefresh([this._battler]);
+        //
+    }; // $._fillATB
+
+    /**
+     * Idempotent
+     * @since v0.16a @version v0.16a
+     */
+    $._resetForceStates = function() {
+        this._forcedBeyondMax = 0, this._forceState = "";
+    }; // $._resetForceStates
+
+})(DoubleX_RMMV.SATB); // Game_SATBPhaseCharge.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.16a+)New class: Game_SATBPhaseCooldown
+ *      - Implements the ATB cooldown business logics for all battlers
+ *----------------------------------------------------------------------------*/
+
+(function() {
+
+    "use strict";
+
+    var $$ = Game_SATBBasePhase.prototype;
+
+    Game_SATBPhaseCooldown.prototype = Object.create($$);
+
+    var $ = Game_SATBPhaseCooldown.prototype;
+
+    $.constructor = Game_SATBPhaseCooldown;
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The current ATB value of this phase
+     * @todo Erases this performance tradeoff while still keeping the class nice
+     */
+    $.curATB = function() {
+        // The cooldown fill direction's opposite to normal and charge ATB
+        return this.maxATB() - this._atb;
+        // Reversing here's to simplify the cooldown logic in everywhere else
+    }; // $.curATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
+     */
+    $.maxATB = function() { return this._battler.cooldownMaxSATB(); };
+
+    /**
+     * Hotspot
+     * @interface @override @since v0.16a @version v0.16a
+     */
+    $.fillATB = function() {
+        this._fillATB();
+        this._battler.runSATBNote("didFillCooldownATB");
+    }; // $.fillATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isCooldown = function() { return true; };
+
+    /**
+     * Hotspot/Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Number} The current ATB gain rate of this phase
+     */
+    $.atbRate = function() {
+        if (SATBManager.areModulesEnabled([
+            "IsRateEnabled",
+            "IsCooldownEnabled"
+        ])) return this._battler.satbNoteResult_("cooldownATBRate");
+        return $$.atbRate.call(this);
+    }; // $.atbRate
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     */
+    $.setATB = function(val) {
+        // A valid ATB cooldown must have a valid skill/item to be cooled down
+        if (!this._battler.hasLatestSATBItems()) return;
+        //
+        // The cooldown fill direction's opposite to normal and charge ATB
+        $$.setATB.call(this, this.maxATB() - val);
+        // Reversing here's to simplify the cooldown logic in everywhere else
+    }; // $.setATB
 
     /**
      * Idempotent Without Events
-     * @interface @since v0.05a @version v0.05a
+     * @interface @since v0.16a @version v0.16a
      * @todo Considers adding a sound effect as an extra feedback
      */
-    $.onCancelCooldown = function() {
+    $.onCancel = function() {
         if (!SATBManager.areModulesEnabled(["IsCooldownEnabled"])) return;
-        if (this.isCooldown() && this._battler.canCancelCooldownSATB()) {
-            this._battler.runSATBNote("willCancelCooldown");
-            this._onCooldownATBBecomeFull();
-        }
-    }; // $.onCancelCooldown
+        if (!this._battler.canCancelCooldownSATB()) return;
+        this._battler.runSATBNote("willCancelCooldown");
+        this._onATBBecomeEnough();
+    }; // $.onCancel
 
     /**
      * Idempotent
-     * @interface @since v0.05b @version v0.07a
+     * @override @since v0.16a @version v0.16a
+     * @param {+ve Num} max - The maximum ATB value of this phase
      */
-    $.onStartFill = function() {
-        this._phase = _SATB._PHASE_NORM;
-        this._useResetATBVal();
-    }; // $.onStartFill
+    $._onATBBecomeEnough = function(max) {
+        $$._onATBBecomeEnough.call(this, max);
+        // The cooldown ATB used in the reverse direction so full = empty
+        this.setATB(0);
+        this._battler.onStartSATBFill();
+        // The ordering must be this or setCooldownATB won't work due to _phase
+    }; // $._onATBBecomeEnough
+
+    /**
+     * Hotspot
+     * @since v0.16a @version v0.16a
+     */
+    $._fillATB = function() {
+        // Refer to reference tag NON_COOLDOWN_SKILL_ITEM_INSTANT_COOLDOWN
+        if (!this._battler.isSATBCooldownItem()) return this.setATB(0);
+        //
+        this.addATB(-this.atbRate());
+    }; // $._fillATB
+
+})(); // Game_SATBPhaseCooldown.prototype
+
+/*----------------------------------------------------------------------------
+ *    # (v0.16a+)New class: Game_SATBPhaseFill
+ *      - Implements the ATB core business logics for all battlers
+ *----------------------------------------------------------------------------*/
+
+(function(SATB) {
+
+    "use strict";
+
+    var _SATB = SATB.Game_SATBPhaseFill = {}, $$ = Game_SATBBasePhase.prototype;
+
+    Game_SATBPhaseFill.prototype = Object.create($$);
+
+    var $ = Game_SATBPhaseFill.prototype;
+
+    $.constructor = Game_SATBPhaseFill;
+
+    // Refer to reference tag SMALLEST_ATB_VAL_INCREMENT
+    _SATB._SMALLEST_ATB_VAL_INCREMENT = Math.pow(2, -32);
+    // Using Number.EPSILON would be too dangerous here
+
+    /*------------------------------------------------------------------------
+     *    New private variables
+     *------------------------------------------------------------------------*/
+     // {Nonnegative Num} _extraATB: The amount of ATB beyond 100% of max
+     // {Number} _resetATBVal: The accumulated battler reset ATB value
+     // {Number} _lastEnoughATB: Used by discrete and continuous modes only
 
     /**
      * Idempotent
-     * @interface @since v0.07a @version v0.07a
+     * @constructor @override @since v0.00a @version v0.16a
+     * @param {Game_Battler} battler - The battler involved in this ATB phase
+     */
+    $.initialize = function(battler) {
+        $$.initialize.call(this, battler);
+        this._extraATB = this._resetATBVal = 0;
+        this._lastEnoughATB = Number.NaN;
+    }; // $.initialize
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The current ATB value of this phase
+     */
+    $.curATB = function() {
+        if (this._battler.satbActMode() !== "discrete") return this._atb;
+        return this._atb + this._extraATB;
+    }; // $.curATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
+     */
+    $.maxATB = function() { return this._battler.coreMaxSATB(); };
+
+    /**
+     * Hotspot
+     * @interface @override @since v0.16a @version v0.16a
+     */
+    $.fillATB = function() {
+        this._fillATB();
+        this._updateDelaySecCounter();
+        this._battler.runSATBNote("didFillCoreATB");
+    }; // $.fillATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $.isFill = function() { return true; };
+
+    /**
+     * Hotspot/Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Number} The current ATB gain rate of this phase
+     */
+    $.atbRate = function() {
+      if (SATBManager.areModulesEnabled(["IsRateEnabled"])) {
+          return this._battler.satbNoteResult_("coreATBRate");
+      } else return $$.atbRate.call(this);
+    }; // $.atbRate
+
+    /**
+     * Hotspot/Idempotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     */
+    $.setATB = function(val) {
+      // It means original ATB's already restored for discrete and continuous
+      this._lastEnoughATB = Number.NaN;
+      //
+      $$.setATB.call(this, val);
+      // val - this.coreATB will never be negative so there's no need to cap
+      this._extraATB = val - this.curATB();
+      //
+      if (this._battler.satbActMode() !== "discrete") return;
+      var newActTimes = 1 + this._extraATB / this.maxATB();
+      if (newActTimes === this._battler.satbActTimes()) return;
+      this._battler.setSATBActTimes(newActTimes);
+    }; // $.setATB
+
+    /**
+     * Script Call/Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Nonnegative Num} multiplier - Delay counter locking battler input
+     */
+    $.multiplyDelaySecCounter = function(multiplier) {
+        this.setDelaySecCounter(this.delaySecCounter() * multiplier);
+    }; // $.multiplyDelaySecCounter
+
+    /**
+     * Script Call/Nullipotent
+     * @interface @since v0.16a @version v0.16a
+     * @returns {Nonnegative Num} Delay counter locking battler action inputs
+     */
+    $.delaySecCounter = function() { return this._delaySecCounter; };
+
+    /**
+     * Script Call/Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Nonnegative Num} increment - Delay counter locking battler inputs
+     */
+    $.addDelaySecCounter = function(increment) {
+        this.setDelaySecCounter(this.delaySecCounter() + increment);
+    }; // $.addDelaySecCounter
+
+    /**
+     * Script Call/Hotspot/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     * @param {Nonnegative Num} delay - Delay counter locking battler inputs
+     */
+    $.setDelaySecCounter = function(delay) { this._delaySecCounter = delay; };
+
+    /**
+     * Script Call/Idempotent
+     * @interface @since v0.16a @version v0.16a
+     */
+    $.clearATB = function() { if (this.curATB() > 0) this.setATB(0); };
+
+    /**
+     * This method's practically idempotent but not theoretically so
+     * @interface @since v0.16a @version v0.16a
+     */
+    $.addSmallestATBDecrement = function() {
+        // Otherwise the increment would be too small for huge max ATB values
+        var addMultiplier = Math.min(this.maxATB(), 1);
+        // It's derived from extensive testing
+        var decrement = -_SATB._SMALLEST_ATB_VAL_INCREMENT * addMultiplier;
+        var actMode = this._battler.satbActMode();
+        if (actMode === "discrete" || actMode === "continuous") {
+            this._setATBJustNotEnough(decrement);
+        } else this.addATB(decrement);
+    }; // $.addSmallestATBDecrement
+
+    /**
+     * Idempotent
+     * @interface @since v0.16a @version v0.16a
      */
     $.resetATBVal = function() { return this._resetATBVal; };
 
     /**
      * Idempotent
-     * @interface @since v0.07a @version v0.07a
+     * @interface @since v0.16a @version v0.16a
      */
     $.setResetATBVal = function(resetATBVal) {
         this._resetATBVal = resetATBVal;
     }; // setResetATBVal
 
     /**
-     * Hotspot
-     * @since v0.00a @version v0.13a
+     * Idempotent
+     * @interface @since v0.16a @version v0.16a
      */
-    $._onFillCoreATB = function() {
-        this._fillCoreATB();
-        this._updateDelaySecCounter();
-        this._battler.runSATBNote("didFillCoreATB");
-    }; // $._onFillCoreATB
+    $.useResetATBVal = function() {
+        if (this._battler.canMakeSATBCmds()) return;
+        if (SATBManager.areModulesEnabled(["IsResetEnabled"])) {
+            this.addATB(this.resetATBVal());
+        }
+        this.setResetATBVal(0);
+    }; // $.useResetATBVal
 
     /**
-     * Hotspot
-     * @since v0.00a @version v0.16a
+     * Hotspot/Nullipotent
+     * @since v0.16a @version v0.16a
+     * @param {Number} val - The new current ATB value of the battler
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     * @returns {{Boolean}} The check result of becoming enough or not enough
      */
-    $._fillCoreATB = function() {
-        // Discrete and continuous modes need to restore the original ATB values
-        if (isNaN(this._lastEnoughCoreATB)) {
-            this.addCoreATB(this.coreRate());
-        } else this.setCoreATB(this._lastEnoughCoreATB);
+    $._isBecomeEnoughNotEnough = function(val, max) {
+        if (this._battler.satbActMode() !== "continuous") {
+            return $$._isBecomeEnoughNotEnough.call(this, val, max);
+        }
+        var isEnough = this._battler.minSATBActCost() <= val;
+        var lastMinActCost = this._battler._satb.acts.lastMinActCost();
+        var wasEnough = lastMinActCost <= this._lastATB;
+        return {
+            isBecomeEnough: !wasEnough && isEnough,
+            isBecomeNotEnough: wasEnough && !isEnough
+        };
+    }; // $._isBecomeEnoughNotEnough
+
+    /**
+     * Idempotent
+     * @override @since v0.16a @version v0.16a
+     * @param {+ve Num} max - The maximum ATB value of this phase
+     */
+    $._onATBBecomeEnough = function(max) {
+        $$._onATBBecomeEnough.call(this, max);
+        if (SATBManager.areModulesEnabled(["IsDelayEnabled"])) {
+            this.setDelaySecCounter(this._battler.satbNoteResult_("delay"));
+        } else this.setDelaySecCounter(0);
+        // It's okay for unmovable battlers to have full atb which will be reset
+        if (this.delaySecCounter() <= 0 && this._battler.canMove()) {
+            this._battler.makeActions();
+        }
         //
-    }; // $._fillCoreATB
+        this._battler.runSATBNote("didCoreATBBecomeFull");
+    }; // $._onATBBecomeEnough
+
+    /**
+     * Idempotent
+     * @override @since v0.16a @version v0.16a
+     */
+    $._onATBBecomeNotEnough = function() {
+        $$._onATBBecomeNotEnough.call(this); // It's just to play safe
+        // Ensures toggling auto inputs will correctly reset the delay counter
+        this.setDelaySecCounter(0);
+        //
+        this._battler.clearActions();
+        this._battler.runSATBNote("didCoreATBBecomeNotFull");
+    }; // $._onATBBecomeNotEnough
 
     /**
      * Hotspot
-     * @since v0.15a @version v0.16a
+     * @since v0.16a @version v0.16a
+     */
+    $._fillATB = function() {
+        // Discrete and continuous modes need to restore the original ATB values
+        if (isNaN(this._lastEnoughATB)) return this.addATB(this.atbRate());
+        this.setATB(this._lastEnoughATB);
+        //
+    }; // $._fillATB
+
+    /**
+     * Hotspot
+     * @since v0.16a @version v0.16a
      * @todo Thinks of if SceneManager._deltaTime is as correct as Date.now()
      */
     $._updateDelaySecCounter = function() {
@@ -7049,7 +7431,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot
-     * @since v0.15a @version v0.15a
+     * @since v0.16a @version v0.16a
      */
     $._onDelayCounterEnd = function() {
         this._battler.makeActions();
@@ -7057,329 +7439,30 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $._onDelayCounterEnd
 
     /**
-     * Hotspot
-     * @since v0.04a @version v0.13a
-     */
-    $._onFillChargeATB = function() {
-        this._fillChargeATB();
-        this._battler.runSATBNote("didFillChargeATB");
-    }; // $._onFillChargeATB
-
-    /**
-     * Hotspot
-     * @since v0.04a @version v0.06a
-     */
-    $._fillChargeATB = function() {
-        // Refer to reference tag NON_CHARGING_SKILL_ITEM_INSTANT_CHARGE
-        if (!this._battler.isSATBChargeItem()) return this.fillUpChargeATB();
-        //
-        if (this._forceChargeState === _SATB._FORCE_ACT) return;
-        this.addChargeATB(this.chargeRate());
-        if (this._forceChargeState !== _SATB._FORCE_CHARGE) return;
-        if (this.chargeATBProportion() <= 1) return;
-        // Otherwise force charge ATB beyond max won't update the bar instantly
-        BattleManager.onSATBBarRefresh([this._battler]);
-        //
-    }; // $._fillChargeATB
-
-    /**
-     * Hotspot
-     * @since v0.05a @version v0.05a
-     */
-    $._onFillCooldownATB = function() {
-        this._fillCooldownATB();
-        this._battler.runSATBNote("didFillCooldownATB");
-    }; // $._onFillCooldownATB
-
-    /**
-     * Hotspot
-     * @since v0.05a @version v0.05a
-     */
-    $._fillCooldownATB = function() {
-        // Refer to reference tag NON_COOLDOWN_SKILL_ITEM_INSTANT_COOLDOWN
-        if (!this._battler.isSATBCooldownItem()) return this.setCooldownATB(0);
-        //
-        this.addCooldownATB(-this.cooldownRate());
-    }; // $._fillCooldownATB
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.10a @version v0.10a
-     */
-    $._defaultFillRate = function() {
-          // The base max should be used or changing max won't change fill rate
-          var baseFillRate = BattleManager.coreBaseSATBFillRate();
-          var baseMax = this._battler.baseCoreMaxSATB();
-          var avgAgi = BattleManager.satbAvgAgi;
-          return baseFillRate * this._battler.agi * baseMax * 1.0 / avgAgi;
-          //
-    }; // $._defaultFillRate
-
-    /**
-     * Hotspot/Idempotent
-     * @since v0.00a @version v0.05b
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     */
-    $._setATB = function(val, phase) {
-        // A valid max must be +ve and updating max will check max anyway
-        var max = this._lastMaxes[phase] || this._maxATB(phase);
-        //
-        if (this._isAlreadyMaxATB(val, phase, max)) return;
-        // It must be here or checkUpdatedMaxes would use wrong _atbs val
-        this._atbs[phase] = Math.min(val, max);
-        // _atbs must be capped by maxATB here to maximize performance gain
-        this._checkUpdatedMax(val, phase, max);
-        // It must be here or checkUpdatedMaxes would use wrong _lastATBs
-        this._lastATBs[phase] = this._atbs[phase];
-        //
-    }; // $._setATB
-
-    /**
-     * Hotspot/Idempotent
-     * @since v0.05b @version v0.05b
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     */
-    $._isAlreadyMaxATB = function(val, phase, max) {
-        /** @todo Makes sure it's always correct even when it's tested so */
-        if (val < max) return false;
-        return this._atbs[phase] === max && this._lastATBs[phase] === max;
-        //
-    }; // $._isAlreadyMaxATB
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.04a @version v0.05a
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @returns {+ve Num} The maximum ATB value of the specified phase
-     * @todo Extracts this switch into an object instead to increase flexibility
-     */
-    $._maxATB = function(phase) {
-        switch (phase) {
-            case _SATB._PHASE_NORM: return this._battler.coreMaxSATB();
-            case _SATB._PHASE_CHARGE: return this._battler.chargeMaxSATB();
-            case _SATB._PHASE_COOLDOWN: return this._battler.cooldownMaxSATB();
-            // It's impossible to fallback into any sensible default
-            default: throw new Error(phase + " isn't a valid ATB phase!");
-            //
-        }
-    }; // $._maxATB
-
-    /**
      * Idempotent
      * @since v0.16a @version v0.16a
      * @param {Number} decrement - The amount to be subtracted from just enough
      */
-    $._setCoreATBJustNotEnough = function(decrement) {
+    $._setATBJustNotEnough = function(decrement) {
         // The ordering must be this or _lastEnoughCoreATB would be used now
-        this.setCoreATB(this._coreATBThreshold() - decrement);
-        this._lastEnoughCoreATB = this.coreATB();
+        this.setATB(this._atbThreshold() - decrement);
+        this._lastEnoughATB = this.curATB();
         //
-    }; // $._setCoreATBJustNotEnough
+    }; // $._setATBJustNotEnough
 
     /**
      * Nullipotent
      * @since v0.16a @version v0.16a
      * @returns {+ve Num} The minimum amount of ATB to be able to input actions
      */
-    $._coreATBThreshold = function() {
+    $._atbThreshold = function() {
         // The action mode must be discrete or continuous to be here
-        if (this._battler.satbActMode() === "discrete") return this.coreMax();
+        if (this._battler.satbActMode() === "discrete") return this.maxATB();
         return this._battler.minSATBActCost();
         //
-    }; // $._coreATBThreshold
+    }; // $._atbThreshold
 
-    /**
-     * Hotspot/Idempotent
-     * @since v0.00a @version v0.05b
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     */
-    $._checkUpdatedMax = function(val, phase, max) {
-        // It must be placed here or refreshBar would miss _onATBBecomeFull
-        this._checkIsBecomeFullNotFull(val, phase, max);
-        //
-        this._lastMaxes[phase] = max;
-        // It's the only place covering all cases changing current/max ATB value
-        BattleManager.onSATBBarRefresh([this._battler]);
-        //
-    }; // $._checkUpdatedMax
-
-    /**
-     * Hotspot/Idempotent
-     * @since v0.05b @version v0.16a
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     */
-    $._checkIsBecomeFullNotFull = function(val, phase, max) {
-        var result = this._isBecomeEnoughNotEnough(val, phase, max);
-        // Refers to reference tag DECREASED_MAX_CORE_ATB_INPUTABLE
-        if (result.isBecomeEnough) return this._onATBBecomeFull(phase, max);
-        // And DECREASED_MAX_CHARGE_ATB_ACTABLE
-        // Refers to reference tag INCREASED_MAX_CORE_ATB_NOT_INPUTABLE
-        if (result.isBecomeNotEnough) this._onATBBecomeNotFull(phase);
-        // And INCREASED_MAX_CHARGE_ATB_NOT_ACTABLE
-    }; // $._checkIsBecomeFullNotFull
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.16a @version v0.16a
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     * @returns {{Boolean}} The check result of becoming enough or not enough
-     */
-    $._isBecomeEnoughNotEnough = function(val, phase, max) {
-        var isContinuous = this._battler.satbActMode() === "continuous";
-        if (phase !== _SATB._PHASE_NORM || !isContinuous) {
-            return this._isBecomeFullNotFull(val, phase, max);
-        }
-        var isEnough = this._battler.minSATBActCost() <= val;
-        var lastMinActCost = this._battler._satb.acts.lastMinActCost();
-        var wasEnough = lastMinActCost <= this._lastATBs[_SATB._PHASE_NORM];
-        return {
-            isBecomeEnough: !wasEnough && isEnough,
-            isBecomeNotEnough: wasEnough && !isEnough
-        };
-    }; // $._isBecomeEnoughNotEnough
-
-    /**
-     * Hotspot/Nullipotent
-     * @since v0.16a @version v0.16a
-     * @param {Number} val - The new current ATB value of the battler
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     * @returns {{Boolean}} The check result of becoming enough or not enough
-     */
-    $._isBecomeFullNotFull = function(val, phase, max) {
-        var isFull = max <= val;
-        var wasFull = this._lastMaxes[phase] <= this._lastATBs[phase];
-        return {
-            isBecomeEnough: !wasFull && isFull,
-            isBecomeNotEnough: wasFull && !isFull
-        };
-    }; // $._isBecomeFullNotFull
-
-    /**
-     * Idempotent
-     * @since v0.04a @version v0.05a
-     * @param {ATBPhase} phase - The phase of the current ATB value to be set
-     * @param {+ve Num} max - The maximum ATB value of the specified phase
-     * @todo Extracts this switch into an object instead to increase flexibility
-     */
-    $._onATBBecomeFull = function(phase, max) {
-        this._lastATBs[phase] = this._atbs[phase] = max;
-        switch (phase) {
-            case _SATB._PHASE_NORM: return this._onCoreATBBecomeFull();
-            case _SATB._PHASE_CHARGE: return this._onChargeATBBecomeFull();
-            // The cooldown ATB used in the reverse direction so full = empty
-            case _SATB._PHASE_COOLDOWN: return this._onCooldownATBBecomeFull();
-            //
-        }
-    }; // $._onATBBecomeFull
-
-    /**
-     * Idempotent Without Events
-     * @since v0.00a @version v0.16a
-     */
-    $._onCoreATBBecomeFull = function() {
-        if (SATBManager.areModulesEnabled(["IsDelayEnabled"])) {
-            this.setDelaySecCounter(this._battler.satbNoteResult_("delay"));
-        } else this.setDelaySecCounter(0);
-        // It's okay for unmovable battlers to have full atb which will be reset
-        if (this.delaySecCounter() <= 0 && this._battler.canMove()) {
-            this._battler.makeActions();
-        }
-        //
-        this._battler.runSATBNote("didCoreATBBecomeFull");
-    }; // $._onCoreATBBecomeFull
-
-    /**
-     * Idempotent
-     * @since v0.04a @version v0.16a
-     */
-    $._onChargeATBBecomeFull = function() {
-        // It's to prevent errors from force charge state without Charge Module
-        if (this._forceChargeState !== _SATB._FORCE_CHARGE) {
-            return this._battler.onBecomeSATBActable();
-        } else if (SATBManager.areModulesEnabled(["IsChargeEnabled"])) return;
-        //
-        this._battler.onBecomeSATBActable();
-    }; // $._onChargeATBBecomeFull
-
-    /**
-     * Idempotent
-     * @since v0.05a @version v0.05a
-     */
-    $._onCooldownATBBecomeFull = function() {
-        // The cooldown ATB used in the reverse direction so full = empty
-        this.setCooldownATB(0);
-        this._battler.onStartSATBFill();
-        // The ordering must be this or setCooldownATB won't work due to _phase
-    }; // $._onCooldownATBBecomeFull
-
-    /**
-     * Idempotent
-     * @since v0.07a @version v0.07a
-     */
-    $._useResetATBVal = function() {
-        if (this._battler.canMakeSATBCmds()) return;
-        if (SATBManager.areModulesEnabled(["IsResetEnabled"])) {
-            this.addCoreATB(this.resetATBVal());
-        }
-        this.setResetATBVal(0);
-    }; // $._useResetATBVal
-
-    /**
-     * Idempotent
-     * @since v0.04a @version v0.04a
-     * @param {ATBPhase} phase - The phase of the current ATB value that changed
-     * @todo Extracts this switch into an object instead to increase flexibility
-     */
-    $._onATBBecomeNotFull = function(phase) {
-        switch (phase) {
-            // There's nothing meaningful to happen for cooldown become not full
-            case _SATB._PHASE_NORM: return this._onCoreATBBecomeNotFull();
-            case _SATB._PHASE_CHARGE: return this._onChargeATBBecomeNotFull();
-            //
-        }
-    }; // $._onATBBecomeNotFull
-
-    /**
-     * Idempotent Without Events
-     * @since v0.00a @version v0.16a
-     */
-    $._onCoreATBBecomeNotFull = function() {
-        // Ensures toggling auto inputs will correctly reset the delay counter
-        this.setDelaySecCounter(0);
-        //
-        this._battler.clearActions();
-        this._battler.runSATBNote("didCoreATBBecomeNotFull");
-    }; // $._onCoreATBBecomeNotFull
-
-    /**
-     * Idempotent Without Events
-     * @since v0.04a @version v0.04a
-     */
-    $._onChargeATBBecomeNotFull = function() {
-        this._forcedChargeBeyondMax = 0; // It's just to play safe
-        BattleManager.eraseSATBActBattler(this._battler);
-        this._battler.runSATBNote("didChargeATBBecomeNotFull");
-    }; // $._onChargeATBBecomeNotFull
-
-    /**
-     * Idempotent
-     * @since v0.04a @version v0.04a
-     */
-    $._resetForceChargeStates = function() {
-        this._forcedChargeBeyondMax = 0, this._forceChargeState = "";
-    }; // $._resetForceChargeStates
-
-})(DoubleX_RMMV.SATB); // Game_SATBPhaseTypes.prototype
+})(DoubleX_RMMV.SATB); // Game_SATBPhaseFill.prototype
 
 /*----------------------------------------------------------------------------
  *    # New class: Game_SATBNotes
