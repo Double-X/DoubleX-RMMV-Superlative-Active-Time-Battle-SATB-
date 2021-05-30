@@ -4982,7 +4982,7 @@ function Window_SATBTurnClock() { // v0.11a+
     _SATB._ACT_FORWARDED_FUNCS = { // v0.16a+
         minSATBActCost: "minActCost",
         satbActTimes: "actTimes",
-        maxSatbActTimes: "maxActTimes",
+        maxSATBActTimes: "maxActTimes",
         usedSATBActTimes: "usedActTimes"
     }; // _SATB._ACT_FORWARDED_FUNCS
 
@@ -5201,8 +5201,8 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.setSurpriseStartSATB
 
     // (v0.16a+)Refers to the Game_SATBActs counterparts
-    Object.keys(_SATB.ACT_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.ACT_FORWARDED_FUNCS[func];
+    Object.keys(_SATB._ACT_FORWARDED_FUNCS).forEach(function(func) {
+        var f = _SATB._ACT_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             return this._satb.acts[f].apply(this._satb.acts, arguments);
@@ -6204,8 +6204,9 @@ function Window_SATBTurnClock() { // v0.11a+
         var actCost = this._battler.latestSATBItemNoteResult_("actCost", [
             { item: item }
         ]);
-        if (this.satbActMode() !== "bundle") return actCost <= this.actTimes();
-        return actCost <= this.actTimes() - this.usedActTimes();
+        if (this._battler.satbActMode() !== "bundle") {
+            return actCost <= this.actTimes();
+        } else return actCost <= this.actTimes() - this.usedActTimes();
     }; // $.hasEnoughActTimes
 
     /**
@@ -6353,7 +6354,7 @@ function Window_SATBTurnClock() { // v0.11a+
         fillUpCurATB: "fillUpATB",
         setCurATBProportion: "setATBProportion",
         setCurATB: "setATB",
-        fillCurATB: "fillATB"
+        fillATB: "fillATB"
     }; // _SATB.CUR_PHASE_FORWARDED_FUNCS
     _SATB.PHASE_CHARGE_FORWARDED_FUNCS = {
         chargeATB: "curATB",
@@ -6438,7 +6439,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     // (v0.16a+)Refers to the Game_SATBPhaseCharge counterparts
     Object.keys(_SATB.COND_PHASE_CHARGE_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.NOTE_FORWARDED_FUNCS[func];
+        var f = _SATB.COND_PHASE_CHARGE_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             if (!this.isCharge()) return;
@@ -6450,7 +6451,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     // (v0.16a+)Refers to the Game_SATBPhaseCooldown counterparts
     Object.keys(_SATB.COND_PHASE_COOLDOWN_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.PHASE_TYPE_FORWARDED_FUNCS[func];
+        var f = _SATB.COND_PHASE_COOLDOWN_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             if (!this.isCooldown()) return;
@@ -6462,7 +6463,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     // (v0.16a+)Refers to the Game_SATBBasePhase and subclasses counterparts
     Object.keys(_SATB.CUR_PHASE_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.ACT_FORWARDED_FUNCS[func];
+        var f = _SATB.CUR_PHASE_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             return this._curPhase[f].apply(this._curPhase, arguments);
@@ -6473,7 +6474,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     // (v0.16a+)Refers to the Game_SATBPhaseCharge counterparts
     Object.keys(_SATB.PHASE_CHARGE_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.NOTE_FORWARDED_FUNCS[func];
+        var f = _SATB.PHASE_CHARGE_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             return this._phaseCharge[f].apply(this._phaseCharge, arguments);
@@ -6484,7 +6485,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     // (v0.16a+)Refers to the Game_SATBPhaseCooldown counterparts
     Object.keys(_SATB.PHASE_COOLDOWN_FORWARDED_FUNCS).forEach(function(func) {
-        var f = _SATB.PHASE_TYPE_FORWARDED_FUNCS[func];
+        var f = _SATB.PHASE_COOLDOWN_FORWARDED_FUNCS[func];
         // It's ok to skip the arguments in the signature as there's arguments
         $[func] = function() {
             return this._phaseCooldown[f].apply(this._phaseCooldown, arguments);
@@ -6665,11 +6666,11 @@ function Window_SATBTurnClock() { // v0.11a+
      * @interface @since v0.16a @version v0.16a
      * @returns {Nonnegative Int} The maximum ATB value of this phase
      */
-    $.curATBProportion = function() {
+    $.atbProportion = function() {
         // * 1.0 is just to ensure that integer division won't be used
         return this.curATB() * 1.0 / this.maxATB();
         //
-    }; // $.curATBProportion
+    }; // $.atbProportion
 
     /**
      * Nullipotent
@@ -7237,6 +7238,20 @@ function Window_SATBTurnClock() { // v0.11a+
         this._updateDelaySecCounter();
         this._battler.runSATBNote("didFillCoreATB");
     }; // $.fillATB
+
+    /**
+     * Nullipotent
+     * @interface @override @since v0.16a @version v0.16a
+     * @returns {Nonnegative Int} The maximum ATB value of this phase
+     */
+    $.atbProportion = function() {
+        var proportion = $$.atbProportion.call(this);
+        // It's possible for the raw proportion to exceed 1 in the discrete mode
+        if (proportion <= 1) return proportion;
+        var remainder = proportion - Math.trunc(proportion);
+        return remainder <= 0 ? 1 : remainder;
+        //
+    }; // $.atbProportion
 
     /**
      * Nullipotent
@@ -8566,12 +8581,12 @@ function Window_SATBTurnClock() { // v0.11a+
                 "discreteOrderSpriteIconYCoor"),
         discreteOrderSpriteIconSourceW: _SATB._DEFAULT_SPRITE_RESULT_ARG(
                 "discreteOrderSpriteIconSourceW"),
-        discreteOrderSpriteIconSourceH: SATB._DEFAULT_SPRITE_RESULT_ARG(
+        discreteOrderSpriteIconSourceH: _SATB._DEFAULT_SPRITE_RESULT_ARG(
                 "discreteOrderSpriteIconSourceH"),
         discreteOrderSpriteIconW:
-                SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconW"),
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconW"),
         discreteOrderSpriteIconH:
-                SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconH"),
+                _SATB._DEFAULT_SPRITE_RESULT_ARG("discreteOrderSpriteIconH"),
         //
         // (v0.10a+)Rate Module
         coreATBRate: _SATB._DEFAULT_RESULT_NO_ARG("coreATBRate"),

@@ -3920,7 +3920,7 @@ DoubleX_RMMV.SATB_VERS = {
     Parameters: "v0.16a",
     Configurations: "v0.16a",
     Implementations: "v0.16a",
-    "Unit Tests": "v0.15b",
+    "Unit Tests": "v0.16a",
     Compatibilities: "v0.05a",
     "Compatibility Tests": "v0.01a"
 }; // DoubleX_RMMV.SATB_VERS

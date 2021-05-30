@@ -145,7 +145,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -371,7 +371,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -576,7 +576,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1121,7 +1121,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1168,7 +1168,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1233,7 +1233,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1284,7 +1284,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1342,7 +1342,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1400,7 +1400,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1465,7 +1465,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1523,7 +1523,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1751,7 +1751,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1806,7 +1806,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1855,7 +1855,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1904,7 +1904,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -1953,7 +1953,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2002,7 +2002,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2051,7 +2051,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2100,7 +2100,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2149,7 +2149,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2198,7 +2198,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2247,7 +2247,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2296,7 +2296,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2345,7 +2345,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2398,7 +2398,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2451,7 +2451,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2504,7 +2504,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2557,7 +2557,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2610,7 +2610,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -2663,7 +2663,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3343,7 +3343,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3402,7 +3402,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3461,7 +3461,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3526,7 +3526,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3598,7 +3598,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3663,7 +3663,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3722,7 +3722,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
@@ -3781,7 +3781,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @value items
  * @option Data of usable items(Shouldn't be used with Data of possessed items)
  * @value usableItems
- * @option Data of the latest skill/item being used(Can double-count with skills/items)
+ * @option Data of the latest skill/items being used(Can double-count with skills/items)
  * @value latestSkillItems
  * @option Data of equipped armors
  * @value armors
