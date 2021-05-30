@@ -461,11 +461,15 @@
  *           of the old latestSATBItem_
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
- *        4. Fixed the bug of not updating the x positions of the battler
+ *        4. addSmallestSATBDecrement has been renamed as
+ *           addSmallestATBDecrement
+ *        5. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        5. Fixed the possible bug of not updating possible skill/item
+ *        6. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
+ *        7. Increased the flexibility, modularity and readability of the
+ *           implementations
  *      - v0.15b(GMT 0300 7-Dec-2020):
  *        1. Fixed the wrong this of the following Array prototype methods:
  *           i. fastFilter
@@ -688,11 +692,15 @@
  *           of the old latestSATBItem_
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
- *        4. Fixed the bug of not updating the x positions of the battler
+ *        4. addSmallestSATBDecrement has been renamed as
+ *           addSmallestATBDecrement
+ *        5. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        5. Fixed the possible bug of not updating possible skill/item
+ *        6. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
+ *        7. Increased the flexibility, modularity and readability of the
+ *           implementations
  *      - v0.15c(GMT 0700 11-Dec-2020):
  *        1. Fixed the following wrong documentations:
  *           Battler manipulations -
