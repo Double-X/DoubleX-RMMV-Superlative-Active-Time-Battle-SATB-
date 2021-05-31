@@ -348,6 +348,11 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 didStartATBFill: "checkNothing",
                 _didStartATBFillNoteChainingRule: "checkChainEventRule",
                 _didStartATBFillNotePriorities: "checkArrayDataType",
+                // v0.16a+
+                didSetMaxActTimes: "checkNothing",
+                _didSetMaxActTimesNoteChainingRule: "checkChainEventRule",
+                _didSetMaxActTimesNotePriorities: "checkArrayDataType",
+                //
                 willCancelCharge: "checkNothing",
                 _willCancelChargeNoteChainingRule: "checkChainEventRule",
                 _willCancelChargeNotePriorities: "checkArrayDataType",
@@ -818,6 +823,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
             didBecomeActable: "checkChainEventRule",
             didSetActTimes: "checkChainEventRule",
             didStartATBFill: "checkChainEventRule",
+            didSetMaxActTimes: "checkChainEventRule",
             willCancelCharge: "checkChainEventRule",
             didStartForceCharge: "checkChainEventRule",
             willCancelCooldown: "checkChainEventRule",

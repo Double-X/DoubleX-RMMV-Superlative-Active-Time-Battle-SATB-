@@ -5653,7 +5653,7 @@ function Window_SATBTurnClock() { // v0.11a+
     _SATB._makeActs = function() {
         if (this.canMakeSATBCmds()) return;
         // This must be set first as _SATB._newActTimes uses it right afterwards
-        this._satb.maxActTimes = _SATB._newMaxActTimes.call(this);
+        this.setMaxSATBActTimes(_SATB._newMaxActTimes.call(this));
         //
         // It's not idempotent as makeActionTimes are random by default
         this.setSATBActTimes(_SATB._newActTimes.call(this));
@@ -5986,8 +5986,8 @@ function Window_SATBTurnClock() { // v0.11a+
         $$.setSATBActTimes.call(this, actTimes);
         // Otherwise actors could input action slots that no longer exist
         if (this.usedSATBActTimes() < this.satbActTimes()) return;
-        BattleManager.selectNextCommand();
-        //
+        if (BattleManager.actor() === this) BattleManager.selectNextCommand();
+        // An autobattle/confused battler won't be the currently inputting one
     }; // $.setSATBActTimes
 
     /**
@@ -6237,10 +6237,11 @@ function Window_SATBTurnClock() { // v0.11a+
         } else if (actMode === "discrete") {
             this._correctDiscreteActTimes(actTimes);
         }
-        // Ensures that the ATB value will become full
-        if (!hadActs && hasActs) return this._battler.fillUpCoreSATB();
+        // Ensures that the ATB value will become full for non-continuous modes
+        if (actMode !== "continuous" && !hadActs && hasActs) {
+            return this._battler.fillUpCoreSATB();
+        } else if (!hadActs || hasActs) return;
         //
-        if (!hadActs || hasActs) return;
         // Ensures that the ATB value will become not full
         this._battler._satb.phaseTypes.addSmallestCoreATBDecrement();
         //

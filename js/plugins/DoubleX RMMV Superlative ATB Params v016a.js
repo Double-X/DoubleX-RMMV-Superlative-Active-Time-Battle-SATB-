@@ -194,7 +194,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets the text showing the battler ATB values
  * It'll be the contents of a function returning a String
- * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
+ * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n} else return cur + '/' + max + ' : ' + actTimes;"
  *
  * @param atbBarXOffset
  * @parent IsBarEnabled
@@ -399,7 +399,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets the text showing the battler ATB values
  * It'll be the contents of a function returning a String
- * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n}\nreturn cur + '/' + max + ' : ' + actTimes;"
+ * @default "var cur = Math.floor(this._battler.curSATB());\nvar max = Math.floor(this._battler.curMaxSATB());\nvar actTimes = this._battler.satbActTimes();\nif (!this._battler.isSATBFill()) {\n    var items = this._battler.latestSATBItems;\n    var itemCount = items.length;\n    if (itemCount > 1) {\n        return cur + '/' + max + ' : ' + actTimes + ' ' + itemCount + ' actions';\n    }\n    var itemName = items[0].item.name;\n    return cur + '/' + max + ' : ' + actTimes + ' ' + itemName;\n} else return cur + '/' + max + ' : ' + actTimes;"
  *
  * @param statusATBBarXOffset
  * @parent IsBarEnabled
