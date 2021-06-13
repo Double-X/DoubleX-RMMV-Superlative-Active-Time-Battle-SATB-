@@ -6546,7 +6546,7 @@ function Window_SATBTurnClock() { // v0.11a+
         //
         // The raw current ATB value must be used or cooldown wouldn't work
         if (!this.isFill()) this._curPhase.checkUpdatedMax(
-                this._curPhase.curATB(), this._curPhase.maxATB());
+                this._curPhase._atb, this._curPhase.maxATB());
         //
     }; // $.checkUpdatedMaxes
 
@@ -7641,16 +7641,20 @@ function Window_SATBTurnClock() { // v0.11a+
         var items = this._battler.latestSATBItems.clone();
         //
         // This function should be inlined as it can't be used anywhere else
-        var results = items.map(function(item) {
+        var actResult = items.map(function(item) {
             this._battler.latestSATBItems = [item];
             return this._result_(note, argObj_);
-        }, this);
+        }, this).reduce(_SATB._ACT_RESULT, 0);
+        //
+        // Skills/items can only be charged in series but not in parallel
+        if (note === "chargeATBRate" || note === "cooldownATBRate") {
+            actResult /= items.length * 1.0;
+        }
         //
         this._battler.latestSATBItems = items;
-        var actResult = results.reduce(_SATB._ACT_RESULT, 0);
         // Refers to reference tag NON_CONTINUOUS_INTEGER_ACT_COST
         if (this._battler.satbActMode() === "continuous") return actResult;
-        return Math.ceil(actResult);
+        return note === "actCost" ? Math.ceil(actResult) : actResult;
         //
     }; // $._actResult
 

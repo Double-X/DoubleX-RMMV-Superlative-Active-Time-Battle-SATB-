@@ -935,9 +935,13 @@
  *                   will be accquired at once, and that battler will input
  *                   all those actions consectively
  *                 - Once all those actions are inputted, they will first be
- *                   charged as if they were a single action, then executed
- *                   consecutively without changing action execution subjects,
- *                   and finally cooled down as if they were a single action
+ *                   charged in series as if they were a single action, then
+ *                   executed consecutively without changing action execution
+ *                   subjects, and finally cooled down in series as if they
+ *                   were a single action(the expected charge/cooldown time
+ *                   will be the sum of charge/cooldown maxes * the number of
+ *                   skill/items / the sum of charge/cooldown rates, which
+ *                   isn't always the same as the time in other action modes)
  *                 - After that, that battler will run out of action slots
  *          batch - If a battler has x action slots, all those action slots
  *                  will be accquired at once, and that battler will input
