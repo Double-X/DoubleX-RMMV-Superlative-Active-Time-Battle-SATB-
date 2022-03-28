@@ -3012,7 +3012,14 @@ function Window_SATBTurnClock() { // v0.11a+
             battleTurnClockTextColor: _SATB.ZERO_ARG_FUNC, // v0.14a+
             battleTurnClockTextAlign: _SATB.ZERO_ARG_FUNC, // v0.14a+
             battleTurnClockTextXOffset: _SATB.ZERO_ARG_FUNC,
-            battleTurnClockTextYOffset: _SATB.ZERO_ARG_FUNC
+            battleTurnClockTextYOffset: _SATB.ZERO_ARG_FUNC,
+            battleTurnClockBarBackColor: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarColor1: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarColor2: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarXOffset: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarYOffset: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarW: _SATB.ZERO_ARG_FUNC, // v0.16a+
+            battleTurnClockBarH: _SATB.ZERO_ARG_FUNC // v0.16a+
             //
         }, // params
         notes: {
@@ -3510,7 +3517,15 @@ function Window_SATBTurnClock() { // v0.11a+
         battleTurnClockTextColor: SATBManager.invalidateParamCache,
         battleTurnClockTextAlign: SATBManager.invalidateParamCache,
         battleTurnClockTextXOffset: SATBManager.invalidateParamCache,
-        battleTurnClockTextYOffset: SATBManager.invalidateParamCache
+        battleTurnClockTextYOffset: SATBManager.invalidateParamCache,
+        battleTurnClockBarBackColor:
+                SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarColor1: SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarColor2: SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarXOffset: SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarYOffset: SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarW: SATBManager.invalidateParamCache, // v0.16a+
+        battleTurnClockBarH: SATBManager.invalidateParamCache // v0.16a+
         //
     }; // _SATB._PARAM_UPDATES
     Object.keys(SATBM.RUN_MODULES).forEach(function(note) { // v0.06a+
@@ -3868,7 +3883,14 @@ function Window_SATBTurnClock() { // v0.11a+
         "battleTurnClockTextColor", // v0.14a+
         "battleTurnClockTextAlign", // v0.14a+
         "battleTurnClockTextXOffset",
-        "battleTurnClockTextYOffset"
+        "battleTurnClockTextYOffset",
+        "battleTurnClockBarBackColor", // v0.16a+
+        "battleTurnClockBarColor1", // v0.16a+
+        "battleTurnClockBarColor2", // v0.16a+
+        "battleTurnClockBarXOffset", // v0.16a+
+        "battleTurnClockBarYOffset", // v0.16a+
+        "battleTurnClockBarW", // v0.16a+
+        "battleTurnClockBarH" // v0.16a+
         //
     ]; // _SATB._JSON_PARAMS
     Object.keys(SATBM.RUN_MODULES).forEach(function(note) { // v0.06a+
@@ -4292,7 +4314,14 @@ function Window_SATBTurnClock() { // v0.11a+
         battleTurnClockTextColor: "turn", // v0.14a+
         battleTurnClockTextAlign: "turn", // v0.14a+
         battleTurnClockTextXOffset: "turn",
-        battleTurnClockTextYOffset: "turn"
+        battleTurnClockTextYOffset: "turn",
+        battleTurnClockBarBackColor: "turn", // v0.16a+
+        battleTurnClockBarColor1: "turn", // v0.16a+
+        battleTurnClockBarColor2: "turn", // v0.16a+
+        battleTurnClockBarXOffset: "turn", // v0.16a+
+        battleTurnClockBarYOffset: "turn", // v0.16a+
+        battleTurnClockBarW: "turn", // v0.16a+
+        battleTurnClockBarH: "turn" // v0.16a+
         //
     }; // _SATB._PARAM_MODULES
     Object.keys(SATBM.RUN_MODULES).forEach(function(note) { // v0.06a+
@@ -7267,9 +7296,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @returns {Number} The current ATB gain rate of this phase
      */
     $.atbRate = function() {
-      if (SATBManager.areModulesEnabled(["IsRateEnabled"])) {
-          return this._battler.satbNoteResult_("coreATBRate");
-      } else return $$.atbRate.call(this);
+        if (SATBManager.areModulesEnabled(["IsRateEnabled"])) {
+            return this._battler.satbNoteResult_("coreATBRate");
+        } else return $$.atbRate.call(this);
     }; // $.atbRate
 
     /**
@@ -7278,17 +7307,17 @@ function Window_SATBTurnClock() { // v0.11a+
      * @param {Number} val - The new current ATB value of the battler
      */
     $.setATB = function(val) {
-      // It means original ATB's already restored for discrete and continuous
-      this._lastEnoughATB = Number.NaN;
-      //
-      $$.setATB.call(this, val);
-      // val - this.coreATB will never be negative so there's no need to cap
-      this._extraATB = val - this.curATB();
-      //
-      if (this._battler.satbActMode() !== "discrete") return;
-      var newActTimes = 1 + this._extraATB / this.maxATB();
-      if (newActTimes === this._battler.satbActTimes()) return;
-      this._battler.setSATBActTimes(newActTimes);
+        // It means original ATB's already restored for discrete and continuous
+        this._lastEnoughATB = Number.NaN;
+        //
+        $$.setATB.call(this, val);
+        // val - this.coreATB will never be negative so there's no need to cap
+        this._extraATB = val - this.curATB();
+        //
+        if (this._battler.satbActMode() !== "discrete") return;
+        var newActTimes = 1 + this._extraATB / this.maxATB();
+        if (newActTimes === this._battler.satbActTimes()) return;
+        this._battler.setSATBActTimes(newActTimes);
     }; // $.setATB
 
     /**
@@ -11906,7 +11935,7 @@ function Window_SATBTurnClock() { // v0.11a+
      * @todo Considers using notetags instead of parameter function results
      */
     $._formattedText = function() {
-        // I'ts pointless to cache this as it's likely to be change per frame
+        // It's pointless to cache this as it's likely to be changed per frame
         return $gameSystem.satbParamFunc(this._textParam).call(this);
         //
     }; // $._formattedText
@@ -11953,7 +11982,7 @@ function Window_SATBTurnClock() { // v0.11a+
      */
     $._redrawBar = function() {
         // The whole window is just the battler ATB bar
-        var padding = this.standardPadding(), paddings = padding * 2;
+        var paddings = this.standardPadding() * 2;
         var w = this.width - paddings, h = this.height - paddings;
         this.contents.fillRect(0, 0, w, h, this._backColor);
         this.contents.gradientFillRect(
@@ -14176,9 +14205,11 @@ function Window_SATBTurnClock() { // v0.11a+
  *      - Shows the battle turn clock statuses
  *----------------------------------------------------------------------------*/
 
-(function() {
+(function(SATB) {
 
     "use strict";
+
+    var _SATB = SATB.Window_SATBTurnClock = {};
 
     var $$ = Window_SATBBase.prototype;
 
@@ -14187,6 +14218,28 @@ function Window_SATBTurnClock() { // v0.11a+
     var $ = Window_SATBTurnClock.prototype;
 
     $.constructor = Window_SATBTurnClock;
+
+    _SATB._FUNC_PARAM_CACHES = { // v0.14a+
+        _backBarColor: "barBackColor",
+        _bar1stColor: "barColor1",
+        _bar2ndColor: "barColor2",
+        _barXOffset: "barXOffset",
+        _barYOffset: "barYOffset",
+        _barWidth: "barW",
+        _barHeight: "barH"
+    }; // _SATB._FUNC_PARAM_CACHES
+
+    /*------------------------------------------------------------------------
+     *    (v0.16a+)New private variables
+     *------------------------------------------------------------------------*/
+    // {{}} _cache: The parameter return result cache
+    //     {Color} barBackColor: The cached bar back color
+    //     {Color} barColor1: The cached bar 1st color
+    //     {Color} barColor2: The cached bar 2nd color
+    //     {Nonnegative Int} barXOffset: The cached bar x offset
+    //     {Nonnegative Int} barYOffset: The cached bar y offset
+    //     {Natural Num} barW: The cached bar width
+    //     {Natural Num} barH: The cached bar height
 
     /**
      * Idempotent
@@ -14219,11 +14272,11 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @interface @override @since v0.11a @version v0.11a
+     * @interface @override @since v0.11a @version v0.16a
      */
     $.refresh = function() {
         $$.refresh.call(this);
-        if ($gameSystem.satbParam("_isParamFuncCached")) this._updateText();
+        if ($gameSystem.satbParam("_isParamFuncCached")) this._updateBarText();
     }; // $.refresh
 
     /**
@@ -14236,10 +14289,10 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @override @since v0.11a @version v0.11a
+     * @override @since v0.11a @version v0.16a
      */
     $._updateWhenVisible = function() {
-        if (!$gameSystem.satbParam("_isParamFuncCached")) this._updateText();
+        if (!$gameSystem.satbParam("_isParamFuncCached")) this._updateBarText();
     }; // $._updateWhenVisible
 
     /**
@@ -14254,7 +14307,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @since v0.11a @version v0.11a
+     * @since v0.11a @version v0.16a
      */
     $._updateStatus = function() {
         delete this._cache.text;
@@ -14262,10 +14315,109 @@ function Window_SATBTurnClock() { // v0.11a+
         if (!this._isCacheUpdated("_text", this._formattedText())) return;
         //
         this.contents.clear();
-        this._redrawText();
+        this._redrawBarText();
     }; // $._updateStatus
 
-})(); // Window_SATBTurnClock.prototype
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @todo Breaks this excessive large method into several smaller methods
+     */
+    $._updateBarText = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isUpdateWH = this._isUpdateWH(), isUpdateEnabled =
+                this._isCacheUpdated("_isLastEnabled", this._isEnabled);
+        var isUpdatePadding =
+                this._isCacheUpdated("_lastPadding", this.standardPadding());
+        var isUpdateFont = this._isUpdateFont(), isUpdateTextColor =
+                this._isCacheUpdated("_lastTextColor", this._textColor());
+        var isUpdateBar = this._isUpdateBar();
+        var isUpdateText = this._isUpdateText();
+        var isUpdateLineH = this._isCacheUpdated("_lineH", this.lineHeight());
+        //
+        if (!isUpdateWH && !isUpdateEnabled && !isUpdatePadding &&
+                !isUpdateFont && !isUpdateTextColor && !isUpdateBar &&
+                !isUpdateText && !isUpdateLineH) return;
+        this.contents.clear();
+        if (isUpdateWH) this.contents.resize(this.width, this.height);
+        if (isUpdateEnabled) this.changePaintOpacity(this._isEnabled);
+        if (isUpdatePadding) this.updatePadding();
+        if (isUpdateFont) this.resetFontSettings();
+        if (isUpdateTextColor) this.changeTextColor(this._lastTextColor);
+        this._redrawBarText();
+    }; // $._updateText
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $._isUpdateBar = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isUpdateBackColor =
+                this._isCacheUpdated("_barBackColor", this._backBarColor());
+        var isUpdateColor1 =
+                this._isCacheUpdated("_barColor1", this._bar1stColor());
+        var isUpdateColor2 =
+                this._isCacheUpdated("_barColor2", this._bar2ndColor());
+        var isUpdateX = this._isCacheUpdated("_barX", this._barXOffset());
+        var isUpdateY = this._isCacheUpdated("_barY", this._barYOffset());
+        var isUpdateW = this._isCacheUpdated("_barW", this._barWidth());
+        var isUpdateH = this._isCacheUpdated("_barH", this._barHeight());
+        //
+        // The bar fill width will be updated only if the text will be updated
+        if (isUpdateBackColor || isUpdateColor1 || isUpdateColor2) return true;
+        return isUpdateX || isUpdateY || isUpdateW || isUpdateH;
+        //
+    }; // $._isUpdateBar
+
+    Object.keys(_SATB._FUNC_PARAM_CACHES).forEach(function(funcName) {
+        var cache = _SATB._FUNC_PARAM_CACHES[funcName];
+        /**
+         * Hotspot/Nullipotent
+         * @since v0.02a @version v0.14a
+         * @returns {*} The parameter function return result
+         */
+        $[funcName] = function() {
+            var param =
+                    "battleTurnClock" + cache[0].toUpperCase() + cache.slice(1);
+            return SATBManager.funcParam.call(this._cache, param, cache, this);
+        }; // $[funcName]
+    });
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     */
+    $._redrawBarText = function() {
+        // The bar must be redrawn before redrawing the texts
+        this._redrawBar();
+        this._redrawText();
+        //
+    }; // $._redrawBarText
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     */
+    $._redrawBar = function() {
+        var x = this._barX, y = this._barY, w = this._barW, h = this._barH;
+        this.contents.fillRect(x, y, w, h, this._barBackColor);
+        this.contents.gradientFillRect(
+                x, y, this._fillW(), h, this._barColor1, this._barColor2);
+    }; // $._redrawBar
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @returns {Number} The fill width of the turn clock window bar
+     */
+    $._fillW = function() {
+        var max = SATBTurnManager.curTurnClockMax();
+        return SATBTurnManager.curTurnClock() * 1.0 / max * this._barW;
+    }; // $._fillW
+
+})(DoubleX_RMMV.SATB); // Window_SATBTurnClock.prototype
 
 /*----------------------------------------------------------------------------
  *    # Edit class: Scene_Battle

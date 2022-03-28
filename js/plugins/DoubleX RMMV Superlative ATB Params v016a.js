@@ -3941,7 +3941,56 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  * @type note
  * @desc Sets the y offset of the text showing the battle turn clock
  * It'll be the contents of a function returning an Integer
- * @default "return 4;"
+ * @default "return 6;"
+ *
+ * @param battleTurnClockBarBackColor
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the bar back color of the battle turn clock window
+ * It'll be the contents of a function returning a color
+ * @default "return this.textColor(15);"
+ *
+ * @param battleTurnClockBarColor1
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the 1st bar color of the battle turn clock window
+ * It'll be the contents of a function returning a color
+ * @default "return this.textColor(7);"
+ *
+ * @param battleTurnClockBarColor2
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the 2nd bar color of the battle turn clock window
+ * It'll be the contents of a function returning a color
+ * @default "return this.textColor(8);"
+ *
+ * @param battleTurnClockBarXOffset
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the x offset of the bar showing the battle turn clock
+ * It'll be the contents of a function returning an Integer
+ * @default "return -4;"
+ *
+ * @param battleTurnClockBarYOffset
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the y offset of the bar showing the battle turn clock
+ * It'll be the contents of a function returning an Integer
+ * @default "return -4;"
+ *
+ * @param battleTurnClockBarW
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the width of the bar showing the battle turn clock
+ * It'll be the contents of a function returning an Integer
+ * @default "return 152;"
+ *
+ * @param battleTurnClockBarH
+ * @parent IsTurnEnabled
+ * @type note
+ * @desc Sets the height of the bar showing the battle turn clock
+ * It'll be the contents of a function returning an Integer
+ * @default "return 32;"
  *
  * @help
  *============================================================================
@@ -5284,8 +5333,8 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *      15.(v0.14a+) battleTurnClockWinskinFile
  *      16.(v0.14a+) battleTurnClockWinskinHue
  *      17.(v0.14a+) battleTurnClockWinskinSmooth
- *      19.(v0.14a+) battleTurnClockTextColor
- *      20.(v0.14a+) battleTurnClockTextAlign
+ *      18.(v0.14a+) battleTurnClockTextColor
+ *      19.(v0.14a+) battleTurnClockTextAlign
  *          You'll likely have to experimenet this yourselves to find values
  *          that suit your needs
  *          THE FUNCTION USED BY THIS PARAMETER SHOULD BE PERFORMANT ENOUGH TO
@@ -5294,7 +5343,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *          (Advanced)The context of the function used by this parameter is
  *          the battle turn clock window involved
  *          (Window_SATBTurnClock.prototype)
- *      21. battleTurnClockTextXOffset
+ *      20. battleTurnClockTextXOffset
  *          The offset's relative to the battle turn clock window x position
  *          The smaller the value, the more left the text will be in the
  *          battle turn clock window
@@ -5306,7 +5355,7 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *          (Advanced)The context of the function used by this parameter is
  *          the battle turn clock window involved
  *          (Window_SATBTurnClock.prototype)
- *      22. battleTurnClockTextYOffset
+ *      21. battleTurnClockTextYOffset
  *          The offset's relative to the battle turn clock window y position
  *          The smaller the value, the upper the text will be in the battle
  *          turn clock window
@@ -5318,6 +5367,17 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *          (Advanced)The context of the function used by this parameter is
  *          the battle turn clock window involved
  *          (Window_SATBTurnClock.prototype)
+ *      22. (v0.16a+) battleTurnClockBarBackColor
+ *      23. (v0.16a+) battleTurnClockBarColor1
+ *      24. (v0.16a+) battleTurnClockBarColor2
+ *          The same as battleTurnClockTextColor
+ *      25. (v0.16a+) battleTurnClockBarXOffset
+ *          The same as battleTurnClockTextXOffset
+ *      26. (v0.16a+) battleTurnClockBarYOffset
+ *          The same as battleTurnClockTextYOffset
+ *      27. (v0.16a+) battleTurnClockBarW
+ *      28. (v0.16a+) battleTurnClockBarH
+ *          The same as battleTurnClockWinW and battleTurnClockWinH
  *    # Function arguments
  *      Core Module:
  *      1. IsCoreEnabled
@@ -5667,6 +5727,13 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *      19.(v0.14a+) battleTurnClockTextAlign
  *      20. battleTurnClockTextXOffset
  *      21. battleTurnClockTextYOffset
+ *      22. (v0.16a+) battleTurnClockBarBackColor
+ *      23. (v0.16a+) battleTurnClockBarColor1
+ *      24. (v0.16a+) battleTurnClockBarColor2
+ *      25. (v0.16a+) battleTurnClockBarXOffset
+ *      26. (v0.16a+) battleTurnClockBarYOffset
+ *      27. (v0.16a+) battleTurnClockBarW
+ *      28. (v0.16a+) battleTurnClockBarH
  *          None
  *    # Valid values
  *      Core Module:
@@ -6227,11 +6294,12 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *          inclusive
  *      7. battleTurnClockWinW
  *      8. battleTurnClockWinH
+ *         Any valid Javascript returning a Natural Number
  *      9.(v0.14a+) battleTurnClockFontFace
  *          Any valid Javascript returning a String
  *      10. battleTurnClockTextSize
  *      11. battleTurnClockWinLineH
- *         Any valid Javascript returning a Natural Number
+ *          Any valid Javascript returning a Natural Number
  *      12. battleTurnClockWinPadding
  *      13. battleTurnClockBackOpacity
  *          Any valid Javascript returning an Integer ranging from 0 to 255
@@ -6255,6 +6323,16 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *      20. battleTurnClockTextXOffset
  *      21. battleTurnClockTextYOffset
  *          Any valid Javascript returning an Integer
+ *      22. (v0.16a+) battleTurnClockBarBackColor
+ *      23. (v0.16a+) battleTurnClockBarColor1
+ *      24. (v0.16a+) battleTurnClockBarColor2
+ *          The same as battleTurnClockTextColor
+ *      25. (v0.16a+) battleTurnClockBarXOffset
+ *      26. (v0.16a+) battleTurnClockBarYOffset
+ *          Any valid Javascript returning an Integer
+ *      27. (v0.16a+) battleTurnClockBarW
+ *      28. (v0.16a+) battleTurnClockBarH
+ *          Any valid Javascript returning a Natural Number
  *    # Examples
  *      Core Module:
  *      1. IsCoreEnabled
@@ -7072,6 +7150,8 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *      6.(v0.14a+) battleTurnClockOpacity
  *      7. battleTurnClockWinW
  *      8. battleTurnClockWinH
+ *         You'll likely have to experimenet this yourselves to find values
+ *         that suit your needs
  *      9.(v0.14a+) battleTurnClockFontFace
  *         Setting battleTurnClockFontFace as
  *         return Window_Base.prototype.standardFontFace.call(this); will use
@@ -7103,6 +7183,18 @@ DoubleX_RMMV["Superlative ATB Parameters"] = "v0.16a";
  *          battle turn clock text to be aligned to the center
  *      20. battleTurnClockTextXOffset
  *      21. battleTurnClockTextYOffset
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *      22. (v0.16a+) battleTurnClockBarBackColor
+ *      23. (v0.16a+) battleTurnClockBarColor1
+ *      24. (v0.16a+) battleTurnClockBarColor2
+ *          The same as battleTurnClockTextColor
+ *      25. (v0.16a+) battleTurnClockBarXOffset
+ *      26. (v0.16a+) battleTurnClockBarYOffset
+ *          You'll likely have to experimenet this yourselves to find values
+ *          that suit your needs
+ *      27. (v0.16a+) battleTurnClockBarW
+ *      28. (v0.16a+) battleTurnClockBarH
  *          You'll likely have to experimenet this yourselves to find values
  *          that suit your needs
  */

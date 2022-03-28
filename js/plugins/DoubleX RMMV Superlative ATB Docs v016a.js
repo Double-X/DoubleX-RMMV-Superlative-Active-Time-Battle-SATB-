@@ -348,12 +348,20 @@
  *----------------------------------------------------------------------------
  *    # Changelog
  *      Parameters:
- *      - v0.16a(GMT 1500 6-Apr-2020):
+ *      - v0.16a(GMT 0800 28-Mar-2022):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
- *           of the old latestSATBItem_
+ *        2. Added the following parameters in the Turn module:
+ *           - battleTurnClockBarBackColor
+ *           - battleTurnClockBarColor1
+ *           - battleTurnClockBarColor2
+ *           - battleTurnClockBarXOffset
+ *           - battleTurnClockBarYOffset
+ *           - battleTurnClockBarW
+ *           - battleTurnClockBarH
  *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
+ *        4. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *           of the old latestSATBItem_
  *      - v0.15b(GMT 1400 3-Dec-2020):
  *        1. You no longer have to edit the value of
  *           DoubleX_RMMZ.Superlative_ATB_Parameters_File when changing the
@@ -403,9 +411,17 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Configurations:
- *      - v0.16a(GMT 1500 6-Apr-2020):
+ *      - v0.16a(GMT 0800 28-Mar-2022):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *        2. Added the following configurations in the Turn module:
+ *           - battleTurnClockBarBackColor
+ *           - battleTurnClockBarColor1
+ *           - battleTurnClockBarColor2
+ *           - battleTurnClockBarXOffset
+ *           - battleTurnClockBarYOffset
+ *           - battleTurnClockBarW
+ *           - battleTurnClockBarH
+ *        3. latestSATBItem_ has changed to latestSATBItems, which is an array
  *           of the old latestSATBItem_
  *      - v0.15a(GMT 0700 18-Aug-2020):
  *        1. Finished the Delay Module
@@ -455,20 +471,28 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Implementations:
- *      - v0.16a(GMT 1500 6-Apr-2020):
+ *      - v0.16a(GMT 0800 28-Mar-2022):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *        2. Added the following configurations in the Turn module:
+ *           - battleTurnClockBarBackColor
+ *           - battleTurnClockBarColor1
+ *           - battleTurnClockBarColor2
+ *           - battleTurnClockBarXOffset
+ *           - battleTurnClockBarYOffset
+ *           - battleTurnClockBarW
+ *           - battleTurnClockBarH
+ *        3. latestSATBItem_ has changed to latestSATBItems, which is an array
  *           of the old latestSATBItem_
- *        3. The notetag priority latestSkillItem has been renamed as
+ *        4. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
- *        4. addSmallestSATBDecrement has been renamed as
+ *        5. addSmallestSATBDecrement has been renamed as
  *           addSmallestATBDecrement
- *        5. Fixed the bug of not updating the x positions of the battler
+ *        6. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        6. Fixed the possible bug of not updating possible skill/item
+ *        7. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
- *        7. Increased the flexibility, modularity and readability of the
+ *        8. Increased the flexibility, modularity and readability of the
  *           implementations
  *      - v0.15b(GMT 0300 7-Dec-2020):
  *        1. Fixed the wrong this of the following Array prototype methods:
@@ -583,10 +607,11 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Unit Tests:
- *      - v0.16a(GMT 1500 6-Apr-2020):
- *        1. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *      - v0.16a(GMT 0800 28-Mar-2022):
+ *        1. Finished the Action module
+ *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
  *           of the old latestSATBItem_
- *        2. The notetag priority latestSkillItem has been renamed as
+ *        3. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *      - v0.15b(GMT 0400 7-Dec-2020):
  *        1. Fixed wrong unit test check conditions for the x and y positions
@@ -646,6 +671,9 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Compatibilities:
+ *      - v0.06a(GMT 0800 28-Mar-2022):
+ *        1. Addressed compatibility issues with Yanfly Engine Plugins -
+ *           Battle Engine Extension - Animated Sideview Enemies
  *      - v0.05a(GMT 0700 11-Dec-2020):
  *        1. Finished the delay module
  *        2. Lets players cancels actor cooldown by clicking the actor sprite
@@ -686,20 +714,30 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Documentations:
- *      - v0.16a(GMT 1500 6-Apr-2020):
+ *      - v0.16a(GMT 0800 28-Mar-2022):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *        2. Added the following configurations in the Turn module:
+ *           - battleTurnClockBarBackColor
+ *           - battleTurnClockBarColor1
+ *           - battleTurnClockBarColor2
+ *           - battleTurnClockBarXOffset
+ *           - battleTurnClockBarYOffset
+ *           - battleTurnClockBarW
+ *           - battleTurnClockBarH
+ *        3. latestSATBItem_ has changed to latestSATBItems, which is an array
  *           of the old latestSATBItem_
- *        3. The notetag priority latestSkillItem has been renamed as
+ *        4. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
- *        4. addSmallestSATBDecrement has been renamed as
+ *        5. addSmallestSATBDecrement has been renamed as
  *           addSmallestATBDecrement
- *        5. Fixed the bug of not updating the x positions of the battler
+ *        6. Addressed compatibility issues with Yanfly Engine Plugins -
+ *           Battle Engine Extension - Animated Sideview Enemies
+ *        7. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        6. Fixed the possible bug of not updating possible skill/item
+ *        8. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
- *        7. Increased the flexibility, modularity and readability of the
+ *        9. Increased the flexibility, modularity and readability of the
  *           implementations
  *      - v0.15c(GMT 0700 11-Dec-2020):
  *        1. Fixed the following wrong documentations:
@@ -3925,7 +3963,7 @@ DoubleX_RMMV.SATB_VERS = {
     Configurations: "v0.16a",
     Implementations: "v0.16a",
     "Unit Tests": "v0.16a",
-    Compatibilities: "v0.05a",
+    Compatibilities: "v0.06a",
     "Compatibility Tests": "v0.01a"
 }; // DoubleX_RMMV.SATB_VERS
 Object.keys(DoubleX_RMMV.SATB_VERS).forEach(function(plugin) {

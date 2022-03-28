@@ -2875,7 +2875,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the opacity of the continuous order battler icon sprite
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Opacity} The continuous order battler sprite opacity
              */
@@ -2890,7 +2890,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the file path of the continuous order battler icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler icon sheet path
              */
@@ -2903,7 +2903,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the file name of the continuous order battler icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler icon sheet name
              */
@@ -2916,7 +2916,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the hue of the continuous order battler sprite icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite icon sheet hue
              */
@@ -2929,7 +2929,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the smooth of the continuous order battler sprite icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Boolean} The continuous order battler icon sheet smooth
              */
@@ -2945,7 +2945,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * sprite in the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite icon sheet x coordinate
              */
@@ -2961,7 +2961,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * sprite in the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite icon sheet y coordinate
              */
@@ -2977,7 +2977,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite width in the icon sheet
              */
@@ -2993,7 +2993,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite height in the icon sheet
              */
@@ -3009,7 +3009,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the continuous order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite width in the order window
              */
@@ -3025,7 +3025,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the continuous order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite height in the order window
              */
@@ -3041,7 +3041,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * in the continuous order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite y position in order window
              */
@@ -3203,7 +3203,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * it's showing
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} Showing discrete order battler sprite opacity
              */
@@ -3222,7 +3222,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * it's hiding
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} Hiding discrete order battler sprite opacity
              */
@@ -3240,7 +3240,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * in the discrete order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite y position in order window
              */
@@ -3262,7 +3262,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * in the discrete order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite y position in order window
              */
@@ -3285,7 +3285,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the opacity of the discrete order battler icon sprite
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} The discrete order battler sprite opacity
              */
@@ -3300,7 +3300,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the file path of the discrete order battler icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler icon sheet path
              */
@@ -3313,7 +3313,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the file name of the discrete order battler icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler icon sheet name
              */
@@ -3326,7 +3326,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the hue of the discrete order battler sprite icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite icon sheet hue
              */
@@ -3339,7 +3339,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * Sets the smooth of the discrete order battler sprite icon sheet
              * Potential Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Boolean} The discrete order battler icon sheet smooth
              */
@@ -3355,7 +3355,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * sprite in the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite icon sheet x coordinate
              */
@@ -3371,7 +3371,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * sprite in the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite icon sheet y coordinate
              */
@@ -3387,7 +3387,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite width in the icon sheet
              */
@@ -3403,7 +3403,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the icon sheet
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite height in the icon sheet
              */
@@ -3419,7 +3419,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the discrete order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite width in the order window
              */
@@ -3435,7 +3435,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * the discrete order window
              * Hotspot/Nullipotent
              * @since v0.14a @version v0.14a
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The battler sprite height in the order window
              */
@@ -3896,7 +3896,80 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @since v0.11a @version v0.11a
              * @returns {Number} The battle turn clock text y offset
              */
-            battleTurnClockTextYOffset: function() { return 4; }
+            battleTurnClockTextYOffset: function() { return 6; },
+
+            /**
+             * The this pointer refers to the Window_SATBTurnClock.prototype
+             * Sets the bar back color of the battle turn clock window
+             * Potential Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {Boolean} The battle turn clock bar back color
+             */
+            battleTurnClockBarBackColor: function() {
+                return this.textColor(15);
+            }, // battleTurnClockBarBackColor
+
+            /**
+             * The this pointer refers to the Window_SATBTurnClock.prototype
+             * Sets the 1st bar color of the battle turn clock window
+             * Potential Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {Boolean} The 1st battle turn clock bar color
+             */
+            battleTurnClockBarColor1: function() { return this.textColor(7); },
+
+            /**
+             * The this pointer refers to the Window_SATBTurnClock.prototype
+             * Sets the 2nd bar color of the battle turn clock window
+             * Potential Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {Boolean} The 2nd battle turn clock bar color
+             */
+            battleTurnClockBarColor2: function() { return this.textColor(8); },
+
+            /**
+             * (Advanced)This pointer refers to Window_SATBTurnClock.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the x offset of the bar showing the force ATB update status
+             * Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {Number} The battle turn clock bar x offset
+             */
+            battleTurnClockBarXOffset: function() { return -4; },
+
+            /**
+             * (Advanced)This pointer refers to Window_SATBTurnClock.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the y offset of the bar showing the force ATB update status
+             * Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {Number} The battle turn clock bar y offset
+             */
+            battleTurnClockBarYOffset: function() { return -4; },
+
+            /**
+             * (Advanced)This pointer refers to Window_SATBTurnClock.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the width of the bar showing the battle turn clock
+             * Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {+ve Num} The battle turn clock bar width
+             */
+            battleTurnClockBarW: function() { return 152; },
+
+            /**
+             * (Advanced)This pointer refers to Window_SATBTurnClock.prototype
+             * THIS FUNCTION SHOULD BE PERFORMANT ENOUGH TO BE RUN PER FRAME
+             * UNLESS _isParamFuncCached IS ON
+             * Sets the height of the bar showing the battle turn clock
+             * Hotspot/Nullipotent
+             * @since v0.16a @version v0.16a
+             * @returns {+ve Num} The battle turn clock bar height
+             */
+            battleTurnClockBarH: function() { return 32; }
 
         } // turn
 
@@ -6363,7 +6436,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Opacity} The continuous order battler sprite opacity
              */
@@ -6378,7 +6451,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Opacity} The continuous order battler sprite opacity
              */
@@ -6395,7 +6468,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Opacity} The continuous order battler sprite opacity
              */
@@ -6437,7 +6510,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet path
              */
@@ -6452,7 +6525,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet path
              */
@@ -6469,7 +6542,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet path
              */
@@ -6511,7 +6584,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet name
              */
@@ -6526,7 +6599,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet name
              */
@@ -6541,7 +6614,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet name
              */
@@ -6556,7 +6629,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {String} The continuous order battler sprite sheet name
              */
@@ -6596,7 +6669,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6611,7 +6684,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6628,7 +6701,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6670,7 +6743,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -6685,7 +6758,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -6702,7 +6775,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -6744,7 +6817,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6759,7 +6832,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6774,7 +6847,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6789,7 +6862,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {Hue} The continuous order battler sprite sheet hue
              */
@@ -6829,7 +6902,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order sprite sheet y coordinate
              */
@@ -6844,7 +6917,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order sprite sheet y coordinate
              */
@@ -6859,7 +6932,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order sprite sheet y coordinate
              */
@@ -6901,7 +6974,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source width
              */
@@ -6916,7 +6989,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source width
              */
@@ -6933,7 +7006,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source width
              */
@@ -6975,7 +7048,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source height
              */
@@ -6990,7 +7063,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source height
              */
@@ -7007,7 +7080,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} Continuous order battler sprite source height
              */
@@ -7048,7 +7121,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite width
              */
@@ -7063,7 +7136,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite width
              */
@@ -7080,7 +7153,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite width
              */
@@ -7121,7 +7194,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite height
              */
@@ -7136,7 +7209,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite height
              */
@@ -7153,7 +7226,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite height
              */
@@ -7194,7 +7267,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite y position
              */
@@ -7209,7 +7282,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite y position
              */
@@ -7226,7 +7299,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBContinuousOrderBattlerIcon} 
+             * @param {Sprite_SATBContinuousOrderBattlerIcon}
              * continuousOrderSprite - The battler icon sprite
              * @returns {+ve Num} The continuous order battler sprite y position
              */
@@ -7268,7 +7341,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} The discrete order battler sprite opacity
              */
@@ -7283,7 +7356,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} The discrete order battler sprite opacity
              */
@@ -7300,7 +7373,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Opacity} The discrete order battler sprite opacity
              */
@@ -7342,7 +7415,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet path
              */
@@ -7357,7 +7430,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet path
              */
@@ -7374,7 +7447,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet path
              */
@@ -7416,7 +7489,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet name
              */
@@ -7431,7 +7504,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet name
              */
@@ -7446,7 +7519,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet name
              */
@@ -7461,7 +7534,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {String} The discrete order battler sprite sheet name
              */
@@ -7501,7 +7574,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7516,7 +7589,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7533,7 +7606,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7575,7 +7648,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -7590,7 +7663,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -7607,7 +7680,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Boolean} The check result
              */
@@ -7649,7 +7722,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7664,7 +7737,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7679,7 +7752,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7694,7 +7767,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {Hue} The discrete order battler sprite sheet hue
              */
@@ -7734,7 +7807,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order sprite sheet y coordinate
              */
@@ -7749,7 +7822,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order sprite sheet y coordinate
              */
@@ -7764,7 +7837,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order sprite sheet y coordinate
              */
@@ -7806,7 +7879,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source width
              */
@@ -7821,7 +7894,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source width
              */
@@ -7838,7 +7911,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source width
              */
@@ -7880,7 +7953,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source height
              */
@@ -7895,7 +7968,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source height
              */
@@ -7912,7 +7985,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} Discrete order battler sprite source height
              */
@@ -7953,7 +8026,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite width
              */
@@ -7968,7 +8041,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite width
              */
@@ -7985,7 +8058,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite width
              */
@@ -8026,7 +8099,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite height
              */
@@ -8041,7 +8114,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite height
              */
@@ -8058,7 +8131,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
              * @param {Datum} datum - The datum having this notetag
              * @enum @param {DatumType} datumType - Refers to reference tag
              *                                      NOTE_DATA_TYPES
-             * @param {Sprite_SATBDiscreteOrderBattlerIcon} 
+             * @param {Sprite_SATBDiscreteOrderBattlerIcon}
              * discreteOrderSprite - The battler icon sprite
              * @returns {+ve Num} The discrete order battler sprite height
              */
