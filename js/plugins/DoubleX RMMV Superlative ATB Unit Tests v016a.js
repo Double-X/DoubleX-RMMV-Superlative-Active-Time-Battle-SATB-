@@ -552,7 +552,14 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
                 battleTurnClockTextColor: "checkColor", // v0.14a+
                 battleTurnClockTextAlign: "checkTextAlign", // v0.14a+
                 battleTurnClockTextXOffset: "checkInt",
-                battleTurnClockTextYOffset: "checkInt"
+                battleTurnClockTextYOffset: "checkInt",
+                battleTurnClockBarBackColor: "checkColor", // v0.16a+
+                battleTurnClockBarColor1: "checkColor", // v0.16a+
+                battleTurnClockBarColor2: "checkColor", // v0.16a+
+                battleTurnClockBarXOffset: "checkInt", // v0.16a+
+                battleTurnClockBarYOffset: "checkInt", // v0.16a+
+                battleTurnClockBarW: "checkNaturalNum", // v0.16a+
+                battleTurnClockBarH: "checkNaturalNum" // v0.16a+
             } // turn
         }, // params
         testParamArgsWithoutContext: {
@@ -1245,7 +1252,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
          * @param {{*}?} context_ - The context of the failed test
          */
         checkContinuousOrderSprite: function(val, param, context_) {
-            SATBUT.checkFuncs.checkObjType(val, param, 
+            SATBUT.checkFuncs.checkObjType(val, param,
                     Sprite_SATBContinuousOrderBattlerIcon, context_);
         }, // checkContinuousOrderSprite
 
@@ -1342,7 +1349,7 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
          * @param {{*}?} context_ - The context of the failed test
          */
         checkDiscreteOrderSprite: function(val, param, context_) {
-            SATBUT.checkFuncs.checkObjType(val, param, 
+            SATBUT.checkFuncs.checkObjType(val, param,
                     Sprite_SATBDiscreteOrderBattlerIcon, context_);
         }, // checkDiscreteOrderSprite
 
@@ -6012,6 +6019,20 @@ if (DoubleX_RMMV.SATB && DoubleX_RMMV["Superlative ATB Implementations"]) {
         _UT[funcName] = $[funcName] = function() { // v0.14a - v0.14a; Extended
             var val = _WSATBTC[funcName].apply(this, arguments);
             var param = this["_" + funcParamCaches[funcName] + "Param"];
+            // Added to check the return result on the call site directly
+            SATBUT.checkFuncs[SATBUT.unitTests.params.turn[param]](
+                    val, "_WSATBTC." + funcName + " val");
+            //
+            return val;
+        }; // $[funcName]
+    });
+    var turnFuncParamCaches = SATB.Window_SATBTurnClock._FUNC_PARAM_CACHES;
+    Object.keys(turnFuncParamCaches).forEach(function(funcName) {
+        var cache = turnFuncParamCaches[funcName];
+        var param = "battleTurnClock" + cache[0].toUpperCase() + cache.slice(1);
+        _WSATBTC[funcName] = $[funcName];
+        _UT[funcName] = $[funcName] = function() { // v0.16a - v0.16a; Extended
+            var val = _WSATBTC[funcName].apply(this, arguments);
             // Added to check the return result on the call site directly
             SATBUT.checkFuncs[SATBUT.unitTests.params.turn[param]](
                     val, "_WSATBTC." + funcName + " val");

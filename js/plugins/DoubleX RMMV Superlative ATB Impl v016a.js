@@ -14373,14 +14373,13 @@ function Window_SATBTurnClock() { // v0.11a+
 
     Object.keys(_SATB._FUNC_PARAM_CACHES).forEach(function(funcName) {
         var cache = _SATB._FUNC_PARAM_CACHES[funcName];
+        var param = "battleTurnClock" + cache[0].toUpperCase() + cache.slice(1);
         /**
          * Hotspot/Nullipotent
          * @since v0.02a @version v0.14a
          * @returns {*} The parameter function return result
          */
         $[funcName] = function() {
-            var param =
-                    "battleTurnClock" + cache[0].toUpperCase() + cache.slice(1);
             return SATBManager.funcParam.call(this._cache, param, cache, this);
         }; // $[funcName]
     });

@@ -609,9 +609,17 @@
  *      Unit Tests:
  *      - v0.16a(GMT 0800 28-Mar-2022):
  *        1. Finished the Action module
- *        2. latestSATBItem_ has changed to latestSATBItems, which is an array
+ *        2. Added the following configurations in the Turn module:
+ *           - battleTurnClockBarBackColor
+ *           - battleTurnClockBarColor1
+ *           - battleTurnClockBarColor2
+ *           - battleTurnClockBarXOffset
+ *           - battleTurnClockBarYOffset
+ *           - battleTurnClockBarW
+ *           - battleTurnClockBarH
+ *        3. latestSATBItem_ has changed to latestSATBItems, which is an array
  *           of the old latestSATBItem_
- *        3. The notetag priority latestSkillItem has been renamed as
+ *        4. The notetag priority latestSkillItem has been renamed as
  *           latestSkillItems
  *      - v0.15b(GMT 0400 7-Dec-2020):
  *        1. Fixed wrong unit test check conditions for the x and y positions
