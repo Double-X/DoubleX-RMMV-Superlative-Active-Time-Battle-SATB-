@@ -5357,6 +5357,7 @@ function Window_SATBTurnClock() { // v0.11a+
      * @enum @returns {String} The current action mode of this battler
      */
     $.satbActMode = function() {
+        if (!SATBManager.areModulesEnabled(["IsActEnabled"])) return "batch";
         var actMode = this.satbNoteResult_("actMode");
         return actMode.replace(/\W+/g, "").toLowerCase();
     }; // $.satbActMode
@@ -7311,13 +7312,16 @@ function Window_SATBTurnClock() { // v0.11a+
         this._lastEnoughATB = Number.NaN;
         //
         $$.setATB.call(this, val);
-        // val - this.coreATB will never be negative so there's no need to cap
+        // val - this.curATB will never be negative so there's no need to cap
         this._extraATB = val - this.curATB();
         //
         if (this._battler.satbActMode() !== "discrete") return;
-        var newActTimes = 1 + this._extraATB / this.maxATB();
-        if (newActTimes === this._battler.satbActTimes()) return;
-        this._battler.setSATBActTimes(newActTimes);
+        var actTimes = this._battler.satbActTimes();
+        if (actTimes < 1) return;
+        // It's impossible for newActTimes to be smaller than actTimes
+        var newActTimes = 1 + Math.floor(this._extraATB * 1.0 / this.maxATB());
+        if (newActTimes > actTimes) this._battler.setSATBActTimes(newActTimes);
+        //
     }; // $.setATB
 
     /**
@@ -7625,7 +7629,7 @@ function Window_SATBTurnClock() { // v0.11a+
     $.latestItemResult_ = function(note, items, argObj_) {
         var oldItems = this._battler.latestSATBItems;
         this._battler.latestSATBItems = items;
-        var result = this._result_(note, argObj_);
+        var result = this.result_(note, argObj_);
         this._battler.latestSATBItems = oldItems;
         return result;
     }; // $.latestItemResult_
