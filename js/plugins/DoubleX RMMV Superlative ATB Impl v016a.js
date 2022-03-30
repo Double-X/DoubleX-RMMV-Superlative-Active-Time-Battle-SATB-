@@ -5357,7 +5357,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @enum @returns {String} The current action mode of this battler
      */
     $.satbActMode = function() {
+        // batch is the default action mode
         if (!SATBManager.areModulesEnabled(["IsActEnabled"])) return "batch";
+        //
         var actMode = this.satbNoteResult_("actMode");
         return actMode.replace(/\W+/g, "").toLowerCase();
     }; // $.satbActMode
@@ -5527,7 +5529,7 @@ function Window_SATBTurnClock() { // v0.11a+
     $.onAllSATBActsEnd = function() {
         if (!SATBManager.isEnabled()) return;
         this.updateSATBStateTurns(1);
-        // This must be placed before onStartCooldown or reset val would wrong
+        // This must place before onStartCooldown or reset val would be wrong
         _SATB._onReset.call(this);
         //
         // The ordering must be this or latestSATBItems would be emptied
@@ -5538,7 +5540,7 @@ function Window_SATBTurnClock() { // v0.11a+
     }; // $.onAllSATBActsEnd
 
     /**
-     * @interface @since v0.05a @version v0.05a
+     * @interface @since v0.05a @version v0.16a
      * @todo Thinks of how to add an event to be run in the Event Module here
      */
     $.eraseVirtualSATBActSlot = function() {
@@ -6343,7 +6345,9 @@ function Window_SATBTurnClock() { // v0.11a+
         this._actTimes = Math.min(actTimes, this.maxActTimes());
         //
         // Number of virtual action slots must be in sync with the atb value
-        var newATB = this.actTimes() * this._battler.coreMaxSATB();
+        var oldProp = this._battler.curSATBProportion();
+        var newProp = this.actTimes() + oldProp - Math.trunc(oldProp);
+        var newATB = newProp * this._battler.coreMaxSATB();
         if (this._battler.coreSATB() === newATB) return;
         this._battler.setCoreSATB(newATB);
         //
@@ -7273,20 +7277,6 @@ function Window_SATBTurnClock() { // v0.11a+
     /**
      * Nullipotent
      * @interface @override @since v0.16a @version v0.16a
-     * @returns {Nonnegative Int} The maximum ATB value of this phase
-     */
-    $.atbProportion = function() {
-        var proportion = $$.atbProportion.call(this);
-        // It's possible for the raw proportion to exceed 1 in the discrete mode
-        if (proportion <= 1) return proportion;
-        var remainder = proportion - Math.trunc(proportion);
-        return remainder <= 0 ? 1 : remainder;
-        //
-    }; // $.atbProportion
-
-    /**
-     * Nullipotent
-     * @interface @override @since v0.16a @version v0.16a
      * @returns {Boolean} The check result
      */
     $.isFill = function() { return true; };
@@ -7306,20 +7296,24 @@ function Window_SATBTurnClock() { // v0.11a+
      * Hotspot/Idempotent
      * @interface @override @since v0.16a @version v0.16a
      * @param {Number} val - The new current ATB value of the battler
+     * @todo Breaks this excessively long method into several smaller pieces
      */
     $.setATB = function(val) {
         // It means original ATB's already restored for discrete and continuous
         this._lastEnoughATB = Number.NaN;
         //
         $$.setATB.call(this, val);
-        // val - this.curATB will never be negative so there's no need to cap
-        this._extraATB = val - this.curATB();
-        //
         if (this._battler.satbActMode() !== "discrete") return;
         var actTimes = this._battler.satbActTimes();
         if (actTimes < 1) return;
+        var maxActTimes = this._battler.maxSATBActTimes();
+        if (maxActTimes <= actTimes) return;
+        var max = this.maxATB();
+        // Val mustn't be below max to have +ve actTimes
+        this._extraATB = Math.min(val - max, max * (maxActTimes - 1));
+        //
         // It's impossible for newActTimes to be smaller than actTimes
-        var newActTimes = 1 + Math.floor(this._extraATB * 1.0 / this.maxATB());
+        var newActTimes = 1 + Math.floor(this._extraATB * 1.0 / max);
         if (newActTimes > actTimes) this._battler.setSATBActTimes(newActTimes);
         //
     }; // $.setATB
@@ -7483,7 +7477,9 @@ function Window_SATBTurnClock() { // v0.11a+
      * @since v0.16a @version v0.16a
      */
     $._onDelayCounterEnd = function() {
-        this._battler.makeActions();
+        // It's okay for unmovable battlers to have full atb which will be reset
+        if (this._battler.canMove()) this._battler.makeActions();
+        //
         this._battler.runSATBNote("didDelayCounterEnd");
     }; // $._onDelayCounterEnd
 
@@ -7493,9 +7489,10 @@ function Window_SATBTurnClock() { // v0.11a+
      * @param {Number} decrement - The amount to be subtracted from just enough
      */
     $._setATBJustNotEnough = function(decrement) {
-        // The ordering must be this or _lastEnoughCoreATB would be used now
-        this.setATB(this._atbThreshold() - decrement);
-        this._lastEnoughATB = this.curATB();
+        // The ordering must be this or _lastEnoughATB would be erased in setATB
+        var lastATB = this.curATB();
+        this.setATB(Math.min(lastATB, this._atbThreshold()) - decrement);
+        this._lastEnoughATB = lastATB;
         //
     }; // $._setATBJustNotEnough
 
@@ -11586,7 +11583,7 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Idempotent
-     * @interface @override @since v0.05b @version v0.05b
+     * @interface @override @since v0.05b @version v0.16a
      */
     $.update = function() {
         if (!SATBManager.areModulesEnabled(["IsBarEnabled"])) {
@@ -11597,8 +11594,9 @@ function Window_SATBTurnClock() { // v0.11a+
             this._updateProp("visible", this._isVisible());
         }
         if (!this.visible) return;
-        if (wasVisible && $gameSystem.satbParam("_isParamFuncCached")) return;
-        this._updateVisibleWin();
+        if (wasVisible && $gameSystem.satbParam("_isParamFuncCached")) {
+            this._updateBarOnly();
+        } else this._updateVisibleWin();
     }; // $.update
 
     /**
@@ -11715,6 +11713,31 @@ function Window_SATBTurnClock() { // v0.11a+
     $._isVisible = function() {
         return this._battler.satbNoteResult_(this._isShowNote);
     }; // $._isVisible
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     */
+    $._updateBarOnly = function() {
+        // It must be run per frame to keep all these caches up to date
+        if (!this._isUpdateBarOnly()) return;
+        //
+        this.contents.clear();
+        this._redraw();
+    }; // $._updateBarOnly
+
+    /**
+     * Hotspot/Idempotent
+     * @since v0.16a @version v0.16a
+     * @returns {Boolean} The check result
+     */
+    $._isUpdateBarOnly = function() {
+        // All of them must be run per frame to keep all these caches up to date
+        var isUpdateFillW = this._isCacheUpdated("_fillW", this._fillBarW());
+        var isUpdateText = this._isCacheUpdated("_text", this._formattedText());
+        //
+        return isUpdateFillW || isUpdateText;
+    }; // $._isUpdateBarOnly
 
     /**
      * Idempotent
@@ -11897,11 +11920,16 @@ function Window_SATBTurnClock() { // v0.11a+
 
     /**
      * Hotspot/Nullipotent
-     * @since v0.03a @version v0.03a
+     * @since v0.03a @version v0.16a
      * @returns {Number} The ATB bar fill width
      */
     $._fillBarW = function() {
-        return this.width * this._battler.curSATBProportion();
+        var proportion = this._battler.curSATBProportion();
+        // It's possible for the raw proportion to exceed 1 in the discrete mode
+        if (proportion <= 1) return this.width * proportion;
+        var remainder = proportion - Math.trunc(proportion);
+        return remainder <= 0 ? this.width : this.width * remainder;
+        //
     }; // $._fillBarW
 
     /**

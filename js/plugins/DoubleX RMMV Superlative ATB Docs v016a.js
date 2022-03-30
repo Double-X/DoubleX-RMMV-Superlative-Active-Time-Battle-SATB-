@@ -348,7 +348,7 @@
  *----------------------------------------------------------------------------
  *    # Changelog
  *      Parameters:
- *      - v0.16a(GMT 0800 28-Mar-2022):
+ *      - v0.16a(GMT 0800 30-Mar-2022):
  *        1. Finished the Action module
  *        2. Added the following parameters in the Turn module:
  *           - battleTurnClockBarBackColor
@@ -411,7 +411,7 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Configurations:
- *      - v0.16a(GMT 0800 28-Mar-2022):
+ *      - v0.16a(GMT 0800 30-Mar-2022):
  *        1. Finished the Action module
  *        2. Added the following configurations in the Turn module:
  *           - battleTurnClockBarBackColor
@@ -471,7 +471,7 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Implementations:
- *      - v0.16a(GMT 0800 28-Mar-2022):
+ *      - v0.16a(GMT 0800 30-Mar-2022):
  *        1. Finished the Action module
  *        2. Added the following configurations in the Turn module:
  *           - battleTurnClockBarBackColor
@@ -490,9 +490,11 @@
  *        6. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        7. Fixed the possible bug of not updating possible skill/item
+ *        7. Fixed the atb bars not always updating their fill ratios and
+ *           texts when _isParamFuncCached is set as true
+ *        8. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
- *        8. Increased the flexibility, modularity and readability of the
+ *        9. Increased the flexibility, modularity and readability of the
  *           implementations
  *      - v0.15b(GMT 0300 7-Dec-2020):
  *        1. Fixed the wrong this of the following Array prototype methods:
@@ -607,7 +609,7 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Unit Tests:
- *      - v0.16a(GMT 0800 28-Mar-2022):
+ *      - v0.16a(GMT 0800 30-Mar-2022):
  *        1. Finished the Action module
  *        2. Added the following configurations in the Turn module:
  *           - battleTurnClockBarBackColor
@@ -679,7 +681,7 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Compatibilities:
- *      - v0.06a(GMT 0800 28-Mar-2022):
+ *      - v0.06a(GMT 0800 30-Mar-2022):
  *        1. Addressed compatibility issues with Yanfly Engine Plugins -
  *           Battle Engine Extension - Animated Sideview Enemies
  *      - v0.05a(GMT 0700 11-Dec-2020):
@@ -722,7 +724,7 @@
  *      - v0.00a(GMT 1500 12-Jun-2020):
  *        1. Finished the core module
  *      Documentations:
- *      - v0.16a(GMT 0800 28-Mar-2022):
+ *      - v0.16a(GMT 0800 30-Mar-2022):
  *        1. Finished the Action module
  *        2. Added the following configurations in the Turn module:
  *           - battleTurnClockBarBackColor
@@ -743,9 +745,11 @@
  *        7. Fixed the bug of not updating the x positions of the battler
  *           sprites in the discrete order window when there are new alive
  *           battlers
- *        8. Fixed the possible bug of not updating possible skill/item
+ *        8. Fixed the atb bars not always updating their fill ratios and
+ *           texts when _isParamFuncCached is set as true
+ *        9. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
- *        9. Increased the flexibility, modularity and readability of the
+ *        10. Increased the flexibility, modularity and readability of the
  *           implementations
  *      - v0.15c(GMT 0700 11-Dec-2020):
  *        1. Fixed the following wrong documentations:
