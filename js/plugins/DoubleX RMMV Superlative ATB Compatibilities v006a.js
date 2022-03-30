@@ -325,9 +325,9 @@ DoubleX_RMMV.SATB.Compatibilities.Battle_Hud = {};
     }; // $.update_at
 
     _BH.at = $.at;
-    _SATBC.at = $.at = function() { // v0.00a - v0.00a; Extended
+    _SATBC.at = $.at = function() { // v0.00a - v0.16a; Extended
         // Added to use the ATB value from SATB only if it's active
-        if (SATBManager.isEnabled()) return this._battler.coreSATB();
+        if (SATBManager.isEnabled()) return _SATBC._at.call(this);
         // MOG_BattleHud_SATBData
         return _BH.at.apply(this, arguments);
     }; // $.at
@@ -399,6 +399,22 @@ DoubleX_RMMV.SATB.Compatibilities.Battle_Hud = {};
         var at = this.cast_at(), type = this.is_max_cast() ? 3 : 2;
         this.refresh_at_meter(this._at_meter, at, this.cast_max_at(), type);
     }; // _SATBC._updateChargeAT
+
+
+    /**
+     * The this pointer is Battle_Hud.prototype
+     * Hotspot/Nullipotent
+     * @since v0.16a @version v0.16a
+     * @returns {Num} The current displayed battler ATB value
+     */
+    _SATBC._at = function() {
+        var max = this.max_at(), proportion = this._battler.curSATBProportion();
+        // It's possible for the raw proportion to exceed 1 in the discrete mode
+        if (proportion <= 1) return max * proportion;
+        var remainder = proportion - Math.trunc(proportion);
+        return remainder <= 0 ? max : max * remainder;
+        //
+    }; // _SATBC._at
 
     /**
      * The this pointer is Battle_Hud.prototype
