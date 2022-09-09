@@ -318,11 +318,12 @@
  *      4. https://www.save-point.org/thread-8157.html
  *      5. https://gdu.one/forums/topic/13622-doublex-rmmv-superlative-atb/
  *      6. http://www.hbgames.org/forums/viewtopic.php?f=332&t=80302
- *      7. https://www.xyphien.com/forums/resources/doublex-rmmv-superlative-atb.1695/
  *      8. https://forum.chaos-project.com/index.php/topic,16071.new.html
  *      9. https://doublexrpgmaker.wordpress.com/2020/08/19/doublex-rmmv-superlative-atb/
  *      10. https://www.patreon.com/doublex?filters[tag]=SATB
  *      11. https://www.makerdevs.com/plugin/doublex-rmmv-superlative-atb
+ *      Mentioned Patreon Supporters:
+ *      https://www.patreon.com/posts/71738797
  *----------------------------------------------------------------------------
  *    # Instructions
  *      1. If you want to edit configurations instead of parameters, you must
