@@ -1,5 +1,7 @@
 My patreon: https://www.patreon.com/doublex
 
+Mentioned patreon supporters: https://www.patreon.com/posts/71738797
+
 IMPORTANT: YOU MUST OWN A LEGEL COPY OF THE RMMV SOFTWARE TO USE THIS PROJECT
 
 Please note that this plugin's still under developement. Currently the following modules are completed:
