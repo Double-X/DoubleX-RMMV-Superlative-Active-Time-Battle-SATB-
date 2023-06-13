@@ -1875,7 +1875,7 @@
  *         - Sets additional events to happen right after the battler involved
  *           becomes able to execute actions
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
+ *         - (Advanced)Please refer to Did Become Actable Functions in the event
  *           module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
@@ -1888,7 +1888,7 @@
  *         - Sets additional events to happen right after the number of
  *           virtual action slots of the battler involved is set
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
+ *         - (Advanced)Please refer to Did Set Act Times Functions in the event
  *           module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
@@ -1901,8 +1901,8 @@
  *         - Sets additional events to happen right after the maximum number
  *           of virtual action slots of the battler involved is set
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
- *           module of the configuration plugin for using cfg or script
+ *         - (Advanced)Please refer to Did Set Max Act Times Functions in the
+ *           event module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
  *           If _didSetMaxActTimesNoteChainingRule is set as last, and the
@@ -1914,7 +1914,7 @@
  *         - Sets additional events to happen right after the battler involved
  *           becomes neither charging nor cooling down
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
+ *         - (Advanced)Please refer to Did Start ATB Fill Functions in the event
  *           module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
@@ -1927,7 +1927,7 @@
  *         - Sets additional events to happen right before the battler
  *           involved cancels the ATB charge
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
+ *         - (Advanced)Please refer to Will Cancel Charge Functions in the event
  *           module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
@@ -1940,8 +1940,8 @@
  *         - Sets additional events to happen right after the battler involved
  *           becomes starting to force the ATB charge
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
- *           module of the configuration plugin for using cfg or script
+ *         - (Advanced)Please refer to Did Start Force Charge Functions in the
+ *           event module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
  *           If _didStartForceChargeNoteChainingRule is set as last, and the
@@ -1953,8 +1953,8 @@
  *         - Sets additional events to happen right before the battler
  *           involved cancels the ATB charge
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
- *           module of the configuration plugin for using cfg or script
+ *         - (Advanced)Please refer to Will Cancel Cooldown Functions in the
+ *           event module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
  *           If _willCancelCooldownNoteChainingRule is set as last, and the
@@ -1966,8 +1966,8 @@
  *         - Sets additional events to happen right after the ATB value of the
  *           battler involved becomes full
  *         - suffix can be cfg, event or script
- *         - (Advanced)Please refer to Did Finish Input Functions in the event
- *           module of the configuration plugin for using cfg or script
+ *         - (Advanced)Please refer to Did Core ATB Become Full Functions in the
+ *           event module of the configuration plugin for using cfg or script
  *           suffixes, or the eval variant
  *         - E.g.:
  *           If _didCoreATBBecomeFullNoteChainingRule is set as last, and the
@@ -1980,9 +1980,9 @@
  *          - Sets additional events to happen right after the ATB value of
  *            the battler involved becomes not full
  *          - suffix can be cfg, event or script
- *          - (Advanced)Please refer to Did Finish Input Functions in the
- *            event module of the configuration plugin for using cfg or script
- *            suffixes, or the eval variant
+ *          - (Advanced)Please refer to Did Core ATB Become Not Full Functions
+ *            in the event module of the configuration plugin for using cfg or
+ *            script suffixes, or the eval variant
  *          - E.g.:
  *            If _didCoreATBBecomeNotFullNoteChainingRule is set as last, and
  *            the only didCoreATBBecomeNotFull notetag is
@@ -1994,9 +1994,9 @@
  *          - Sets additional events to happen right after the ATB charge
  *            value of the battler involved becomes not full
  *          - suffix can be cfg, event or script
- *          - (Advanced)Please refer to Did Finish Input Functions in the event
- *            module of the configuration plugin for using cfg or script
- *            suffixes, or the eval variant
+ *          - (Advanced)Please refer to Did Charge ATB Become Not Full Functions
+ *            in the event module of the configuration plugin for using cfg or
+ *            script suffixes, or the eval variant
  *          - E.g.:
  *            If _didChargeATBBecomeNotFullNoteChainingRule is set as last,
  *            and the only didChargeATBBecomeNotFull notetag is
@@ -2008,8 +2008,8 @@
  *          - Sets additional events to happen right after the battler
  *            involved becomes able to input actions
  *          - suffix can be cfg, event or script
- *          - (Advanced)Please refer to Did Finish Input Functions in the event
- *            module of the configuration plugin for using cfg or script
+ *          - (Advanced)Please refer to Did Add Inputable Actor Functions in the
+ *            event module of the configuration plugin for using cfg or script
  *            suffixes, or the eval variant
  *          - E.g.:
  *            If _didAddInputableActorNoteChainingRule is set as last, and the
