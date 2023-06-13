@@ -5273,7 +5273,7 @@ DoubleX_RMMV["Superlative ATB Configurations"] = "v0.16a";
         }, // didFinishInput
 
         /*--------------------------------------------------------------------
-         *    (v0.06a+)Did Finish Input Functions
+         *    (v0.06a+)Did Become Actable Functions
          *    - Setups DBAX used by plugin's didBecomeActable notetags
          *--------------------------------------------------------------------*/
         /* DBAX names can only use alphanumeric characters
