@@ -751,7 +751,7 @@
  *        9. Fixed the possible bug of not updating possible skill/item
  *           notetag value changes on time
  *        10. Increased the flexibility, modularity and readability of the
- *           implementations
+ *            implementations
  *      - v0.15c(GMT 0700 11-Dec-2020):
  *        1. Fixed the following wrong documentations:
  *           Battler manipulations -
@@ -957,21 +957,22 @@
  *----------------------------------------------------------------------------
  *    # Todo
  *      1. Adds _isSaveParamNotes
- *      2. Allows party escape attempts when executing actions
- *      3. Lets players forces actor charge by long pressing the actor sprite
- *      4. Lets you set some skills to demand a set period to charge up before
+ *      2. Adds parameter counterparts of notetag configurations
+ *      3. Allows party escape attempts when executing actions
+ *      4. Lets players forces actor charge by long pressing the actor sprite
+ *      5. Lets you set some skills to demand a set period to charge up before
  *         they become usable actions that can be inputted by battlers
- *      5. Lets you set some skills to demand a set period to cool down before
+ *      6. Lets you set some skills to demand a set period to cool down before
  *         they become usable actions that can be inputted by battlers again
- *      6. Adds a parameter for each sprite/window class to be called per
+ *      7. Adds a parameter for each sprite/window class to be called per
  *         frame so you can control which parameter cache to be
  *         enabled/disabled
- *      7. Fixes the actor command window not selecting the last command when
+ *      8. Fixes the actor command window not selecting the last command when
  *         it becomes able to be shown again bug
- *      8. Fixes the autobattle actor freezed charge/cooldown with the Delay
+ *      9. Fixes the autobattle actor freezed charge/cooldown with the Delay
  *         module enabled
- *      9. Fixes the compatibility issues/bugs when the CTB Module interacts
- *         with SEK_ChangeActor
+ *      10. Fixes the compatibility issues/bugs when the CTB Module interacts
+ *          with SEK_ChangeActor
  *============================================================================*/
 /*:
  * @plugindesc To be the most flexible, performant and powerful ATB system
